@@ -5,7 +5,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class SettingJalurRequest extends FormRequest
+class InputKksoGetDataRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,12 +26,10 @@ class SettingJalurRequest extends FormRequest
     {
         return [
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
-            'kode_rak' => ['required','integer'],
-            'kode_sub_rak' => ['nullable','min_digits:2'],
-            'tipe_rak' => ['nullable'],
-            'shelving_rak' => ['nullable','min_digits:2'],
-            'no_urut' => ['nullable'],
-            'jalur_kertas' => ['required','in:K,H']
+            'txtKodeRak' => ['required','integer'],
+            'txtKodeSubRak' => ['required','min_digits:2'],
+            'txtTipeRak' => ['required'],
+            'txtShelvingRak' => ['required','min_digits:2'],
         ];
     }
 

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
+use App\Http\Requests\InputKksoGetDataRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InputKksoController extends Controller
 {
@@ -17,48 +20,75 @@ class InputKksoController extends Controller
     }
 
     public function index(){
-        // dtSO = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
-        // If dtSO.Rows.Count = 0 Then
-        //     MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "SO belum diinitial", "Warning")
-        //     Me.DialogResult = Windows.Forms.DialogResult.No
-        //     Me.Close()
-        //     Exit Sub
-        // Else
-        //     If dtSO.Rows(0).Item("MSO_FLAGSUM").ToString <> "" Then
-        //         MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "SO sudah diproses BA", "Warning")
-        //         Me.DialogResult = Windows.Forms.DialogResult.No
-        //         Me.Close()
-        //         Exit Sub
-        //     End If
-        // End If
 
-        // flagCopyLokasi = dtSO.Rows(0).Item("mso_flag_createlso").ToString.ToUpper
-        // cboJenisBarang.Text = "Baik"
+        $dtSO = DB::table('tbmaster_setting_so')
+            ->whereNull('mso_flagreset')
+            ->get();
 
-        return view('home');
+        if(count($dtSO)){
+            return ApiFormatter::error(400, 'SO belum diinitial');
+        }
+
+        if($dtSO[0]->MSO_FLAGSUM <> ""){
+            return ApiFormatter::error(400, 'SO sudah diproses BA');
+        }
+
+        $this->flagCopyLokasi = $dtSO[0]->mso_flag_createlso;
+        $this->cboJenisBarang = "Baik";
+
+        $data['flagCopyLokasi'] = $dtSO[0]->mso_flag_createlso;
+        $data['cboJenisBarang'] = "Baik";
+
+        return view('home', $data);
     }
 
-    public function getData(){
-        // strSQL = "SELECT LSO_NOURUT, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, LSO_QTY, LSO_TMP_QTYCTN, LSO_TMP_QTYPCS, coalesce(ST_AVGCOST, 0) AS ST_AVGCOST, LSO_MODIFY_BY "
-        // strSQL &= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI AND LSO_KODEIGR = ST_KODEIGR, TBMASTER_PRODMAST "
-        // strSQL &= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" & Format(dtSO.Rows(0).Item("MSO_TGLSO"), "dd-MM-yyyy").ToString & "' "
-        // strSQL &= "WHERE LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' "
-        // If flagCopyLokasi = "Y" Then
-        //     strSQL &= "AND (coalesce(LSO_FLAGLIMIT, 'N') = 'Y' OR LSO_LOKASI = '02' OR LSO_LOKASI = '03') "
+    public function getData(InputKksoGetDataRequest $request){
+
+        $query = '';
+        $query .= "SELECT LSO_NOURUT, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, LSO_QTY, LSO_TMP_QTYCTN, LSO_TMP_QTYPCS, coalesce(ST_AVGCOST, 0) AS ST_AVGCOST, LSO_MODIFY_BY ";
+        $query .= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI AND LSO_KODEIGR = ST_KODEIGR, TBMASTER_PRODMAST ";
+        $query .= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "' ";
+        $query .= "WHERE LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' ";
+        if($this->flagCopyLokasi == 'Y'){
+            $query .= "AND (coalesce(LSO_FLAGLIMIT, 'N') = 'Y' OR LSO_LOKASI = '02' OR LSO_LOKASI = '03') ";
+        }
+        $query .= "AND LSO_KODERAK = '" . $request->txtKodeRak . "' ";
+        $query .= "AND LSO_KODESUBRAK = '" . $request->txtKodeSubRak . "' ";
+        $query .= "AND LSO_TIPERAK = '" . $request->txtTipeRak . "' ";
+        $query .= "AND LSO_SHELVINGRAK = '" . $request->txtShelvingRak . "' ";
+        $query .= "AND LSO_FLAGSARANA = 'K' ";
+        if($this->cboJenisBarang == 'Baik'){
+            $query .= "AND LSO_LOKASI = '01' ";
+        }elseif($this->cboJenisBarang == 'Retur'){
+            $query .= "AND LSO_LOKASI = '02' ";
+        }elseif($this->cboJenisBarang == 'Rusak'){
+            $query .= "AND LSO_LOKASI = '03' ";
+        }
+        $query .= "ORDER BY LSO_NOURUT ASC";
+
+        return DB::select($query);
+
+        // DGV.Item(0, i).Value = Val(dt.Rows(i).Item("LSO_NOURUT").ToString)
+        // DGV.Item(1, i).Value = dt.Rows(i).Item("PRD_PRDCD").ToString
+        // DGV.Item(2, i).Value = dt.Rows(i).Item("PRD_DESKRIPSIPANJANG").ToString
+        // DGV.Item(3, i).Value = dt.Rows(i).Item("PRD_UNIT").ToString & "/" & dt.Rows(i).Item("PRD_FRAC").ToString
+        // If Val(dt.Rows(i).Item("LSO_QTY").ToString) <> 0 And (Val(dt.Rows(i).Item("LSO_TMP_QTYCTN").ToString) = 0 And Val(dt.Rows(i).Item("LSO_TMP_QTYPCS").ToString) = 0) Then
+        //     Dim CTN As Double = 0
+        //     If Val(dt.Rows(i).Item("LSO_QTY").ToString) < 0 Then
+        //         DGV.Item(4, i).Value = Math.Ceiling(Val(dt.Rows(i).Item("LSO_QTY").ToString) / IIf(Val(dt.Rows(i).Item("PRD_FRAC").ToString) = 0, 1, Val(dt.Rows(i).Item("PRD_FRAC").ToString)))
+        //     Else
+        //         DGV.Item(4, i).Value = Math.Floor(Val(dt.Rows(i).Item("LSO_QTY").ToString) / IIf(Val(dt.Rows(i).Item("PRD_FRAC").ToString) = 0, 1, Val(dt.Rows(i).Item("PRD_FRAC").ToString)))
+        //     End If
+        //     DGV.Item(5, i).Value = Val(dt.Rows(i).Item("LSO_QTY").ToString) Mod IIf(Val(dt.Rows(i).Item("PRD_FRAC").ToString) = 0, 1, Val(dt.Rows(i).Item("PRD_FRAC").ToString))
+        // Else
+        //     DGV.Item(4, i).Value = Val(dt.Rows(i).Item("LSO_TMP_QTYCTN").ToString)
+        //     DGV.Item(5, i).Value = Val(dt.Rows(i).Item("LSO_TMP_QTYPCS").ToString)
         // End If
-        // strSQL &= "AND LSO_KODERAK = '" & txtKodeRak.Text & "' "
-        // strSQL &= "AND LSO_KODESUBRAK = '" & txtKodeSubRak.Text & "' "
-        // strSQL &= "AND LSO_TIPERAK = '" & txtTipeRak.Text & "' "
-        // strSQL &= "AND LSO_SHELVINGRAK = '" & txtShelvingRak.Text & "' "
-        // strSQL &= "AND LSO_FLAGSARANA = 'K' "
-        // If cboJenisBarang.Text = "Baik" Then
-        //     strSQL &= "AND LSO_LOKASI = '01' "
-        // ElseIf cboJenisBarang.Text = "Retur" Then
-        //     strSQL &= "AND LSO_LOKASI = '02' "
-        // ElseIf cboJenisBarang.Text = "Rusak" Then
-        //     strSQL &= "AND LSO_LOKASI = '03' "
-        // End If
-        // strSQL &= "ORDER BY LSO_NOURUT ASC"
+        // DGV.Item(6, i).Value = Val(dt.Rows(i).Item("PRD_FRAC").ToString)
+        // DGV.Item(7, i).Value = Val(dt.Rows(i).Item("LSO_QTY").ToString)
+        // DGV.Item(8, i).Value = Val(dt.Rows(i).Item("ST_AVGCOST").ToString)
+        // DGV.Item(9, i).Value = Val(dt.Rows(i).Item("LSO_QTY").ToString)
+        // DGV.Item(10, i).Value = dt.Rows(i).Item("LSO_MODIFY_BY").ToString
     }
 
     public function actionUpdate(){

@@ -5,7 +5,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class AuthUserRequest extends FormRequest
+class InputLokasiRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,8 +25,11 @@ class AuthUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'username' => ['required'],
-            'password' => ['required'],
+            'kode_rak' => ['required','integer'],
+            'kode_sub_rak' => ['required','min_digits:2'],
+            'tipe_rak' => ['required'],
+            'shelving_rak' => ['required','min_digits:2'],
+            'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
         ];
     }
 
@@ -43,9 +46,9 @@ class AuthUserRequest extends FormRequest
             }
         }
         throw new HttpResponseException(response()->json([
-            'code' => 300,
+            'code' => 400,
             'errors' => $array,
-            'message' => 'Username atau Password Belum Terisi'
-        ], 203));
+            'message' => 'Input validation error'
+        ], 400));
     }
 }

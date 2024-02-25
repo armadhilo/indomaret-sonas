@@ -5,7 +5,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class LoadPbRequest extends FormRequest
+class initialSoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,7 @@ class LoadPbRequest extends FormRequest
     public function rules()
     {
         return [
-            'toko' => ['required'],
+            'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
         ];
     }
 

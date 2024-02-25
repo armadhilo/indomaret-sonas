@@ -5,7 +5,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class UpdateJatuhTempoRequest extends FormRequest
+class SettingJalurRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +25,13 @@ class UpdateJatuhTempoRequest extends FormRequest
     public function rules()
     {
         return [
-            'toko' => ['required'],
-            'no_pb' => ['required'],
-            'kode_customer' => ['required'],
-            'tgl_jatuh_tempo' => ['required', 'date_format:d-m-Y']
+            'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
+            'kode_rak' => ['required','integer'],
+            'kode_sub_rak' => ['required','min_digits:2'],
+            'tipe_rak' => ['required'],
+            'shelving_rak' => ['required','min_digits:2'],
+            'no_urut' => ['required'],
+            'jalur_kertas' => ['required','in:K,H']
         ];
     }
 
@@ -45,9 +48,9 @@ class UpdateJatuhTempoRequest extends FormRequest
             }
         }
         throw new HttpResponseException(response()->json([
-            'code' => 300,
+            'code' => 400,
             'errors' => $array,
-            'message' => 'Input Belum Lengkap'
-        ], 203));
+            'message' => 'Input validation error'
+        ], 400));
     }
 }

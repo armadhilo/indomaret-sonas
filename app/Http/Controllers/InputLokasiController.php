@@ -4,186 +4,179 @@ namespace App\Http\Controllers;
 
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
+use App\Http\Requests\InputLokasiActionSaveRequest;
 use App\Http\Requests\InputLokasiRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class InputLokasiController extends Controller
 {
 
-    private $FlagTahap = false;
+    private $FlagTahap;
+
     public function __construct(Request $request){
+        $this->FlagTahap = 0;
         DatabaseConnection::setConnection(session('KODECABANG'), "PRODUCTION");
     }
 
     public function index(){
 
-        // $dtSO = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL");
-        // if(count($dtSO) == 0){
-        //     return ApiFormatter::error(400, 'SO belum diinitial');
-        // }
+        $dtSO = DB::table('tbmaster_setting_so')
+            ->whereNull('mso_flagreset')
+            ->get();
 
-        // if($dtSO[0]->MSO_FLAGSUM <> ''){
-        //     return ApiFormatter::error(400, 'SO sudah diproses BA');
+        if(count($dtSO) == 0){
+            return ApiFormatter::error(400, 'SO belum diinitial');
+        }
 
-        //     $FlagTahap = Val(dtSO.Rows(0).Item("MSO_FLAGTAHAP").ToString);
-        // }
+        if($dtSO[0]->mso_flagsum <> ''){
+            return ApiFormatter::error(400, 'SO sudah diproses BA');
+
+            $this->FlagTahap = (int)$dtSO[0]->mso_flagtahap;
+        }
 
         return view('input-lokasi');
     }
 
     public function actionAddLokasi(InputLokasiRequest $request){
 
-        // strSQL = "SELECT * FROM TBMASTER_LOKASI "
-        // strSQL &= "WHERE LKS_KODERAK = '" & txtKodeRak.Text & "' "
-        // strSQL &= "AND LKS_KODESUBRAK = '" & txtKodeSubRak.Text & "' "
-        // strSQL &= "AND LKS_TIPERAK = '" & txtTipeRak.Text & "' "
-        // strSQL &= "AND LKS_SHELVINGRAK = '" & txtShelvingRak.Text & "' "
+        $dtCek = DB::table('tbmaster_lokasi')
+            ->where([
+                'lks_koderak' => $request->kode_rak,
+                'lks_kodesubrak' => $request->kode_sub_rak,
+                'lks_tiperak' => $request->tipe_rak,
+                'lks_shelvingrak' => $request->shelving_rak,
+            ])
+            ->get();
 
-        // If dtCek.Rows.Count > 0 Then
-        //     MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "Lokasi sudah terdaftar di Master Lokasi", "Warning")
-        //     Exit Sub
-        // End If
+        if(count($dtCek) > 0){
+            return ApiFormatter::error(400, 'Lokasi sudah terdaftar di Master Lokasi');
+        }
 
-        // strSQL = "SELECT LSO_LOKASI FROM TBTR_LOKASI_SO "
-        // strSQL &= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" & Format(dtSO.Rows(0).Item("MSO_TGLSO"), "dd-MM-yyyy").ToString & "' "
-        // strSQL &= "AND LSO_KODERAK = '" & txtKodeRak.Text & "' "
+        $dtCek = DB::table('tbtr_lokasi_so')
+            ->select('lso_lokasi')
+            ->where('lso_koderak', $request->kode_rak)
+            ->whereRaw("to_char(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "'")
+            ->first();
 
-        // If dtCek.Rows.Count > 0 Then
-        //     If dtCek.Rows(0).Item("LSO_LOKASI") = "01" And cboJenisBarang.Text <> "Baik" Then
-        //         MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "Kode Rak sudah terisi barang Baik", "Warning")
-        //         txtKodeRak.Focus()
-        //         txtKodeRak.SelectionStart = 0
-        //         txtKodeRak.SelectionLength = txtKodeRak.TextLength
-        //         Exit Sub
-        //     ElseIf dtCek.Rows(0).Item("LSO_LOKASI") = "02" And cboJenisBarang.Text <> "Retur" Then
-        //         MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "Kode Rak sudah terisi barang Retur", "Warning")
-        //         txtKodeRak.Focus()
-        //         txtKodeRak.SelectionStart = 0
-        //         txtKodeRak.SelectionLength = txtKodeRak.TextLength
-        //         Exit Sub
-        //     ElseIf dtCek.Rows(0).Item("LSO_LOKASI") = "03" And cboJenisBarang.Text <> "Rusak" Then
-        //         MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "Kode Rak sudah terisi barang Rusak", "Warning")
-        //         txtKodeRak.Focus()
-        //         txtKodeRak.SelectionStart = 0
-        //         txtKodeRak.SelectionLength = txtKodeRak.TextLength
-        //         Exit Sub
-        //     End If
-        // End If
+        if(!empty($dtCek)){
+            if($dtCek->LSO_LOKASI == '01' &&  $request->jenis_barang == 'Baik'){
+                return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Baik');
+            }elseif($dtCek->LSO_LOKASI == '02' &&  $request->jenis_barang == 'Retur'){
+                return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Retur');
+            }elseif($dtCek->LSO_LOKASI == '03' &&  $request->jenis_barang == 'Rusak'){
+                return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Rusak');
+            }
+        }
 
         //? akan buka halaman baru untuk menambah produk dan daftar lokasi
+        return view('detail-input-lokasi');
     }
 
     //? jadi nanti no urut berdasarkan function ini
-    public function getLastNumber(){
-        // strSQL = "SELECT MAX(LSO_NOURUT) AS NOURUT FROM TBTR_LOKASI_SO "
-        // strSQL &= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" & Format(dtSO.Rows(0).Item("MSO_TGLSO"), "dd-MM-yyyy").ToString & "' "
-        // strSQL &= "AND LSO_KODERAK = '" & txtKodeRak.Text & "' "
-        // strSQL &= "AND LSO_KODESUBRAK = '" & txtKodeSubRak.Text & "' "
-        // strSQL &= "AND LSO_TIPERAK = '" & txtTipeRak.Text & "' "
-        // strSQL &= "AND LSO_SHELVINGRAK = '" & txtShelvingRak.Text & "' "
+    public function getLastNumber(InputLokasiRequest $request){
+
+        $data = DB::table('tbtr_lokasi_so')
+            ->selectRaw('MAX(lso_nourut) AS nourut')
+            ->where([
+                'lks_koderak' => $request->kode_rak,
+                'lks_kodesubrak' => $request->kode_sub_rak,
+                'lks_tiperak' => $request->tipe_rak,
+                'lks_shelvingrak' => $request->shelving_rak,
+            ])
+            ->whereRaw("TO_CHAR(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "'")
+            ->first();
+
+        return ApiFormatter::success(200, 'Berhasil menampilkan last number', $data);
     }
 
     //? klik enter nanti harusnya otomatis dapet desc nya
     public function getDescPlu($prdcd){
-        // dtPrd = QueryOra("SELECT PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC FROM TBMASTER_PRODMAST WHERE PRD_PRDCD = '" & DGV.Item(1, DGV.CurrentCell.RowIndex).Value.ToString & "'")
-        // If dtPrd.Rows.Count > 0 Then
-        //     If FlagTahap = 0 Then
-        //         DGV.Item(2, DGV.CurrentCell.RowIndex).Value = dtPrd.Rows(0).Item("PRD_DESKRIPSIPANJANG").ToString
-        //         DGV.Item(3, DGV.CurrentCell.RowIndex).Value = dtPrd.Rows(0).Item("PRD_UNIT").ToString & "/" & dtPrd.Rows(0).Item("PRD_FRAC").ToString
-        //     Else
-        //         Dim dtCek As New DataTable
-        //         dtCek = QueryOra("SELECT * FROM TBTR_LOKASI_SO WHERE LSO_PRDCD = '" & DGV.Item(1, DGV.CurrentCell.RowIndex).Value.ToString & "' AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y'")
-        //         If dtCek.Rows.Count > 0 Then
-        //             DGV.Item(2, DGV.CurrentCell.RowIndex).Value = dtPrd.Rows(0).Item("PRD_DESKRIPSIPANJANG").ToString
-        //             DGV.Item(3, DGV.CurrentCell.RowIndex).Value = dtPrd.Rows(0).Item("PRD_UNIT").ToString & "/" & dtPrd.Rows(0).Item("PRD_FRAC").ToString
-        //         Else
-        //             MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "PLU tidak termasuk dalam limit item SO", "Warning")
-        //             DGV.Item(1, DGV.CurrentCell.RowIndex).Value = ""
-        //             DGV.CurrentCell = DGV.Item(1, DGV.CurrentCell.RowIndex)
-        //         End If
-        //     End If
-        // Else
-        //     MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "PLU tidak ditemukan", "Warning")
-        //     DGV.Item(1, DGV.CurrentCell.RowIndex).Value = ""
-        //     DGV.CurrentCell = DGV.Item(1, DGV.CurrentCell.RowIndex)
-        // End If
+
+        $data = DB::table('tbmaster_prodmast')
+            ->select('prd_deskripsipanjang','prd_unit','prd_frac')
+            ->where('prd_prdcd', $prdcd)
+            ->first();
+
+        if(empty($data)){
+            return ApiFormatter::error(404, 'PLU tidak ditemukan');
+        }
+
+        if($this->FlagTahap != 0){
+            $dtCek = DB::table('tbtr_lokasi_so')
+                ->where('lso_prdcd', $prdcd)
+                ->whereRaw("coalesce(lso_flaglimit, 'N') = 'Y'")
+                ->count();
+
+            if($dtCek == 0){
+                return ApiFormatter::error(404, 'PLU tidak termasuk dalam limit item SO');
+            }
+        }
+
+        return ApiFormatter::success(200, 'Plu berhasil ditampilkan', $data);
     }
 
-    public function actionSave(){
-        // If DGV.Item(1, i).Value.ToString <> "" And DGV.Item(4, i).Value.ToString = "" Then
-        //     strSQL = "SELECT 1 FROM TBTR_LOKASI_SO "
-        //     strSQL &= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" & Format(dtSO.Rows(0).Item("MSO_TGLSO"), "dd-MM-yyyy").ToString & "' "
-        //     strSQL &= "AND LSO_KODERAK = '" & txtKodeRak.Text & "' "
-        //     strSQL &= "AND LSO_KODESUBRAK = '" & txtKodeSubRak.Text & "' "
-        //     strSQL &= "AND LSO_TIPERAK = '" & txtTipeRak.Text & "' "
-        //     strSQL &= "AND LSO_SHELVINGRAK = '" & txtShelvingRak.Text & "' "
-        //     strSQL &= "AND LSO_NOURUT = '" & DGV.Item(0, i).Value.ToString & "'"
+    public function datatablesDetailLokasi(InputLokasiRequest $request){
+        $data = DB::table('tbtr_lokasi_so')
+            ->where([
+                'lso_koderak' => $request->kode_rak,
+                'lso_kodesubrak' => $request->kode_sub_rak,
+                'lso_tiperak' => $request->tipe_rak,
+                'lso_shelvingrak' => $request->shelving_rak,
+            ])
+            ->whereDate('lso_tglso', Carbon::parse($request->tanggal_start_so)->format('Y-m-d'))
+            ->get();
 
-        //     dtLks = QueryOra(strSQL)
-        //     If dtLks.Rows.Count = 0 Then
-        //         strSQL = "INSERT INTO TBTR_LOKASI_SO ( "
-        //         strSQL &= "LSO_KODEIGR, "
-        //         strSQL &= "LSO_TGLSO, "
-        //         strSQL &= "LSO_KODERAK, "
-        //         strSQL &= "LSO_KODESUBRAK, "
-        //         strSQL &= "LSO_TIPERAK, "
-        //         strSQL &= "LSO_SHELVINGRAK, "
-        //         strSQL &= "LSO_NOURUT, "
-        //         strSQL &= "LSO_PRDCD, "
-        //         strSQL &= "LSO_LOKASI, "
-        //         strSQL &= "LSO_QTY, "
-        //         strSQL &= "LSO_FLAGSARANA, "
-        //         strSQL &= "LSO_CREATE_BY, "
-        //         strSQL &= "LSO_CREATE_DT, "
-        //         strSQL &= "LSO_FLAGLIMIT, "
-        //         strSQL &= "LSO_JENISRAK "
-        //         strSQL &= ") VALUES ( "
-        //         strSQL &= "'" & KodeIGR & "', "
-        //         strSQL &= "TO_DATE('" & Format(dtSO.Rows(0).Item("MSO_TGLSO"), "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY'), "
-        //         strSQL &= "'" & txtKodeRak.Text.Replace("'", "") & "', "
-        //         strSQL &= "'" & txtKodeSubRak.Text.Replace("'", "") & "', "
-        //         strSQL &= "'" & txtTipeRak.Text.Replace("'", "") & "', "
-        //         strSQL &= "'" & txtShelvingRak.Text.Replace("'", "") & "', "
-        //         strSQL &= "'" & DGV.Item(0, i).Value.ToString.Replace("'", "") & "', "
-        //         strSQL &= "'" & DGV.Item(1, i).Value.ToString.Replace("'", "") & "', "
-        //         If cboJenisBarang.Text = "Baik" Then
-        //             strSQL &= "'01', "
-        //         ElseIf cboJenisBarang.Text = "Retur" Then
-        //             strSQL &= "'02', "
-        //         ElseIf cboJenisBarang.Text = "Rusak" Then
-        //             strSQL &= "'03', "
-        //         End If
-        //         strSQL &= "'0', "
-        //         strSQL &= "'K', "
-        //         strSQL &= "'" & UserMODUL & "', "
-        //         strSQL &= "CURRENT_TIMESTAMP, "
-        //         If FlagTahap = 0 Then
-        //             strSQL &= "NULL, "
-        //         Else
-        //             strSQL &= "'Y', "
-        //         End If
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
+    }
 
-        //         Dim JenisRak As String = "T"
-        //         If Strings.Left(txtKodeRak.Text.Replace("'", ""), 1).ToUpper <> "D" And _
-        //             Strings.Left(txtKodeRak.Text.Replace("'", ""), 1).ToUpper <> "G" And _
-        //             Strings.Left(txtTipeRak.Text.Replace("'", ""), 1).ToUpper = "Z" Then
-        //             JenisRak = "L"
-        //         End If
-        //         strSQL &= "'" & JenisRak & "')"
+    public function actionSave(InputLokasiActionSaveRequest $request){
 
-        //         NonQueryOraTransaction(strSQL, OraConn, OraTrans)
-        //     Else
-        //         strSQL = "UPDATE TBTR_LOKASI_SO SET "
-        //         strSQL &= "LSO_PRDCD = '" & DGV.Item(1, i).Value.ToString.Replace("'", "") & "' "
-        //         strSQL &= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" & Format(dtSO.Rows(0).Item("MSO_TGLSO"), "dd-MM-yyyy").ToString & "' "
-        //         strSQL &= "AND LSO_KODERAK = '" & txtKodeRak.Text & "' "
-        //         strSQL &= "AND LSO_KODESUBRAK = '" & txtKodeSubRak.Text & "' "
-        //         strSQL &= "AND LSO_TIPERAK = '" & txtTipeRak.Text & "' "
-        //         strSQL &= "AND LSO_SHELVINGRAK = '" & txtShelvingRak.Text & "' "
-        //         strSQL &= "AND LSO_NOURUT = '" & DGV.Item(0, i).Value.ToString & "'"
+        $jenis_barang = '03';
+        if($request->jenis_barang == 'Baik'){
+            $jenis_barang = '01';
+        }elseif($request->jenis_barang == 'Retur'){
+            $jenis_barang = '02';
+        }
 
-        //         NonQueryOraTransaction(strSQL, OraConn, OraTrans)
-        //     End If
-        // End If
+        $flag_limit = 'Y';
+        if($this->FlagTahap == 0) $flag_limit = null;
+
+        $jenis_rak = 'T';
+        if(strtoupper($request->kode_rak[0]) == 'D' || strtoupper($request->kode_rak[0]) == 'G' || strtoupper($request->kode_rak[0]) == 'Z'){
+            $jenis_rak = 'L';
+        }
+
+        foreach($request->plu as $key => $item){
+            DB::table('tbtr_lokasi_so')->updateOrCreate([
+                'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
+                'lso_koderak' => $request->kode_rak,
+                'lso_kodesubrak' => $request->kode_sub_rak,
+                'lso_tiperak' => $request->tipe_rak,
+                'lso_shelvingrak' => $request->shelving_rak,
+                'lso_nourut' => $request->no_urut[$key],
+                'lso_prdcd' => $item,
+            ],[
+                'lso_kodeigr' => session('KODECABANG'),
+                'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
+                'lso_koderak' => $request->kode_rak,
+                'lso_kodesubrak' => $request->kode_sub_rak,
+                'lso_tiperak' => $request->tipe_rak,
+                'lso_shelvingrak' => $request->shelving_rak,
+                'lso_nourut' => $request->no_urut[$key],
+                'lso_prdcd' => $item,
+                'lso_lokasi' => $jenis_barang,
+                'lso_qty' => 0,
+                'lso_flagsarana' => 'K',
+                'lso_create_by' => session('user_id'),
+                'lso_create_dt' => Carbon::now(),
+                'lso_flaglimit' => $flag_limit,
+                'lso_jenisrak' => $jenis_rak,
+            ]);
+        }
     }
 }

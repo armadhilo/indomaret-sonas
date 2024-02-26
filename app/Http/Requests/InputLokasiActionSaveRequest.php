@@ -5,7 +5,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class InputLokasiRequest extends FormRequest
+class InputLokasiActionSaveRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,6 +31,8 @@ class InputLokasiRequest extends FormRequest
             'shelving_rak' => ['required','min_digits:2'],
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
             'jenis_barang' => ['required','in:Baik,Retur,Rusak'],
+            'no_urut' => ['required','array'],
+            'plu' => ['required','array'],
         ];
     }
 

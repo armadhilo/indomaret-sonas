@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class HomeController extends Controller
+class SettingJalurController extends Controller
 {
 
     public function __construct(Request $request){
@@ -21,15 +21,19 @@ class HomeController extends Controller
         $dtSO = DB::table('tbmaster_setting_so')
             ->whereNull('mso_flagreset')
             ->get();
-
+        $data['tglSo'] = Carbon::parse($dtSO[0]->mso_tglso)->format('Y-m-d');
+        
         if(count($dtSO) == 0){
-            return ApiFormatter::error(400, 'SO belum diinitial');
+            $check_error = "SO belum diinitial";
+            return view('setting-jalur', compact('check_error'));
         }elseif($dtSO[0]->mso_flagsum <> ''){
-            return ApiFormatter::error(400, 'SO sudah diproses BA');
+            $check_error = "SO sudah diproses BA";
+            return view('setting-jalur', compact('check_error'));
         }
 
         if($dtSO[0]->mso_flagtahap > 0 && $dtSO[0]->mso_flaglimit == ""){
-            return ApiFormatter::error(400, 'Setting limit item untuk tahap ini belum disetting');
+            $check_error = "Setting limit item untuk tahap ini belum disetting";
+            return view('setting-jalur', compact('check_error'));
         }
 
         // dtSO = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
@@ -53,7 +57,7 @@ class HomeController extends Controller
         //         Exit Sub
         //     End If
         // End If
-        return view('home');
+        return view('setting-jalur', $data);
     }
 
     public function actionUpdate(SettingJalurRequest $request){
@@ -74,10 +78,15 @@ class HomeController extends Controller
             $query .= "AND LSO_NOURUT = '" . $request->no_urut . "' ";
         }
 
-        DB::update($query);
+        $affectedRows = DB::update($query);
 
         //? cek apakah function updatenya berhasil melakukan save
         //* Records Updated
         //* Tidak ada lokasi yang terupdate
+        if ($affectedRows > 0) {
+            return ApiFormatter::success(200, 'Records Updated');
+        } else {
+            return ApiFormatter::error(400, 'Tidak ada lokasi yang terupdate');
+        }
     }
 }

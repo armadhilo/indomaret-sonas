@@ -55,6 +55,7 @@
     <script src="{{ asset('js/buttons.html5.min.js')}}"></script>
     <script src="{{ asset('js/pace.min.js')}}"></script>
     <script src="{{ asset('js/print.min.js')}}"></script>
+    <script src="{{ asset('js/moment.min.js')}}"></script>
     <script src="{{ asset('js/jquery.number.min.js')}}"></script>
     <script src="{{ asset('plugin/izitoast/js/iziToast.min.js')}}"></script>
     <script src="{{ asset('plugin/select2/dist/js/select2.min.js')}}"></script>
@@ -111,18 +112,23 @@
             color: #012970;
             font-weight: 600;
         }
+
+        .select-r td {
+            background-color: #566cfb !important;
+            color: white!important;
+        }
     </style>
 </head>
 
 <body id="page-top">
     <div id="wrapper">
-        @include('sidebar')
+        @include('layouts.sidebar')
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
             <!-- Main Content -->
             <div id="content">
-                @include('header')
+                @include('layouts.header')
 
                 @yield('content')
 
@@ -149,6 +155,12 @@
 			}
 		});
         $('.select2').select2();
+
+        function setDateNow(element){
+            var today = moment().format('YYYY-MM-DD');
+            // Set today's date as the value for the input element
+            $(element).val(today).trigger('change');
+        }
     </script>
     @stack('page-script')
 </body>

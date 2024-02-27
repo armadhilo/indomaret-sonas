@@ -23,6 +23,14 @@ class InitialSoController extends Controller
         return view('initial-so');
     }
 
+    public function checkPersiapanDataSo(initialSoRequest $request){
+        $check = DB::table('tbmaster_setting_so')
+                ->where('mso_tglso','>=', Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'))->select('mso_flagtahap')->first();
+        if(isset($check->mso_flagtahap) && $check->mso_flagtahap !== null){
+            return ApiFormatter::success(200, 'data-so-found', true);
+        }
+    }
+
     public function actionStartPersiapanDataSo(initialSoRequest $request){
 
         //* Apakah anda yakin ingin memulai SO, Dan Sudah Yakin untuk Tanggal SO yang dipilih ?
@@ -33,7 +41,6 @@ class InitialSoController extends Controller
 
         //! START SO
         try{
-
             $kodeigr = session('KODECABANG');
             $userid = session('userid');
             $procedure = DB::select("call sp_initial_so('$kodeigr','$userid', $request->tanggal_start_so, NULL)");
@@ -66,7 +73,6 @@ class InitialSoController extends Controller
     }
 
     public function actionCopyMasterLokasi(initialSoRequest $request){
-
         // dtCekkkso = QueryOra("SELECT * FROM TBTR_LOKASI_SO WHERE DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" & Format(dtTgl_SO.Value, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY')  AND LSO_FLAGKKSO IS NULL")
         // If dtCekkkso.Rows.Count > 0 Then
         //     MessageDialog.Show(EnumMessageType.ErrorMessage, EnumCommonButtonMessage.Ok, "Silahkan Cetak KKSO terlebih dahulu", Me.Text)
@@ -275,8 +281,11 @@ class InitialSoController extends Controller
         //? kemudian lanjut step
 
         //* Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?
+        return ApiFormatter::success(200, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
+    }
 
-        if(session('userlevel') != 1){
+    public function nextActionCopyMasterLokasi($request){
+         if(session('userlevel') != 1){
             return ApiFormatter::error(400, 'Anda tidak berhak menjalankan menu ini');
         }
 

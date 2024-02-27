@@ -24,13 +24,16 @@ class InputKksoController extends Controller
         $dtSO = DB::table('tbmaster_setting_so')
             ->whereNull('mso_flagreset')
             ->get();
+        $data['tglSo'] = Carbon::parse($dtSO[0]->mso_tglso)->format('Y-m-d');
 
         if(count($dtSO)){
-            return ApiFormatter::error(400, 'SO belum diinitial');
+            $check_error = "SO belum diinitial";
+            return view('input-kkso', compact('check_error'));
         }
 
-        if($dtSO[0]->MSO_FLAGSUM <> ""){
-            return ApiFormatter::error(400, 'SO sudah diproses BA');
+        if($dtSO[0]->mso_flagsum <> ""){
+            $check_error = "SO sudah diproses BA";
+            return view('input-kkso', compact('check_error'));
         }
 
         $this->flagCopyLokasi = $dtSO[0]->mso_flag_createlso;
@@ -39,15 +42,14 @@ class InputKksoController extends Controller
         $data['flagCopyLokasi'] = $dtSO[0]->mso_flag_createlso;
         $data['cboJenisBarang'] = "Baik";
 
-        return view('home', $data);
+        return view('input-kkso', $data);
     }
 
     public function getData(InputKksoGetDataRequest $request){
-
         $query = '';
         $query .= "SELECT LSO_NOURUT, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, LSO_QTY, LSO_TMP_QTYCTN, LSO_TMP_QTYPCS, coalesce(ST_AVGCOST, 0) AS ST_AVGCOST, LSO_MODIFY_BY ";
         $query .= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI AND LSO_KODEIGR = ST_KODEIGR, TBMASTER_PRODMAST ";
-        $query .= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "' ";
+        // $query .= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "' ";
         $query .= "WHERE LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' ";
         if($this->flagCopyLokasi == 'Y'){
             $query .= "AND (coalesce(LSO_FLAGLIMIT, 'N') = 'Y' OR LSO_LOKASI = '02' OR LSO_LOKASI = '03') ";
@@ -66,7 +68,9 @@ class InputKksoController extends Controller
         }
         $query .= "ORDER BY LSO_NOURUT ASC";
 
-        return DB::select($query);
+        $data = DB::select($query);
+
+        return ApiFormatter::success(200, 'Data Berhasil Ditampilkan !', $data);
 
         // DGV.Item(0, i).Value = Val(dt.Rows(i).Item("LSO_NOURUT").ToString)
         // DGV.Item(1, i).Value = dt.Rows(i).Item("PRD_PRDCD").ToString

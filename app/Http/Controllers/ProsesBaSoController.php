@@ -16,31 +16,33 @@ class ProsesBaSoController extends Controller
     public function __construct(Request $request){
         DatabaseConnection::setConnection(session('KODECABANG'), "PRODUCTION");
     }
-
+    
     public function index(){
-
+        
         $dtCek = DB::table('tbmaster_setting_so')
-            ->whereNull('mso_flagreset')
-            ->get();
+        ->whereNull('mso_flagreset')
+        ->get();
+        $data['tgl_so'] = Carbon::parse($dtCek[0]->mso_tglso)->format('Y-m-d');
 
         if(count($dtCek)){
-            return ApiFormatter::error(400, 'SO belum diinitial');
+            $check_error = "SO belum diinitial";
+            return view('proses-ba-so', compact('check_error'));
         }
 
         if($dtCek[0]->mso_flagtahap == ''){
-            return ApiFormatter::error(400, 'Belum Copy Master Lokasi ke lokasi SO');
+            $check_error = "Belum Copy Master Lokasi ke lokasi SOZ";
+            return view('proses-ba-so', compact('check_error'));
         }
 
         //? membawa isi $data query dibawah ini
-        $data['tgl_so'] = $dtCek[0]->MSO_TGLSO;
-        if($dtCek[0]->MSO_FLAGSUM == ''){
+        if($dtCek[0]->mso_flagsum == ''){
             $data['BtnDraftLHSO'] = True;
             $data['BtnProsesBASO'] = True;
-            $data['BtnProsesBASO'] = 'START PROSES BA SO';
+            $data['BtnProsesBASOText'] = 'START PROSES BA SO';
 
             $this->FlagTahap = $dtCek[0]->mso_flagtahap;
             $data['FlagTahap'] = True;
-            $data['BtnDraftLHSO'] = "PROSES DRAFT LHSO TAHAP " . (int)$this->FlagTahap + 1;
+            $data['BtnDraftLHSOText'] = "PROSES DRAFT LHSO TAHAP " . (int)$this->FlagTahap + 1;
 
             if($this->FlagTahap < 1){
                 $data['BtnProsesBASO'] = True;
@@ -48,14 +50,14 @@ class ProsesBaSoController extends Controller
                 $data['BtnProsesBASO'] = False;
             }
         }else{
-            return ApiFormatter::error(400, 'SO sudah di Proses BA');
+            $check_error = "SO sudah di Proses BA";
+            return view('proses-ba-so', compact('check_error'));
         }
 
-        return view('home', $data);
+        return view('proses-ba-so', $data);
     }
 
     public function action(ProsesBaSoRequest $request){
-
         if($this->FlagTahap > 0){
             $dtCek = DB::table('tbtr_lokasi_so')
                 ->where(DB::raw("DATE_TRUNC('DAY',lso_tglso)"),'>=', Carbon::parse($request->tanggal_start_so)->format('Y-m-d'))

@@ -22,22 +22,25 @@ class InputLokasiController extends Controller
     }
 
     public function index(){
-
         $dtSO = DB::table('tbmaster_setting_so')
             ->whereNull('mso_flagreset')
             ->get();
 
         if(count($dtSO) == 0){
-            return ApiFormatter::error(400, 'SO belum diinitial');
+            $check_error = "SO belum diinitial";
+            return view('input-lokasi', compact('check_error'));
         }
 
         if($dtSO[0]->mso_flagsum <> ''){
-            return ApiFormatter::error(400, 'SO sudah diproses BA');
+            $check_error = "SO sudah diproses BA";
+            return view('input-lokasi', compact('check_error'));
 
             $this->FlagTahap = (int)$dtSO[0]->mso_flagtahap;
         }
 
-        return view('input-lokasi');
+        $tgl_so = Carbon::parse($dtSO[0]->mso_tglso)->format('Y-m-d');
+
+        return view('input-lokasi', compact('tgl_so'));
     }
 
     public function actionAddLokasi(InputLokasiRequest $request){
@@ -71,7 +74,11 @@ class InputLokasiController extends Controller
             }
         }
 
-        //? akan buka halaman baru untuk menambah produk dan daftar lokasi
+        //? akan buka halaman baru untuk menambah produk dan daftar lokas
+        return ApiFormatter::success(200, 'Lokasi SO Berhasil Ditambahkan..!', $request);
+    }
+
+    public function detail(){
         return view('detail-input-lokasi');
     }
 
@@ -81,10 +88,10 @@ class InputLokasiController extends Controller
         $data = DB::table('tbtr_lokasi_so')
             ->selectRaw('MAX(lso_nourut) AS nourut')
             ->where([
-                'lks_koderak' => $request->kode_rak,
-                'lks_kodesubrak' => $request->kode_sub_rak,
-                'lks_tiperak' => $request->tipe_rak,
-                'lks_shelvingrak' => $request->shelving_rak,
+                'lso_koderak' => $request->kode_rak,
+                'lso_kodesubrak' => $request->kode_sub_rak,
+                'lso_tiperak' => $request->tipe_rak,
+                'lso_shelvingrak' => $request->shelving_rak,
             ])
             ->whereRaw("TO_CHAR(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "'")
             ->first();
@@ -101,7 +108,7 @@ class InputLokasiController extends Controller
             ->first();
 
         if(empty($data)){
-            return ApiFormatter::error(404, 'PLU tidak ditemukan');
+            return ApiFormatter::error(400, 'PLU tidak ditemukan');
         }
 
         if($this->FlagTahap != 0){
@@ -111,7 +118,7 @@ class InputLokasiController extends Controller
                 ->count();
 
             if($dtCek == 0){
-                return ApiFormatter::error(404, 'PLU tidak termasuk dalam limit item SO');
+                return ApiFormatter::error(400, 'PLU tidak termasuk dalam limit item SO');
             }
         }
 
@@ -135,7 +142,6 @@ class InputLokasiController extends Controller
     }
 
     public function actionSave(InputLokasiActionSaveRequest $request){
-
         $jenis_barang = '03';
         if($request->jenis_barang == 'Baik'){
             $jenis_barang = '01';
@@ -151,8 +157,9 @@ class InputLokasiController extends Controller
             $jenis_rak = 'L';
         }
 
+        
         foreach($request->plu as $key => $item){
-            DB::table('tbtr_lokasi_so')->updateOrCreate([
+            DB::table('tbtr_lokasi_so')->updateOrInsert([
                 'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
                 'lso_koderak' => $request->kode_rak,
                 'lso_kodesubrak' => $request->kode_sub_rak,
@@ -178,5 +185,7 @@ class InputLokasiController extends Controller
                 'lso_jenisrak' => $jenis_rak,
             ]);
         }
+
+        return ApiFormatter::success(200, 'Action Save Berhasil');
     }
 }

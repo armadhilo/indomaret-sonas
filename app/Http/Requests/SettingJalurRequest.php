@@ -48,7 +48,7 @@ class SettingJalurRequest extends FormRequest
             }
         }
         throw new HttpResponseException(response()->json([
-            'code' => 400,
+            'code' => 500,
             'errors' => $array,
             'message' => 'Input validation error'
         ], 400));

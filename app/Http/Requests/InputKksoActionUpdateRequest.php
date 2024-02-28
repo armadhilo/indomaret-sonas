@@ -26,10 +26,23 @@ class InputKksoActionUpdateRequest extends FormRequest
     {
         return [
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
-            'txtKodeRak' => ['required','integer'],
-            'txtKodeSubRak' => ['required','min_digits:2'],
+            'txtKodeRak' => ['required'],
+            'txtKodeSubRak' => ['required','min:2'],
             'txtTipeRak' => ['required'],
-            'txtShelvingRak' => ['required','min_digits:2'],
+            'txtShelvingRak' => ['required','min:2'],
+            'datatables' => ['required','array'],
+            'datatables.*.lso_nourut' => ['required'],
+            'datatables.*.lso_jenisrak' => ['required'],
+            'datatables.*.prd_prdcd' => ['required'],
+            'datatables.*.prd_deskripsipanjang' => ['required'],
+            'datatables.*.prd_unit' => ['required'],
+            'datatables.*.lso_tmp_qtypcs' => ['required'],
+            'datatables.*.lso_tmp_qtyctn' => ['required'],
+            'datatables.*.prd_frac' => ['required'],
+            'datatables.*.st_avgcost' => ['required'],
+            'datatables.*.lso_qty' => ['required'],
+            'datatables.*.row4' => ['required'],
+            'datatables.*.row5' => ['required'],
         ];
     }
 

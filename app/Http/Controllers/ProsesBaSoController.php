@@ -16,9 +16,9 @@ class ProsesBaSoController extends Controller
     public function __construct(Request $request){
         DatabaseConnection::setConnection(session('KODECABANG'), "PRODUCTION");
     }
-    
+
     public function index(){
-        
+
         $dtCek = DB::table('tbmaster_setting_so')
         ->whereNull('mso_flagreset')
         ->get();
@@ -84,7 +84,7 @@ class ProsesBaSoController extends Controller
             ->get();
 
         if(count($dtCek) > 0){
-            if($dtCek[0]->MSO_FLAG_CREATELSO == 'Y'){
+            if($dtCek[0]->mso_flag_createlso == 'Y'){
                 return ApiFormatter::error(400, 'Lokasi Plano belum dicopy ke Lokasi SO');
             }
         }
@@ -99,70 +99,85 @@ class ProsesBaSoController extends Controller
         // str = "UPDATE TBMASTER_SETTING_SO SET MSO_FLAGTAHAP = '" & Tahap & "', MSO_FLAGTRFLOKASI = 'Y', MSO_FLAGLIMIT = NULL "
         // str &= "WHERE DATE_TRUNC('DAY',MSO_TGLSO) >= TO_DATE('" & Format(TglSO, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY')"
 
-        DB::table('tbmaster_setting_so')
-            ->whereRaw("DATE_TRUNC('DAY',mso_tglso) >= TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "', 'DD-MM-YYYY')")
+        DB::beginTransaction();
+	    try{
+
+            DB::table('tbmaster_setting_so')
+                ->whereRaw("DATE_TRUNC('DAY',mso_tglso) >= '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') ."'")
+                ->update([
+                    'mso_flagtahap' => $tahap,
+                    'mso_flagtrflokasi' => 'Y',
+                    'mso_flaglimit' => NULL
+                ]);
+
+            $query = '';
+            $query .= "INSERT INTO TBHISTORY_LHSO_SONAS ";
+            $query .= "(LSO_KODEIGR, ";
+            $query .= "LSO_TGLSO, ";
+            $query .= "LSO_KODERAK, ";
+            $query .= "LSO_KODESUBRAK, ";
+            $query .= "LSO_TIPERAK, ";
+            $query .= "LSO_SHELVINGRAK, ";
+            $query .= "LSO_NOURUT, ";
+            $query .= "LSO_PRDCD, ";
+            $query .= "LSO_LOKASI, ";
+            $query .= "LSO_QTY, ";
+            $query .= "LSO_TMP_QTYCTN, ";
+            $query .= "LSO_TMP_QTYPCS, ";
+            $query .= "LSO_FLAGSARANA, ";
+            $query .= "LSO_FLAGTAHAP, ";
+            $query .= "LSO_AVGCOST, ";
+            $query .= "LSO_CREATE_BY, ";
+            $query .= "LSO_CREATE_DT, ";
+            $query .= "LSO_JENISRAK, ";
+            $query .= "LSO_ST_SALDOAKHIR) ";
+            $query .= "SELECT ";
+            $query .= "LSO_KODEIGR, ";
+            $query .= "'" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "', ";
+            $query .= "LSO_KODERAK, ";
+            $query .= "LSO_KODESUBRAK, ";
+            $query .= "LSO_TIPERAK, ";
+            $query .= "LSO_SHELVINGRAK, ";
+            $query .= "LSO_NOURUT, ";
+            $query .= "LSO_PRDCD, ";
+            $query .= "LSO_LOKASI, ";
+            $query .= "LSO_QTY, ";
+            $query .= "LSO_TMP_QTYCTN, ";
+            $query .= "LSO_TMP_QTYPCS, ";
+            $query .= "LSO_FLAGSARANA, ";
+            $query .= "'" . $tahap . "', ";
+            $query .= "(SELECT (case when prd_unit='KG' then st_avgcost/1000  else st_avgcost  end) ST_AVGCOST FROM TBMASTER_STOCK, TBMASTER_PRODMAST WHERE ST_PRDCD = PRD_PRDCD AND ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD AND ST_AVGCOST IS NOT NULL LIMIT 1) AS ACOST, ";
+            $query .= "'" . session('user_id') . "', ";
+            $query .= "CURRENT_TIMESTAMP, ";
+            $query .= "LSO_JENISRAK, ";
+            $query .= "(SELECT coalesce (ST_SALDOAKHIR, 0) FROM TBMASTER_STOCK WHERE ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD AND ST_SALDOAKHIR IS NOT NULL LIMIT 1) AS SALDO_AKHIR ";
+            $query .= "FROM TBTR_LOKASI_SO WHERE DATE_TRUNC('DAY',LSO_TGLSO) >= '".Carbon::parse($request->tanggal_start_so)->format('Y-m-d')."' ";
+            $query .= " AND LSO_PRDCD = LSO_PRDCD";
+
+            // str = "UPDATE TBTR_LOKASI_SO SET LSO_MODIFY_BY = NULL, LSO_MODIFY_DT = NULL, LSO_FLAGLIMIT = NULL "
+            // str &= "WHERE DATE_TRUNC('DAY',LSO_TGLSO) >= TO_DATE('" & Format(TglSO, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY')"
+
+            DB::table('tbtr_lokasi_so')
+            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) >= '".Carbon::parse($request->tanggal_start_so)->format('Y-m-d')."'")
             ->update([
-                'mso_flagtahap' => $tahap,
-                'mso_flagtrflokasi' => 'Y',
-                'mso_flaglimit' => NULL
+                'lso_modify_by' => NULL,
+                'lso_modify_dt' => NULL,
+                'lso_flaglimit' => NULL
             ]);
 
-        $query = '';
-        $query .= "INSERT INTO TBHISTORY_LHSO_SONAS ";
-        $query .= "(LSO_KODEIGR, ";
-        $query .= "LSO_TGLSO, ";
-        $query .= "LSO_KODERAK, ";
-        $query .= "LSO_KODESUBRAK, ";
-        $query .= "LSO_TIPERAK, ";
-        $query .= "LSO_SHELVINGRAK, ";
-        $query .= "LSO_NOURUT, ";
-        $query .= "LSO_PRDCD, ";
-        $query .= "LSO_LOKASI, ";
-        $query .= "LSO_QTY, ";
-        $query .= "LSO_TMP_QTYCTN, ";
-        $query .= "LSO_TMP_QTYPCS, ";
-        $query .= "LSO_FLAGSARANA, ";
-        $query .= "LSO_FLAGTAHAP, ";
-        $query .= "LSO_AVGCOST, ";
-        $query .= "LSO_CREATE_BY, ";
-        $query .= "LSO_CREATE_DT, ";
-        $query .= "LSO_JENISRAK, ";
-        $query .= "LSO_ST_SALDOAKHIR) ";
-        $query .= "SELECT ";
-        $query .= "LSO_KODEIGR, ";
-        $query .= "TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "','DD-MM-YYYY'), ";
-        $query .= "LSO_KODERAK, ";
-        $query .= "LSO_KODESUBRAK, ";
-        $query .= "LSO_TIPERAK, ";
-        $query .= "LSO_SHELVINGRAK, ";
-        $query .= "LSO_NOURUT, ";
-        $query .= "LSO_PRDCD, ";
-        $query .= "LSO_LOKASI, ";
-        $query .= "LSO_QTY, ";
-        $query .= "LSO_TMP_QTYCTN, ";
-        $query .= "LSO_TMP_QTYPCS, ";
-        $query .= "LSO_FLAGSARANA, ";
-        $query .= "'" . $tahap . "', ";
-        $query .= "(SELECT (case when prd_unit='KG' then st_avgcost/1000  else st_avgcost  end) ST_AVGCOST FROM TBMASTER_STOCK, TBMASTER_PRODMAST WHERE ST_PRDCD = PRD_PRDCD AND ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD AND ST_AVGCOST IS NOT NULL LIMIT 1) AS ACOST, ";
-        $query .= "'" . session('user_id') . "', ";
-        $query .= "CURRENT_TIMESTAMP, ";
-        $query .= "LSO_JENISRAK, ";
-        $query .= "(SELECT coalesce (ST_SALDOAKHIR, 0) FROM TBMASTER_STOCK WHERE ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD AND ST_SALDOAKHIR IS NOT NULL LIMIT 1) AS SALDO_AKHIR ";
-        $query .= "FROM TBTR_LOKASI_SO WHERE DATE_TRUNC('DAY',LSO_TGLSO) >= TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "', 'DD-MM-YYYY') ";
-        $query .= " AND LSO_PRDCD = LSO_PRDCD";
+            // DB::commit();
 
-        // str = "UPDATE TBTR_LOKASI_SO SET LSO_MODIFY_BY = NULL, LSO_MODIFY_DT = NULL, LSO_FLAGLIMIT = NULL "
-        // str &= "WHERE DATE_TRUNC('DAY',LSO_TGLSO) >= TO_DATE('" & Format(TglSO, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY')"
+            return ApiFormatter::success(200, 'Update BASO berhasil dilakukan');
 
-        DB::table('tbtr_lokasi_so')
-        ->whereRaw("DATE_TRUNC('DAY',lso_tglso) >= TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "', 'DD-MM-YYYY')")
-        ->update([
-            'lso_modify_by' => NULL,
-            'lso_modify_dt' => NULL,
-            'lso_flaglimit' => NULL
-        ]);
+        }
 
-        return ApiFormatter::success(200, 'Update BASO berhasil dilakukan');
+        catch(\Exception $e){
+
+            DB::rollBack();
+
+            $message = "Oops! Something wrong ( $e )";
+            return ApiFormatter::error(400, $message);
+        }
     }
 
     public function prosesBaSo(ProsesBaSoRequest $request){
@@ -174,7 +189,7 @@ class ProsesBaSoController extends Controller
         // End If
 
         $dtCheck = DB::table('tbtr_lokasi_so')
-            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) >= TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "', 'DD-MM-YYYY')")
+            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) >= '".Carbon::parse($request->tanggal_start_so)->format('Y-m-d')."'")
             ->whereRaw("coalesce(lso_flaglimit, 'N') = 'Y'")
             ->whereNull('lso_modify_by')
             ->count();

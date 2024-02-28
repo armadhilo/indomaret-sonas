@@ -25,10 +25,10 @@ class InputLokasiRequest extends FormRequest
     public function rules()
     {
         return [
-            'kode_rak' => ['required','integer'],
-            'kode_sub_rak' => ['required','min_digits:2'],
+            'kode_rak' => ['required'],
+            'kode_sub_rak' => ['required','min:2'],
             'tipe_rak' => ['required'],
-            'shelving_rak' => ['required','min_digits:2'],
+            'shelving_rak' => ['required','min:2'],
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
             'jenis_barang' => ['required','in:Baik,Retur,Rusak'],
         ];

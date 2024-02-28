@@ -26,10 +26,10 @@ class SettingJalurRequest extends FormRequest
     {
         return [
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
-            'kode_rak' => ['required','integer'],
-            'kode_sub_rak' => ['nullable','min_digits:2'],
+            'kode_rak' => ['required'],
+            'kode_sub_rak' => ['nullable','min:2'],
             'tipe_rak' => ['nullable'],
-            'shelving_rak' => ['nullable','min_digits:2'],
+            'shelving_rak' => ['nullable','min:2'],
             'no_urut' => ['nullable'],
             'jalur_kertas' => ['required','in:K,H']
         ];

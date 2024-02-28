@@ -26,10 +26,10 @@ class InputKksoGetDataRequest extends FormRequest
     {
         return [
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
-            'txtKodeRak' => ['required','integer'],
-            'txtKodeSubRak' => ['required','min_digits:2'],
+            'txtKodeRak' => ['required'],
+            'txtKodeSubRak' => ['required','min:2'],
             'txtTipeRak' => ['required'],
-            'txtShelvingRak' => ['required','min_digits:2'],
+            'txtShelvingRak' => ['required','min:2'],
         ];
     }
 

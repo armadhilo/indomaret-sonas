@@ -283,13 +283,10 @@ class InitialSoController extends Controller
 
             //? kemudian lanjut step
 
-            //* Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?
-            return ApiFormatter::success(200, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
-
             DB::commit();
 
-            $message = 'Data Berhasil disimpan !!';
-            return ApiFormatter::success(200, $message);
+            //* Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?
+            return ApiFormatter::success(200, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
         }
 
         catch(\Exception $e){

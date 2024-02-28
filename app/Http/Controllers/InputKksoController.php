@@ -128,7 +128,6 @@ class InputKksoController extends Controller
                 $query .= "'" . $item->lso_qty . "', ";
                 $query .= "'" . session('user_id') . "', ";
                 $query .= "CURRENT_TIMESTAMP) ";
-
                 DB::insert($query);
 
                 $query = '';
@@ -150,13 +149,13 @@ class InputKksoController extends Controller
             }
 
             //! LANGSUNG UPLOAD PLANOPROGRAM
-                $KodeRak = $request->txtKodeRak;
-                $KodeSubRak = $request->txtKodeSubRak;
-                $TipeRak = $request->txtTipeRak;
-                $Shelving = $request->txtShelvingRak;
-                $NoUrut = $item->lso_nourut;
-                $KodePLU = $item->prdcd;
-                $Qty = $item->lso_qty;
+            $KodeRak = $request->txtKodeRak;
+            $KodeSubRak = $request->txtKodeSubRak;
+            $TipeRak = $request->txtTipeRak;
+            $Shelving = $request->txtShelvingRak;
+            $NoUrut = $item->lso_nourut;
+            $KodePLU = $item->prdcd;
+            $Qty = $item->lso_qty;
 
             foreach($request->datatables as $item){
                 $query = '';

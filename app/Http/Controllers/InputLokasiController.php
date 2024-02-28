@@ -61,7 +61,7 @@ class InputLokasiController extends Controller
         $dtCek = DB::table('tbtr_lokasi_so')
             ->select('lso_lokasi')
             ->where('lso_koderak', $request->kode_rak)
-            ->whereRaw("to_char(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "'")
+            ->whereRaw("to_char(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('d-m-Y') . "'")
             ->first();
 
         if(!empty($dtCek)){
@@ -142,50 +142,64 @@ class InputLokasiController extends Controller
     }
 
     public function actionSave(InputLokasiActionSaveRequest $request){
-        $jenis_barang = '03';
-        if($request->jenis_barang == 'Baik'){
-            $jenis_barang = '01';
-        }elseif($request->jenis_barang == 'Retur'){
-            $jenis_barang = '02';
+
+        DB::beginTransaction();
+	    try{
+
+            $jenis_barang = '03';
+            if($request->jenis_barang == 'Baik'){
+                $jenis_barang = '01';
+            }elseif($request->jenis_barang == 'Retur'){
+                $jenis_barang = '02';
+            }
+
+            $flag_limit = 'Y';
+            if($this->FlagTahap == 0) $flag_limit = null;
+
+            $jenis_rak = 'T';
+            if(strtoupper($request->kode_rak[0]) == 'D' || strtoupper($request->kode_rak[0]) == 'G' || strtoupper($request->kode_rak[0]) == 'Z'){
+                $jenis_rak = 'L';
+            }
+
+            foreach($request->plu as $key => $item){
+                DB::table('tbtr_lokasi_so')->updateOrInsert([
+                    'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
+                    'lso_koderak' => $request->kode_rak,
+                    'lso_kodesubrak' => $request->kode_sub_rak,
+                    'lso_tiperak' => $request->tipe_rak,
+                    'lso_shelvingrak' => $request->shelving_rak,
+                    'lso_nourut' => $request->no_urut[$key],
+                    'lso_prdcd' => $item,
+                ],[
+                    'lso_kodeigr' => session('KODECABANG'),
+                    'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
+                    'lso_koderak' => $request->kode_rak,
+                    'lso_kodesubrak' => $request->kode_sub_rak,
+                    'lso_tiperak' => $request->tipe_rak,
+                    'lso_shelvingrak' => $request->shelving_rak,
+                    'lso_nourut' => $request->no_urut[$key],
+                    'lso_prdcd' => $item,
+                    'lso_lokasi' => $jenis_barang,
+                    'lso_qty' => 0,
+                    'lso_flagsarana' => 'K',
+                    'lso_create_by' => session('user_id'),
+                    'lso_create_dt' => Carbon::now(),
+                    'lso_flaglimit' => $flag_limit,
+                    'lso_jenisrak' => $jenis_rak,
+                ]);
+            }
+
+            DB::commit();
+
+            return ApiFormatter::success(200, 'Action Save Berhasil');
         }
 
-        $flag_limit = 'Y';
-        if($this->FlagTahap == 0) $flag_limit = null;
+        catch(\Exception $e){
 
-        $jenis_rak = 'T';
-        if(strtoupper($request->kode_rak[0]) == 'D' || strtoupper($request->kode_rak[0]) == 'G' || strtoupper($request->kode_rak[0]) == 'Z'){
-            $jenis_rak = 'L';
+            DB::rollBack();
+
+            $message = "Oops! Something wrong ( $e )";
+            return ApiFormatter::error(400, $message);
         }
-
-        
-        foreach($request->plu as $key => $item){
-            DB::table('tbtr_lokasi_so')->updateOrInsert([
-                'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
-                'lso_koderak' => $request->kode_rak,
-                'lso_kodesubrak' => $request->kode_sub_rak,
-                'lso_tiperak' => $request->tipe_rak,
-                'lso_shelvingrak' => $request->shelving_rak,
-                'lso_nourut' => $request->no_urut[$key],
-                'lso_prdcd' => $item,
-            ],[
-                'lso_kodeigr' => session('KODECABANG'),
-                'lso_tglso' => Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s'),
-                'lso_koderak' => $request->kode_rak,
-                'lso_kodesubrak' => $request->kode_sub_rak,
-                'lso_tiperak' => $request->tipe_rak,
-                'lso_shelvingrak' => $request->shelving_rak,
-                'lso_nourut' => $request->no_urut[$key],
-                'lso_prdcd' => $item,
-                'lso_lokasi' => $jenis_barang,
-                'lso_qty' => 0,
-                'lso_flagsarana' => 'K',
-                'lso_create_by' => session('user_id'),
-                'lso_create_dt' => Carbon::now(),
-                'lso_flaglimit' => $flag_limit,
-                'lso_jenisrak' => $jenis_rak,
-            ]);
-        }
-
-        return ApiFormatter::success(200, 'Action Save Berhasil');
     }
 }

@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class SettingJalurController extends Controller
+class SettingJalurHHController extends Controller
 {
 
     public function __construct(Request $request){
@@ -22,7 +22,7 @@ class SettingJalurController extends Controller
             ->whereNull('mso_flagreset')
             ->get();
         $data['tglSo'] = Carbon::parse($dtSO[0]->mso_tglso)->format('Y-m-d');
-        
+
         if(count($dtSO) == 0){
             $check_error = "SO belum diinitial";
             return view('setting-jalur', compact('check_error'));
@@ -65,7 +65,7 @@ class SettingJalurController extends Controller
         $query .= "UPDATE TBTR_LOKASI_SO SET LSO_FLAGSARANA = '" . $request->jalur_kertas . "' ";
         $query .= "WHERE LSO_KODEIGR = '" . session('KODECABANG') . "' ";
         $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
-        $query .= "AND LSO_TGLSO = TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "', 'DD-MM-YYYY') ";
+        $query .= "AND LSO_TGLSO = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "' ";
         $query .= "AND LSO_RECID IS NULL ";
         $query .= "AND LSO_KODERAK = '" . $request->kode_rak . "' ";
         if(isset($request->kode_sub_rak)){
@@ -83,7 +83,7 @@ class SettingJalurController extends Controller
         //? cek apakah function updatenya berhasil melakukan save
         //* Records Updated
         //* Tidak ada lokasi yang terupdate
-        if ($affectedRows > 0) {
+        if ($affectedRows !== false) {
             return ApiFormatter::success(200, 'Records Updated');
         } else {
             return ApiFormatter::error(400, 'Tidak ada lokasi yang terupdate');

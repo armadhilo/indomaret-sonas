@@ -7,7 +7,7 @@ use App\Http\Controllers\InputLokasiController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProsesBaSoController;
 use App\Http\Controllers\SettingJalur;
-use App\Http\Controllers\SettingJalurController;
+use App\Http\Controllers\SettingJalurHHController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -51,7 +51,7 @@ Route::middleware(['mylogin'])->group(function () {
 
             // Detail Action
             Route::get('/detail-datatables', [InputLokasiController::class, 'datatablesDetailLokasi']);
-    
+
             Route::get('/get-last-number', [InputLokasiController::class, 'getLastNumber']);
             Route::get('/get-desc-plu/{prdcd}', [InputLokasiController::class, 'getDescPlu']);
             Route::post('/action-save', [InputLokasiController::class, 'actionSave']);
@@ -67,10 +67,10 @@ Route::middleware(['mylogin'])->group(function () {
     });
 
     Route::group(['prefix' => 'setting-jalur'], function(){
-        Route::get('/', [SettingJalurController::class, 'index']);
+        Route::get('/', [SettingJalurHHController::class, 'index']);
 
         Route::group(['prefix' => 'action'], function(){
-            Route::post('/update-jalur', [SettingJalurController::class, 'actionUpdate']);
+            Route::post('/update-jalur', [SettingJalurHHController::class, 'actionUpdate']);
         });
     });
 

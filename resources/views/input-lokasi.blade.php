@@ -17,7 +17,7 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <form id="form_input_lokasi">
-                            <input type="date" name="tanggal_start_so" hidden value="{{ isset($tglSo) ? $tglSo : '' }}">
+                            <input type="date" name="tanggal_start_so" hidden value="{{ isset($tgl_so) ? $tgl_so : '' }}">
                             <div class="form-group">
                                 <label for="kode_rak">Kode Rak</label>
                                 <input type="text" class="form-control" name="kode_rak" id="kode_rak">

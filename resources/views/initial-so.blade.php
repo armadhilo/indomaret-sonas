@@ -166,6 +166,9 @@
                     date = date.format('DD/MM/YYYY');
                     $('#start_data_so').prop('disabled', true);
                     $('#start_data_so').text(`Proses Persiapan Data SO ${date} sudah selesai`);
+                } else {
+                    $('#start_data_so').prop('disabled', false);
+                    $('#start_data_so').text(`START PERSIAPAN DATA SO`);
                 }
             }, error: function(jqXHR, textStatus, errorThrown) {
                 setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);

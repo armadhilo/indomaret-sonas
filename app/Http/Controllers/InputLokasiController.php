@@ -63,17 +63,17 @@ class InputLokasiController extends Controller
             ->where('lso_koderak', $request->kode_rak)
             ->whereRaw("to_char(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('d-m-Y') . "'")
             ->first();
-
+    
         if(!empty($dtCek)){
-            if($dtCek->LSO_LOKASI == '01' &&  $request->jenis_barang == 'Baik'){
+            if($dtCek->lso_lokasi == '01' &&  $request->jenis_barang == 'Baik'){
                 return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Baik');
-            }elseif($dtCek->LSO_LOKASI == '02' &&  $request->jenis_barang == 'Retur'){
+            }elseif($dtCek->lso_lokasi == '02' &&  $request->jenis_barang == 'Retur'){
                 return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Retur');
-            }elseif($dtCek->LSO_LOKASI == '03' &&  $request->jenis_barang == 'Rusak'){
+            }elseif($dtCek->lso_lokasi == '03' &&  $request->jenis_barang == 'Rusak'){
                 return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Rusak');
             }
         }
-
+        
         //? akan buka halaman baru untuk menambah produk dan daftar lokas
         return ApiFormatter::success(200, 'Lokasi SO Berhasil Ditambahkan..!', $request);
     }

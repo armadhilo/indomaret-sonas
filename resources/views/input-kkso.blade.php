@@ -192,6 +192,7 @@
 
     function clearForm(){
         $('#form_input_kkso')[0].reset();
+        tb_kkso.clear().draw();
     }
 
     $("#form_input_kkso").submit(function(e){

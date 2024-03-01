@@ -27,7 +27,7 @@ class InputKksoController extends Controller
             ->get();
         $data['tglSo'] = Carbon::parse($dtSO[0]->mso_tglso)->format('Y-m-d');
 
-        if(count($dtSO)){
+        if(count($dtSO) == 0){
             $check_error = "SO belum diinitial";
             return view('input-kkso', compact('check_error'));
         }

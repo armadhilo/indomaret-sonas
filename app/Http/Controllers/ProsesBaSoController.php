@@ -24,7 +24,7 @@ class ProsesBaSoController extends Controller
         ->get();
         $data['tgl_so'] = Carbon::parse($dtCek[0]->mso_tglso)->format('Y-m-d');
 
-        if(count($dtCek)){
+        if(count($dtCek) == 0){
             $check_error = "SO belum diinitial";
             return view('proses-ba-so', compact('check_error'));
         }

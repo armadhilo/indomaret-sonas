@@ -187,8 +187,8 @@
         if($('#tb tbody tr:not(:has(td.dataTables_empty))').length > 0){
             var content = $('#tb tbody tr:last').find('td:first input').val();
             let addRow = [
-                `<input name="no_urut[]" value="${parseInt(content) + 1}" type="text" class="form-control form-no-style" disabled>`,
-                '<input name="plu[]" type="text" class="form-control required">',
+                `${parseInt(content) + 1}`,
+                '',
                 '',
                 '',
             ];

@@ -30,6 +30,7 @@ class InputKksoActionUpdateRequest extends FormRequest
             'txtKodeSubRak' => ['required','min:2'],
             'txtTipeRak' => ['required'],
             'txtShelvingRak' => ['required','min:2'],
+            
             'datatables' => ['required','array'],
             'datatables.*.lso_nourut' => ['required'],
             'datatables.*.lso_jenisrak' => ['required'],
@@ -41,8 +42,8 @@ class InputKksoActionUpdateRequest extends FormRequest
             'datatables.*.prd_frac' => ['required'],
             'datatables.*.st_avgcost' => ['required'],
             'datatables.*.lso_qty' => ['required'],
-            'datatables.*.row4' => ['required'],
-            'datatables.*.row5' => ['required'],
+            'datatables.*.new_qty_ctn' => ['required'],
+            'datatables.*.new_qty_pcs' => ['required'],
         ];
     }
 

@@ -68,8 +68,22 @@ class InputKksoController extends Controller
             $query .= "AND LSO_LOKASI = '03' ";
         }
         $query .= "ORDER BY LSO_NOURUT ASC";
-
         $data = DB::select($query);
+
+        foreach ($data as &$item) {
+            if ((int)$item->lso_qty !== 0 && ((int)$item->lso_tmp_qtyctn === 0 && (int)$item->lso_tmp_qtypcs === 0)) {
+                $CTN = 0;
+                if ((int)$item->lso_qty < 0) {
+                    $item->new_qty_ctn = ceil((int)$item->lso_qty / ((int)$item->prd_frac == 0 ? 1 : (int)$item->prd_frac));
+                } else {
+                    $item->new_qty_ctn = floor((int)$item->lso_qty / ((int)$item->prd_frac == 0 ? 1 : (int)$item->prd_frac));
+                }
+                $item->new_qty_pcs = (int)$item->lso_qty % ((int)$item->prd_frac == 0 ? 1 : (int)$item->prd_frac);
+            } else {
+                $item->new_qty_ctn = (int)$item->lso_tmp_qtyctn;
+                $item->new_qty_pcs = (int)$item->lso_tmp_qtypcs;
+            }
+        }
 
         return ApiFormatter::success(200, 'Data Berhasil Ditampilkan !', $data);
 
@@ -97,7 +111,6 @@ class InputKksoController extends Controller
     }
 
     public function actionUpdate(InputKksoActionUpdateRequest $request){
-
         DB::beginTransaction();
 	    try{
 

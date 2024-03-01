@@ -63,6 +63,7 @@ Route::middleware(['mylogin'])->group(function () {
         Route::get('/datatables', [InputKksoController::class, 'getData']);
 
         Route::group(['prefix' => 'action'], function(){
+            Route::post('/update', [InputKksoController::class, 'actionUpdate']);
         });
     });
 

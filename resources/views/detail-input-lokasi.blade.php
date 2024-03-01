@@ -217,7 +217,6 @@
                 addRow.forEach(item => {
                     newRow.append(`<td>${item}</td>`);
                 });
-                console.log(newRow);
                 $('#tb tbody').append(newRow);
                 tb.row.add(newRow).draw();
             }, error: function(jqXHR, textStatus, errorThrown) {

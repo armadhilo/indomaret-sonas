@@ -211,7 +211,11 @@ class ProsesBaSoController extends Controller
             $procedure = DB::select("call sp_summary_so_plano('$kodeigr','$userid', NULL)");
             $procedure = $procedure[0]->sukses;
 
-            return ApiFormatter::success(200, $procedure);
+            if($procedure == 'Summary Sukses!'){
+                return ApiFormatter::success(200, $procedure);
+            }
+
+            return ApiFormatter::error(400, $procedure);
         }
 
         catch(\Exception $e){

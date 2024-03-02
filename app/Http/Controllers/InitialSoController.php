@@ -97,9 +97,9 @@ class InitialSoController extends Controller
             if($check > 0) return ApiFormatter::error(400, 'Silahkan Cetak KKSO terlebih dahulu');
 
             $check = DB::table('tbmaster_lokasi')
-                ->whereNull('lks_jenisrak')
-                ->whereNotNull('lks_prdcd')
-                ->count();
+            ->whereNull('lks_jenisrak')
+            ->whereNotNull('lks_prdcd')
+            ->count();
 
             if($check > 0) return ApiFormatter::error(400, 'Terdapat PLU di Master Lokasi yang tidak ada Jenis Rak');
 

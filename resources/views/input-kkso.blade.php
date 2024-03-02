@@ -62,7 +62,7 @@
     table td {
         color: black;
     }
-    
+
 </style>
 @endsection
 
@@ -109,14 +109,14 @@
                                             </div>
                                         </div>
                                     </div>
-    
+
                                     <div class="form-group" style="flex: 1">
                                         <label for="jenis_barang" class="text-nowrap">Jenis Barang</label>
                                         <select id="jenis_barang" class="form-control">
                                             <option value="baik" selected>Baik</option>
                                         </select>
                                     </div>
-    
+
                                     <div class="form-group d-flex align-items-center" style="gap: 15px; flex: 1;">
                                         <button type="submit" class="btn btn-lg btn-cust btn-primary">View</button>
                                         <button type="button" class="btn btn-lg btn-cust btn-secondary" onclick="clearForm()">Clear</button>
@@ -156,7 +156,7 @@
 
 @push('page-script')
 <script>
-    let tb_kkso; 
+    let tb_kkso;
     $(document).ready(function(){
         @if(isset($check_error) && !empty($check_error))
             let check_error = "{{ $check_error }}";
@@ -193,13 +193,13 @@
                             <input name="prd_unit" type="hidden" readonly value="${row.prd_frac}">
                             <input name="prd_frac" type="hidden" readonly class="prd_frac" value="${row.prd_frac !== null ? row.prd_frac : 0}">
                             <input name="st_avgcost" type="hidden" readonly value="${row.st_avgcost}">
-                            <input name="lso_qty" type="hidden" readonly value="${row.lso_qty}"> 
-                            <input name="new_qty_ctn" type="hidden" readonly value="${row.new_qty_ctn}"> 
-                            <input name="new_qty_pcs" type="hidden" readonly value="${row.new_qty_pcs}"> 
-                        
+                            <input name="lso_qty" type="hidden" readonly value="${row.lso_qty}">
+                            <input name="new_qty_ctn" type="hidden" readonly value="${row.new_qty_ctn}">
+                            <input name="new_qty_pcs" type="hidden" readonly value="${row.new_qty_pcs}">
+
                             <div>${data}/${row.prd_frac !== null ? row.prd_frac : ''}</div>
-                        `;                        
-                        
+                        `;
+
                     }
                 },
                 { data: 'lso_tmp_qtyctn',
@@ -212,7 +212,7 @@
                         return `<input name="lso_tmp_qtypcs" type="text" class="form-control lso_tmp_qtypcs_input" value="${data !== null ? data : ''}">`;
                     }
                 },
-                { 
+                {
                     "data": null,
                     "render": function(data, type, row, meta) {
                         var prd_frac = row.prd_frac !== null ? parseInt(row.prd_frac) : 0;
@@ -239,9 +239,9 @@
         var prd_frac = parseFloat($row.find('.prd_frac').val()) || 0;
         var lso_tmp_qtyctn = parseFloat($row.find('.lso_tmp_qtyctn_input').val()) || 0;
         var lso_tmp_qtypcs = parseFloat($row.find('.lso_tmp_qtypcs_input').val()) || 0;
-        
+
         var result = (prd_frac * lso_tmp_qtyctn) + lso_tmp_qtypcs;
-        $row.find('.total').text(result); 
+        $row.find('.total').text(result);
     }
 
     $(document).on('input', '.lso_tmp_qtyctn_input, .lso_tmp_qtypcs_input', function() {
@@ -340,7 +340,7 @@
                     success: function(response) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire('Success!',response.message,'success').then(function(){
-                            window.location.href = '/input-lokasi/';
+                            window.location.href = '/input-kkso/';
                         });
                     }, error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
@@ -357,5 +357,5 @@
     };
 
 </script>
-    
+
 @endpush

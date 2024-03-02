@@ -115,62 +115,53 @@ class InputKksoController extends Controller
 	    try{
 
             foreach($request->datatables as $item){
-                $query = "";
-                $query .= "INSERT INTO TBHISTORY_SONAS ";
-                $query .= "(HSO_KODERAK, ";
-                $query .= "HSO_KODESUBRAK, ";
-                $query .= "HSO_TIPERAK, ";
-                $query .= "HSO_SHELVINGRAK, ";
-                $query .= "HSO_NOURUT, ";
-                $query .= "HSO_PRDCD, ";
-                $query .= "HSO_TGLSO, ";
-                $query .= "HSO_QTYLAMA, ";
-                $query .= "HSO_QTYBARU, ";
-                $query .= "HSO_CREATE_BY, ";
-                $query .= "HSO_CREATE_DT) ";
-                $query .= "VALUES ";
-                $query .= "( ";
-                $query .= "'" . $request->txtKodeRak . "', ";
-                $query .= "'" . $request->txtKodeSubRak . "', ";
-                $query .= "'" . $request->txtTipeRak . "', ";
-                $query .= "'" . $request->txtShelvingRak . "', ";
-                $query .= "'" . $item->lso_nourut . "', ";
-                $query .= "'" . $item->prd_prdcd . "', ";
-                $query .= "TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY'), ";
-                $query .= "'" . $item->lso_qty . "', ";
-                $query .= "'" . $item->lso_qty . "', ";
-                $query .= "'" . session('user_id') . "', ";
-                $query .= "CURRENT_TIMESTAMP) ";
-                DB::insert($query);
 
-                $query = '';
-                $query .= "UPDATE TBTR_LOKASI_SO SET ";
-                $query .= "LSO_QTY = '" . $item->lso_qty . "', ";
-                $query .= "LSO_TMP_QTYCTN = '" . $item->row4 . "', ";
-                $query .= "LSO_TMP_QTYPCS = '" . $item->row5 . "', ";
-                $query .= "LSO_MODIFY_BY = '" . session('user_id') . "', ";
-                $query .= "LSO_MODIFY_DT = CURRENT_TIMESTAMP ";
-                $query .= "WHERE LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY') ";
-                $query .= "AND LSO_KODERAK = '" . $request->txtKodeRak . "' ";
-                $query .= "AND LSO_KODESUBRAK = '" . $request->txtKodeSubRak . "' ";
-                $query .= "AND LSO_TIPERAK = '" . $request->txtTipeRak . "' ";
-                $query .= "AND LSO_SHELVINGRAK = '" . $request->txtShelvingRak . "' ";
-                $query .= "AND LSO_NOURUT = '" . $item->lso_nourut . "' ";
-                $query .= "AND LSO_PRDCD = '" . $item->prdcd . "' ";
-                $query .= "AND LSO_FLAGSARANA = 'K'";
-                DB::update($query);
+                DB::table('tbhistory_sonas')
+                    ->insert([
+                        'hso_koderak' => $request->txtKodeRak,
+                        'hso_kodesubrak' => $request->txtKodeSubRak,
+                        'hso_tiperak' => $request->txtTipeRak,
+                        'hso_shelvingrak' => $request->txtShelvingRak,
+                        'hso_nourut' => $item['lso_nourut'],
+                        'hso_prdcd' => $item['prd_prdcd'],
+                        'hso_tglso' => $request->tanggal_start_so,
+                        'hso_qtylama' => $item['lso_qty'],
+                        'hso_qtybaru' => $item['lso_qty'],
+                        'hso_create_by' => session('user_id'),
+                        'hso_create_dt' => Carbon::now(),
+                    ]);
+
+                DB::table('tbtr_lokasi_so')
+                    ->where([
+                        'lso_tglso' => $request->tanggal_start_so,
+                        'lso_koderak' => $request->txtKodeRak,
+                        'lso_kodesubrak' => $request->txtKodeSubRak,
+                        'lso_tiperak' => $request->txtTipeRak,
+                        'lso_shelvingrak' => $request->txtShelvingRak,
+                        'lso_nourut' => $item['lso_nourut'],
+                        'lso_prdcd' => $item['prd_prdcd'],
+                        'lso_flagsarana' => 'K'
+                    ])
+                    ->update([
+                        'lso_qty' => $item['lso_qty'],
+                        'lso_tmp_qtyctn' => $item['new_qty_ctn'],
+                        'lso_tmp_qtypcs' => $item['new_qty_pcs'],
+                        'lso_modify_by' => session('user_id'),
+                        'lso_modify_dt' => Carbon::now(),
+                    ]);
             }
 
             //! LANGSUNG UPLOAD PLANOPROGRAM
-            $KodeRak = $request->txtKodeRak;
-            $KodeSubRak = $request->txtKodeSubRak;
-            $TipeRak = $request->txtTipeRak;
-            $Shelving = $request->txtShelvingRak;
-            $NoUrut = $item->lso_nourut;
-            $KodePLU = $item->prdcd;
-            $Qty = $item->lso_qty;
-
             foreach($request->datatables as $item){
+
+                $KodeRak = $request->txtKodeRak;
+                $KodeSubRak = $request->txtKodeSubRak;
+                $TipeRak = $request->txtTipeRak;
+                $Shelving = $request->txtShelvingRak;
+                $NoUrut = $item['lso_nourut'];
+                $KodePLU = $item['prd_prdcd'];
+                $Qty = $item['lso_qty'];
+
                 $query = '';
                 $query .= "SELECT * FROM TBTR_LOKASI_SO ";
                 $query .= "WHERE LSO_KODERAK = '" . $KodeRak . "' AND ";
@@ -183,7 +174,7 @@ class InputKksoController extends Controller
                 $firstCharacter = strtoupper(substr($KodeRak, 0, 1));
 
                 if($firstCharacter == 'D' || $firstCharacter == 'G'){
-                    if($item->lso_jenisrak == 'D' || $item->lso_jenisrak == 'N'){
+                    if($item['lso_jenisrak'] == 'D' || $item['lso_jenisrak'] == 'N'){
                         //! Jika rak cadangan Gudang (L) maka update ke Display Gudang
                         $query = "";
                         $query .= "UPDATE tbmaster_lokasi ";
@@ -191,12 +182,12 @@ class InputKksoController extends Controller
                         $query .= "             FROM tbtr_lokasi_so ";
                         $query .= "             WHERE (lso_lokasi = '01' ";
                         $query .= "                 AND lso_jenisrak = 'L' ";
-                        $query .= "                 AND lso_tglso = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY') ";
+                        $query .= "                 AND lso_tglso = $request->tanggal_start_so ";
                         $query .= "                 AND lso_prdcd = '" . $KodePLU . "' ";
                         $query .= "                 AND lso_koderak LIKE 'L%') ";
                         $query .= "             OR (lso_koderak LIKE 'D%'";
                         $query .= "                 AND lso_jenisrak IN ('D', 'N')";
-                        $query .= "                 AND lso_tglso = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY') ";
+                        $query .= "                 AND lso_tglso = $request->tanggal_start_so ";
                         $query .= "                 AND lso_prdcd     = '" . $KodePLU . "')";
                         $query .= "             GROUP BY lso_prdcd), 0), ";
                         $query .= "LKS_MODIFY_BY = '" . session('user_id') . "', ";
@@ -227,12 +218,12 @@ class InputKksoController extends Controller
                     $query .= "             FROM tbtr_lokasi_so ";
                     $query .= "             WHERE (lso_lokasi = '01' ";
                     $query .= "                 AND lso_jenisrak = 'L' ";
-                    $query .= "                 AND lso_tglso = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY') ";
+                    $query .= "                 AND lso_tglso = $request->tanggal_start_so ";
                     $query .= "                 AND lso_prdcd = '" . $KodePLU . "' ";
                     $query .= "                 AND lso_koderak LIKE 'L%') ";
                     $query .= "             OR (lso_koderak LIKE 'D%'";
                     $query .= "                 AND lso_jenisrak IN ('D', 'N')";
-                    $query .= "                 AND lso_tglso = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY') ";
+                    $query .= "                 AND lso_tglso = $request->tanggal_start_so ";
                     $query .= "                 AND lso_prdcd     = '" . $KodePLU . "')";
                     $query .= "             GROUP BY lso_prdcd), 0), ";
                     $query .= "LKS_MODIFY_BY = '" . session('user_id') . "', ";
@@ -240,7 +231,7 @@ class InputKksoController extends Controller
                     $query .= "WHERE lks_koderak LIKE 'D%' AND lks_jenisrak IN ('D', 'N') and lks_prdcd = '" . $KodePLU . "' ";
                     DB::update($query);
                 }else{
-                    if($item->lso_jenisrak == "S"){
+                    if($item['lso_jenisrak'] == "S"){
                         //! Jika Toko Storage update apa adanya
                         $query .= "";
                         $query .= "UPDATE TBMASTER_LOKASI ";
@@ -262,7 +253,7 @@ class InputKksoController extends Controller
                         $query .= "SET ";
                         $query .= "LKS_QTY = ";
                         $query .= "         coalesce((SELECT SUM(LSO_QTY) FROM TBTR_LOKASI_SO ";
-                        $query .= "         WHERE LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY') ";
+                        $query .= "         WHERE LSO_TGLSO = $request->tanggal_start_so ";
                         $query .= "         AND (SUBSTR(LSO_KODERAK,1,1) <> 'D' AND SUBSTR(LSO_KODERAK,1,1) <> 'G' AND SUBSTR(LSO_KODERAK,1,3) <> 'HDH') AND ";
                         $query .= "         LSO_PRDCD = '" . $KodePLU . "' AND (LSO_JENISRAK = 'D' OR LSO_JENISRAK = 'N' OR LSO_JENISRAK = 'L')), 0), ";
                         $query .= "LKS_MODIFY_BY = '" . session('user_id') . "', ";
@@ -276,8 +267,7 @@ class InputKksoController extends Controller
                 }
             }
 
-            dd('run');
-            // DB::commit();
+            DB::commit();
 
             $message = 'Data Berhasil disimpan !!';
             return ApiFormatter::success(200, $message);

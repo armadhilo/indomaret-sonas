@@ -4,7 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
-use App\Http\Requests\ProsesBaSoRequest;
+use App\Http\Requests\ReportDaftarItemAdjustRequest;
+use App\Http\Requests\ReportDaftarItemBelumAdaDiMasterRequest;
+use App\Http\Requests\ReportInqueryPlanoSonasRequest;
+use App\Http\Requests\ReportLokasiRakBelumDiSoRequest;
+use App\Http\Requests\ReportMasterLokasiSoRequest;
+use App\Http\Requests\ReportPerincianBasoRequest;
+use App\Http\Requests\ReportRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 class SetLimitSoController extends Controller
 {
     private $FlagTahap;
+    private $flagTransferLokasi;
     public function __construct(Request $request){
         DatabaseConnection::setConnection(session('KODECABANG'), "PRODUCTION");
     }
@@ -24,463 +31,480 @@ class SetLimitSoController extends Controller
         }
 
         $data['TanggalSO'] = $dtCek[0]->mso_tglso;
-        $data['flagTransferLokasi'] = $dtCek[0]->mso_flag_createlso;
+        $this->flagTransferLokasi = $dtCek[0]->mso_flag_createlso;
 
         return view('proses-ba-so', $data);
     }
 
-    public function reportListFormKkso(){
+    public function reportListFormKkso(ReportRequest $request){
 
-        $koderak1 = "0";
-        $subrak1 = "0";
-        $tipe1 = "0";
-        $shelving1 = "0";
-        $koderak2 = "ZZZZZZZ";
-        $subrak2 = "ZZZ";
-        $tipe2 = "ZZZ";
-        $shelving2 = "ZZ";
-
-        // jb = IIf(InputRpt1.JbID = "B", "01", IIf(InputRpt1.JbID = "T", "02", "03"))
-
-        // Sql = "SELECT lso_tglso, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, "
-        // Sql += "lso_prdcd, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi, prd_deskripsipanjang, prd_unit || '/' || prd_frac satuan, prd_kodetag, lso_tmp_qtyctn, lso_tmp_qtypcs "
-        // Sql += "FROM tbtr_lokasi_so, tbmaster_prodmast "
-        // Sql += "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" & koderak1 & "' and '" & koderak2 & "' "
-        // Sql += "AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND LSO_LOKASI = '" & jb & "'  "
-        // Sql += "AND lso_kodesubrak between '" & subrak1 & "' and '" & subrak2 & "' "
-        // Sql += "AND lso_tiperak between '" & tipe1 & "' and '" & tipe2 & "' "
-        // Sql += "AND lso_shelvingrak between '" & shelving1 & "' and '" & shelving2 & "' "
-        // Sql += "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR "
-        // Sql += "AND coalesce(lso_flagsarana, 'K') = 'K' "
-        // If _flagTransferLokasi = "Y" Then
-        //     Sql += "AND LSO_FLAGLIMIT='Y' "
-        // End If
-        // Sql += "Order By lso_lokasi, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut  "
+        $query = '';
+        $query .= "SELECT lso_tglso, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, ";
+        $query .= "lso_prdcd, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi, prd_deskripsipanjang, prd_unit || '/' || prd_frac satuan, prd_kodetag, lso_tmp_qtyctn, lso_tmp_qtypcs ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_prodmast ";
+        $query .= "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" & $request->koderak1 & "' and '" & $request->koderak2 & "' ";
+        $query .= "AND LSO_TGLSO = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
+        $query .= "AND LSO_LOKASI = '" & $request->jenisbrg & "'  ";
+        $query .= "AND lso_kodesubrak between '" & $request->subrak1 & "' and '" & $request->subrak2 & "' ";
+        $query .= "AND lso_tiperak between '" & $request->tipe1 & "' and '" & $request->tipe2 & "' ";
+        $query .= "AND lso_shelvingrak between '" & $request->shelving1 & "' and '" & $request->shelving2 & "' ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+        $query .= "AND coalesce(lso_flagsarana, 'K') = 'K' ";
+        if($this->flagTransferLokasi == 'Y'){
+            $query .= "AND LSO_FLAGLIMIT='Y' ";
+        }
+        $query .= "Order By lso_lokasi, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut  ";
+        $data = DB::select($query);
 
         //! UPDATE
-        // For i As Integer = 0 To dtSO.Rows.Count - 1
-        //     plu = dtSO.Rows(i).Item("lso_prdcd")
-        //     Str = "UPDATE TBTR_LOKASI_SO SET LSO_FLAGKKSO='Y' "
-        //     Str &= "WHERE LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = '" & plu & "' "
-        //     NonQueryOraTransaction(Str, OraConn, OraTrans)
-        // Next
+        foreach($data as $item){
+            DB::table('tbtr_lokasi_so')
+                ->whereDate('lso_tglso', $request->tanggal_start_so)
+                ->where('lso_prdcd', $item->lso_prdcd)
+                ->update(['lso_flagkkso' => 'Y']);
+        }
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportRegisterKkso1(){
-        $koderak1 = "0";
-        $subrak1 = "0";
-        $tipe1 = "0";
-        $shelving1 = "0";
-        $koderak2 = "ZZZZZZZ";
-        $subrak2 = "ZZZ";
-        $tipe2 = "ZZZ";
-        $shelving2 = "ZZ";
+    public function reportRegisterKkso1(ReportRequest $request){
 
-        // jb = IIf(InputRpt1.JbID = "B", "01", IIf(InputRpt1.JbID = "T", "02", "03"))
-
-        // Sql = "SELECT rak1, rak2, sub1, sub2, shel1, shel2, tipe1, tipe2, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lokasi, SUM(item) item, "
-        // Sql += "floor(( (sum(ITEM)+10+(1*2)) / 25) + CASE WHEN  MOD((sum(ITEM)+10+(1*2)), 25) <> 0 THEN 1 ELSE 0 END) lbr FROM ( "
-        // Sql += "SELECT '" & koderak1 & "' rak1, '" & koderak2 & "' rak2, '" & subrak1 & "' sub1, '" & subrak2 & "' sub2, "
-        // Sql += "'" & tipe1 & "' tipe1, '" & tipe2 & "' tipe2, '" & shelving1 & "' shel1, '" & shelving2 & "' shel2, "
-        // Sql += "lso_tglso, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, "
-        // Sql += "lso_prdcd, 1 item, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi, prd_deskripsipanjang, prd_unit || '/' || prd_frac satuan, prd_kodetag "
-        // Sql += "FROM tbtr_lokasi_so, tbmaster_prodmast "
-        // Sql += "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" & koderak1 & "' and '" & koderak2 & "' "
-        // Sql += "AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND lso_kodesubrak between '" & subrak1 & "' and '" & subrak2 & "' "
-        // Sql += "AND lso_tiperak between '" & tipe1 & "' and '" & tipe2 & "' "
-        // Sql += "AND lso_shelvingrak between '" & shelving1 & "' and '" & shelving2 & "' "
-        // Sql += "AND lso_lokasi = '" & jenisbrg & "' "
-        // Sql += "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR "
-        // If _flagTransferLokasi = "Y" Then
-        //     Sql += "AND LSO_FLAGLIMIT='Y' "
-        // End If
-        // Sql += " ) A "
-        // Sql += "GROUP BY rak1, rak2, sub1, sub2, shel1, shel2, tipe1, tipe2, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI "
-        // Sql += "ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI "
+        $query = '';
+        $query .= "SELECT rak1, rak2, sub1, sub2, shel1, shel2, tipe1, tipe2, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lokasi, SUM(item) item, ";
+        $query .= "floor(( (sum(ITEM)+10+(1*2)) / 25) + CASE WHEN  MOD((sum(ITEM)+10+(1*2)), 25) <> 0 THEN 1 ELSE 0 END) lbr FROM ( ";
+        $query .= "SELECT '" . $request->koderak1 . "' rak1, '" . $request->koderak2 . "' rak2, '" . $request->subrak1 . "' sub1, '" . $request->subrak2 . "' sub2, ";
+        $query .= "'" . $request->tipe1 . "' tipe1, '" . $request->tipe2 . "' tipe2, '" . $request->shelving1 . "' shel1, '" . $request->shelving2 . "' shel2, ";
+        $query .= "lso_tglso, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, ";
+        $query .= "lso_prdcd, 1 item, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi, prd_deskripsipanjang, prd_unit || '/' || prd_frac satuan, prd_kodetag ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_prodmast ";
+        $query .= "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" . $request->koderak1 . "' and '" . $request->koderak2 . "' ";
+        $query .= "AND LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
+        $query .= "AND lso_kodesubrak between '" . $request->subrak1 . "' and '" . $request->subrak2 . "' ";
+        $query .= "AND lso_tiperak between '" . $request->tipe1 . "' and '" . $request->tipe2 . "' ";
+        $query .= "AND lso_shelvingrak between '" . $request->shelving1 . "' and '" . $request->shelving2 . "' ";
+        $query .= "AND lso_lokasi = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+        if($this->flagTransferLokasi == 'Y'){
+            $query .= "AND LSO_FLAGLIMIT='Y' ";
+        }
+        $query .= " ) A ";
+        $query .= "GROUP BY rak1, rak2, sub1, sub2, shel1, shel2, tipe1, tipe2, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI ";
+        $query .= "ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI ";
+        $data = DB::select($query);
 
         //! GET NAMA PERUSAHAAN
-        // "select prs_kodeigr kode_igr, PRS_NAMACABANG from tbmaster_perusahaan
+        $perusahaan = DB::table('tbmaster_perusahaan')
+            ->select('prs_kodeigr as kode_igr', 'prs_namacabang')
+            ->first();
+
+        $data['data'] = $data;
+        $data['perusahaan'] = $perusahaan;
+
+        return $data;
     }
 
-    public function reportEditListKkso(){
-        // FlagReset = "N"
-        // dtSO = QueryOra("SELECT coalesce(MSO_FLAGSUM, 'N') MSO_FLAGSUM FROM TBMASTER_SETTING_SO WHERE MSO_TGLSO =  TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY')")
-        // If dtSO.Rows.Count <> 0 Then
-        //     FlagReset = dtSO.Rows(0).Item("MSO_FLAGSUM")
-        // End If
+    public function reportEditListKkso(ReportRequest $request){
 
-        // Sql = "SELECT to_char(LSO_TGLSO, 'dd-MM-yyyy') LSO_TGLSO, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT, LSO_PRDCD, "
-        // Sql += "CASE WHEN LSO_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN LSO_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI, "
-        // Sql += "PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, PRD_KODETAG, "
-        // Sql += "CASE WHEN LSO_FLAGSARANA = 'K' THEN FLOOR (LSO_QTY / PRD_FRAC) ELSE LSO_TMP_QTYCTN END CTN, CASE WHEN LSO_FLAGSARANA = 'K' THEN MOD (LSO_QTY, PRD_FRAC) ELSE LSO_TMP_QTYPCS END PCS, LSO_QTY, "
+        $FlagReset = 'N';
+        $dtCek = DB::select("SELECT coalesce(MSO_FLAGSUM, 'N') MSO_FLAGSUM FROM TBMASTER_SETTING_SO WHERE MSO_TGLSO =  TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY')");
+        if(count($dtCek) <> 0){
+            $FlagReset = $dtCek[0]->mso_flagsum;
+        }
 
-        // If FlagReset = "Y" Then
-        //     Sql += "SOP_NEWAVGCOST ST_AVGCOSTMONTHEND, "
-        //     Sql += "(LSO_QTY * CASE WHEN PRD_UNIT = 'KG' THEN (SOP_NEWAVGCOST / 1000) ELSE SOP_NEWAVGCOST End ) TOTAL, "
-        // Else
-        //     Sql += "ST_AVGCOST ST_AVGCOSTMONTHEND, "
-        //     Sql += "(LSO_QTY * CASE WHEN PRD_UNIT = 'KG' THEN (ST_AVGCOST / 1000) ELSE ST_AVGCOST End ) TOTAL, "
-        // End If
+        $query = '';
+        $query .= "SELECT to_char(LSO_TGLSO, 'dd-MM-yyyy') LSO_TGLSO, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT, LSO_PRDCD, ";
+        $query .= "CASE WHEN LSO_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN LSO_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI, ";
+        $query .= "PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, PRD_KODETAG, ";
+        $query .= "CASE WHEN LSO_FLAGSARANA = 'K' THEN FLOOR (LSO_QTY / PRD_FRAC) ELSE LSO_TMP_QTYCTN END CTN, CASE WHEN LSO_FLAGSARANA = 'K' THEN MOD (LSO_QTY, PRD_FRAC) ELSE LSO_TMP_QTYPCS END PCS, LSO_QTY, ";
 
-        // Sql += "LSO_MODIFY_BY, sop_prdcd, sop_newavgcost, sop_tglso "
-        // Sql += "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST, TBMASTER_STOCK, tbtr_ba_stockopname "
-        // Sql += "WHERE coalesce (LSO_RECID, '0') <> '1' "
-        // Sql += "AND LSO_TGLSO = TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND LSO_KODERAK BETWEEN '" & koderak1 & "' and '" & koderak2 & "' "
-        // Sql += "AND LSO_KODESUBRAK BETWEEN '" & subrak1 & "' and '" & subrak2 & "' "
-        // Sql += "AND LSO_TIPERAK BETWEEN '" & tipe1 & "' and '" & tipe2 & "' "
-        // Sql += "AND LSO_SHELVINGRAK BETWEEN '" & shelving1 & "' and '" & shelving2 & "' "
-        // Sql += "AND LSO_LOKASI = '" & jenisbrg & "' "
-        // Sql += "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR "
-        // Sql += "AND ST_PRDCD = LSO_PRDCD AND ST_LOKASI = LSO_LOKASI "
-        // Sql += "and sop_tglso = TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND sop_lokasi = st_lokasi and sop_prdcd = st_prdcd "
-        // Sql += "ORDER BY LSO_TGLSO, LOKASI, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT "
+        if($FlagReset == 'Y'){
+            $query .= "(LSO_QTY * CASE WHEN PRD_UNIT = 'KG' THEN (SOP_NEWAVGCOST / 1000) ELSE SOP_NEWAVGCOST End ) TOTAL, ";
+            $query .= "SOP_NEWAVGCOST ST_AVGCOSTMONTHEND, ";
+        }else{
+            $query .= "ST_AVGCOST ST_AVGCOSTMONTHEND, ";
+            $query .= "(LSO_QTY * CASE WHEN PRD_UNIT = 'KG' THEN (ST_AVGCOST / 1000) ELSE ST_AVGCOST End ) TOTAL, ";
+        }
+
+        $query .= "LSO_MODIFY_BY, sop_prdcd, sop_newavgcost, sop_tglso ";
+        $query .= "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST, TBMASTER_STOCK, tbtr_ba_stockopname ";
+        $query .= "WHERE coalesce (LSO_RECID, '0') <> '1' ";
+        $query .= "AND LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
+        $query .= "AND LSO_KODERAK BETWEEN '" . $request->koderak1 . "' and '" . $request->koderak2 . "' ";
+        $query .= "AND LSO_KODESUBRAK BETWEEN '" . $request->subrak1 . "' and '" . $request->subrak2 . "' ";
+        $query .= "AND LSO_TIPERAK BETWEEN '" . $request->tipe1 . "' and '" . $request->tipe2 . "' ";
+        $query .= "AND LSO_SHELVINGRAK BETWEEN '" . $request->shelving1 . "' and '" . $request->shelving2 . "' ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+        $query .= "AND ST_PRDCD = LSO_PRDCD AND ST_LOKASI = LSO_LOKASI ";
+        $query .= "and sop_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
+        $query .= "AND sop_lokasi = st_lokasi and sop_prdcd = st_prdcd ";
+        $query .= "ORDER BY LSO_TGLSO, LOKASI, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ";
+        $data = DB::select($query);
 
         //! GET NAMA PERUSAHAAN
-        // "select prs_kodeigr kode_igr, PRS_NAMACABANG from tbmaster_perusahaan
+        $perusahaan = DB::table('tbmaster_perusahaan')
+            ->select('prs_kodeigr as kode_igr', 'prs_namacabang')
+            ->first();
+
+        $data['data'] = $data;
+        $data['perusahaan'] = $perusahaan;
+
+        return $data;
     }
 
-    public function reportRegisterKkso2(){
-        // Sql = "SELECT   RAK1, RAK2, SUB1, SUB2, SHEL1, SHEL2, TIPE1, TIPE2, LSO_KODERAK, LSO_TGLSO, LSO_KODESUBRAK, "
-        // Sql += "LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI, SUM (ITEM) ITEM, SUM (SO) SO, (SUM(ITEM) - SUM(SO)) SELISIH, "
-        // Sql += "FLOOR (  ((SUM (ITEM) + 10 + (1 * 2)) / 25) + CASE WHEN MOD ((SUM (ITEM) + 10 + (1 * 2)), 25) <> 0 THEN 1 ELSE 0 END) LBR "
-        // Sql += "FROM (SELECT '" & koderak1 & "' rak1, '" & koderak2 & "' rak2, '" & subrak1 & "' sub1, '" & subrak2 & "' sub2, "
-        // Sql += "'" & tipe1 & "' tipe1, '" & tipe2 & "' tipe2, '" & shelving1 & "' shel1, '" & shelving2 & "' shel2, "
-        // Sql += "TO_CHAR(LSO_TGLSO, 'dd-MM-yyyy') LSO_TGLSO, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT, LSO_PRDCD, 1 ITEM, "
-        // Sql += "CASE WHEN LSO_QTY <> 0 THEN 1 ELSE 0 END SO, "
-        // Sql += "CASE WHEN LSO_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN LSO_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' END END LOKASI, "
-        // Sql += "PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, PRD_KODETAG FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST "
-        // Sql += "WHERE coalesce (LSO_RECID, '0') <> '1' AND LSO_KODERAK BETWEEN '" & koderak1 & "' and '" & koderak2 & "' "
-        // Sql += "AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND LSO_KODESUBRAK BETWEEN '" & subrak1 & "' and '" & subrak2 & "' AND LSO_TIPERAK BETWEEN '" & tipe1 & "' and '" & tipe2 & "' "
-        // Sql += "AND LSO_SHELVINGRAK BETWEEN '" & shelving1 & "' and '" & shelving2 & "'  AND LSO_LOKASI = '" & jenisbrg & "' "
-        // If _flagTransferLokasi = "Y " Then
-        //     Sql += "AND LSO_FLAGLIMIT='Y' "
-        // End If
-        // Sql += "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ) A "
-        // Sql += "GROUP BY RAK1,  RAK2, SUB1, SUB2, SHEL1, SHEL2, TIPE1, TIPE2, LSO_KODERAK, LSO_TGLSO, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI "
-        // Sql += "ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI "
+    public function reportRegisterKkso2(ReportRequest $request){
+        $query = '';
+        $query .= "SELECT   RAK1, RAK2, SUB1, SUB2, SHEL1, SHEL2, TIPE1, TIPE2, LSO_KODERAK, LSO_TGLSO, LSO_KODESUBRAK, ";
+        $query .= "LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI, SUM (ITEM) ITEM, SUM (SO) SO, (SUM(ITEM) - SUM(SO)) SELISIH, ";
+        $query .= "FLOOR (  ((SUM (ITEM) + 10 + (1 * 2)) / 25) + CASE WHEN MOD ((SUM (ITEM) + 10 + (1 * 2)), 25) <> 0 THEN 1 ELSE 0 END) LBR ";
+        $query .= "FROM (SELECT '" & $request->koderak1 & "' rak1, '" & $request->koderak2 & "' rak2, '" & $request->subrak1 & "' sub1, '" & $request->subrak2 & "' sub2, ";
+        $query .= "'" & $request->tipe1 & "' tipe1, '" & $request->tipe2 & "' tipe2, '" & $request->shelving1 & "' shel1, '" & $request->shelving2 & "' shel2, ";
+        $query .= "TO_CHAR(LSO_TGLSO, 'dd-MM-yyyy') LSO_TGLSO, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT, LSO_PRDCD, 1 ITEM, ";
+        $query .= "CASE WHEN LSO_QTY <> 0 THEN 1 ELSE 0 END SO, ";
+        $query .= "CASE WHEN LSO_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN LSO_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' END END LOKASI, ";
+        $query .= "PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, PRD_KODETAG FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST ";
+        $query .= "WHERE coalesce (LSO_RECID, '0') <> '1' AND LSO_KODERAK BETWEEN '" & $request->koderak1 & "' and '" & $request->koderak2 & "' ";
+        $query .= "AND LSO_TGLSO = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
+        $query .= "AND LSO_KODESUBRAK BETWEEN '" & $request->subrak1 & "' and '" & $request->subrak2 & "' AND LSO_TIPERAK BETWEEN '" & $request->tipe1 & "' and '" & $request->tipe2 & "' ";
+        $query .= "AND LSO_SHELVINGRAK BETWEEN '" & $request->shelving1 & "' and '" & $request->shelving2 & "'  AND LSO_LOKASI = '" & $request->jenisbrg & "' ";
+        if($this->flagTransferLokasi == 'Y'){
+            $query .= "AND LSO_FLAGLIMIT='Y' ";
+        }
+        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ) A ";
+        $query .= "GROUP BY RAK1,  RAK2, SUB1, SUB2, SHEL1, SHEL2, TIPE1, TIPE2, LSO_KODERAK, LSO_TGLSO, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI ";
+        $query .= "ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LOKASI ";
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportPerincianBaso(){
-        // Sql = "SELECT * FROM (SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Sql += "KAT_NAMAKATEGORI, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, "
-        // Sql += "TO_CHAR(SOP_TGLSO, 'dd-MM-yyyy') SOP_TGLSO, CASE WHEN '" & pilLap & "' = '1' THEN 'ALL' ELSE CASE WHEN '" & pilLap & "' = '2' THEN '< -1000000' ELSE '> 1000000' END END Lap, CASE WHEN SOP_LOKASI = '01' THEN '01 - Barang Baik' ELSE CASE WHEN SOP_LOKASI = '02' THEN '02 - Barang Retur' "
-        // Sql += "ELSE '03 = Barang Rusak' END END LOKASI, (sop_newavgcost * CASE WHEN PRD_UNIT = 'KG' THEN 1000 ELSE 1 END) SOP_LASTAVGCOST, (sop_newavgcost * PRD_FRAC) HPP, "
-        // Sql += "SOP_QTYLPP, FLOOR (SOP_QTYLPP / PRD_FRAC) CTNLPP, MOD (SOP_QTYLPP, PRD_FRAC) PCSLPP, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYLPP) RPHLPP, SOP_QTYSO, "
-        // Sql += "FLOOR (SOP_QTYSO / PRD_FRAC) CTNSO, MOD (SOP_QTYSO, PRD_FRAC) PCSSO, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYSO) RPHSO, coalesce (QTY_ADJ, 0) QTY_ADJ, "
-        // Sql += "case when FLOOR (coalesce (QTY_ADJ, 0) / PRD_FRAC) < 0 then CEIL (coalesce (QTY_ADJ, 0) / PRD_FRAC) else FLOOR (coalesce (QTY_ADJ, 0) / PRD_FRAC) end CTNADJ, MOD (coalesce (QTY_ADJ, 0), PRD_FRAC) PCSADJ, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * coalesce (QTY_ADJ, 0)) RPHADJ, "
-        // Sql += "case when FLOOR ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP) / PRD_FRAC) < 0 then CEIL ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP) / PRD_FRAC) else FLOOR ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP ) / PRD_FRAC) end CTNSEL, MOD ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP ), PRD_FRAC) PCSSEL, "
-        // Sql += "(case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * (SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP )) RPHSEL "
-        // Sql += " FROM TBMASTER_PRODMAST"
-        // Sql += " JOIN TBTR_BA_STOCKOPNAME"
-        // Sql += "      ON PRD_PRDCD = SOP_PRDCD "
-        // Sql += "      AND SOP_LOKASI = '" & jenisbrg & "'"
-        // Sql += "      AND SOP_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY')"
-        // Sql += " JOIN TBMASTER_DEPARTEMENT "
-        // Sql += "      ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT"
-        // Sql += " LEFT JOIN TBMASTER_KATEGORI "
-        // Sql += "      ON KAT_KODEKATEGORI = PRD_KODEKATEGORIBARANG "
-        // Sql += "      AND KAT_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT "
-        // Sql += " LEFT JOIN "
-        // Sql += " ("
-        // Sql += "        Select "
-        // Sql += "        ADJ_KODEIGR,"
-        // Sql += "        ADJ_TGLSO, "
-        // Sql += "        ADJ_PRDCD, "
-        // Sql += "        ADJ_LOKASI, "
-        // Sql += "        SUM (coalesce (ADJ_QTY, 0)) QTY_ADJ "
-        // Sql += "        FROM TBTR_ADJUSTSO "
-        // Sql += "        GROUP BY ADJ_KODEIGR, ADJ_TGLSO, ADJ_PRDCD, ADJ_LOKASI"
-        // Sql += "  ) AS DATAS "
-        // Sql += "    ON ADJ_KODEIGR = SOP_KODEIGR  "
-        // Sql += "    AND ADJ_TGLSO = SOP_TGLSO "
-        // Sql += "    AND ADJ_PRDCD = SOP_PRDCD "
-        // Sql += "    AND ADJ_LOKASI = SOP_LOKASI "
-        // Sql += "WHERE PRD_KODEDIVISI BETWEEN '" & div1 & "' AND '" & div2 & "' "
-        // Sql += "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' AND '" & dept2 & "' "
-        // Sql += "AND PRD_KODEKATEGORIBARANG BETWEEN '" & kat1 & "' AND '" & kat2 & "' "
-        // Sql += "AND PRD_PRDCD BETWEEN '" & plu1 & "' AND '" & plu2 & "' "
-        // Sql += "AND PRD_PRDCD LIKE '%0' "
-        // Sql += "Order by PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, LOKASI, PRD_PRDCD ) A "
+    public function reportPerincianBaso(ReportPerincianBasoRequest $request){
+        $query = '';
+        $query .= "SELECT * FROM (SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "KAT_NAMAKATEGORI, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, ";
+        $query .= "TO_CHAR(SOP_TGLSO, 'dd-MM-yyyy') SOP_TGLSO, CASE WHEN '" . $request->selisih_so . "' = '1' THEN 'ALL' ELSE CASE WHEN '" . $request->selisih_so . "' = '2' THEN '< -1000000' ELSE '> 1000000' END END Lap, CASE WHEN SOP_LOKASI = '01' THEN '01 - Barang Baik' ELSE CASE WHEN SOP_LOKASI = '02' THEN '02 - Barang Retur' ";
+        $query .= "ELSE '03 = Barang Rusak' END END LOKASI, (sop_newavgcost * CASE WHEN PRD_UNIT = 'KG' THEN 1000 ELSE 1 END) SOP_LASTAVGCOST, (sop_newavgcost * PRD_FRAC) HPP, ";
+        $query .= "SOP_QTYLPP, FLOOR (SOP_QTYLPP / PRD_FRAC) CTNLPP, MOD (SOP_QTYLPP, PRD_FRAC) PCSLPP, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYLPP) RPHLPP, SOP_QTYSO, ";
+        $query .= "FLOOR (SOP_QTYSO / PRD_FRAC) CTNSO, MOD (SOP_QTYSO, PRD_FRAC) PCSSO, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYSO) RPHSO, coalesce (QTY_ADJ, 0) QTY_ADJ, ";
+        $query .= "case when FLOOR (coalesce (QTY_ADJ, 0) / PRD_FRAC) < 0 then CEIL (coalesce (QTY_ADJ, 0) / PRD_FRAC) else FLOOR (coalesce (QTY_ADJ, 0) / PRD_FRAC) end CTNADJ, MOD (coalesce (QTY_ADJ, 0), PRD_FRAC) PCSADJ, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * coalesce (QTY_ADJ, 0)) RPHADJ, ";
+        $query .= "case when FLOOR ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP) / PRD_FRAC) < 0 then CEIL ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP) / PRD_FRAC) else FLOOR ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP ) / PRD_FRAC) end CTNSEL, MOD ((SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP ), PRD_FRAC) PCSSEL, ";
+        $query .= "(case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * (SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP )) RPHSEL ";
+        $query .= " FROM TBMASTER_PRODMAST";
+        $query .= " JOIN TBTR_BA_STOCKOPNAME";
+        $query .= "      ON PRD_PRDCD = SOP_PRDCD ";
+        $query .= "      AND SOP_LOKASI = '" . $request->jenisbrg . "'";
+        $query .= "      AND SOP_TGLSO = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY')";
+        $query .= " JOIN TBMASTER_DEPARTEMENT ";
+        $query .= "      ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT";
+        $query .= " LEFT JOIN TBMASTER_KATEGORI ";
+        $query .= "      ON KAT_KODEKATEGORI = PRD_KODEKATEGORIBARANG ";
+        $query .= "      AND KAT_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT ";
+        $query .= " LEFT JOIN ";
+        $query .= " (";
+        $query .= "        Select ";
+        $query .= "        ADJ_KODEIGR,";
+        $query .= "        ADJ_TGLSO, ";
+        $query .= "        ADJ_PRDCD, ";
+        $query .= "        ADJ_LOKASI, ";
+        $query .= "        SUM (coalesce (ADJ_QTY, 0)) QTY_ADJ ";
+        $query .= "        FROM TBTR_ADJUSTSO ";
+        $query .= "        GROUP BY ADJ_KODEIGR, ADJ_TGLSO, ADJ_PRDCD, ADJ_LOKASI";
+        $query .= "  ) AS DATAS ";
+        $query .= "    ON ADJ_KODEIGR = SOP_KODEIGR  ";
+        $query .= "    AND ADJ_TGLSO = SOP_TGLSO ";
+        $query .= "    AND ADJ_PRDCD = SOP_PRDCD ";
+        $query .= "    AND ADJ_LOKASI = SOP_LOKASI ";
+        $query .= "WHERE PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' AND '" . $request->div2 . "' ";
+        $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' AND '" . $request->dept2 . "' ";
+        $query .= "AND PRD_KODEKATEGORIBARANG BETWEEN '" . $request->kat1 . "' AND '" . $request->kat2 . "' ";
+        $query .= "AND PRD_PRDCD BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' ";
+        $query .= "AND PRD_PRDCD LIKE '%0' ";
+        $query .= "Order by PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, LOKASI, PRD_PRDCD ) A ";
 
-        // If pilLap = 2 Then
-        //     Sql += "WHERE RPHSO - RPHLPP < -1000000 "
-        // ElseIf pilLap = 3 Then
-        //     Sql += "WHERE RPHSO - RPHLPP > 1000000 "
-        // End If
+        if($request->selisih_so == '2'){
+            $query .= "WHERE RPHSO - RPHLPP < -1000000 ";
+        }elseif($request->selisih_so == '3'){
+            $query .= "WHERE RPHSO - RPHLPP > 1000000 ";
+        }
 
-        // If audit = True Then
-        //     Dim dtAudit As DataTable
-        //     dtAudit = QueryOra("SELECT DISTINCT LSI_PRDCD FROM TBTR_LOKASI_SO_EY WHERE DATE_TRUNC('DAY',LSI_TGLSO) = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY')")
-        //     If dtAudit.Rows.Count > 0 Then
-        //         If pilLap = 2 Or pilLap = 3 Then
-        //             Sql += "AND "
-        //         Else
-        //             Sql += "WHERE "
-        //         End If
+        if($request->check_rpt_audit == 1){
+            $dtCek = DB::select("SELECT DISTINCT LSI_PRDCD FROM TBTR_LOKASI_SO_EY WHERE DATE_TRUNC('DAY',LSI_TGLSO) = TO_DATE('" & $request->tanggal_start_so & "', 'DD-MM-YYYY')");
+            if(count($dtCek) > 0){
+                if($request->selisih_so != '1'){
+                    $query .= "AND ";
+                }else{
+                    $query .= "WHERE ";
+                }
 
-        //         Sql += "PRD_PRDCD IN ("
-        //         For i As Integer = 0 To dtAudit.Rows.Count - 1
-        //             Sql += "'" & dtAudit.Rows(i).Item("LSI_PRDCD").ToString & "',"
-        //         Next
-        //         Sql = Strings.Left(Sql, Sql.Length - 1)
-        //         Sql += ")"
-        //     End If
-        // End If
+                $query .= "PRD_PRDCD IN (";
+
+                foreach($dtCek as $key => $item){
+
+                    if($key == count($dtCek) - 1){
+                        $query .= "'" . $item->lsi_prdcd . "'";
+                    }else{
+                        $query .= "'" . $item->lsi_prdcd . "',";
+                    }
+                }
+
+                $query .= ")";
+            }
+        }
+
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportRingkasanBaso(){
-        // Sql = "SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Sql += "KAT_NAMAKATEGORI, SOP_TGLSO, LOKASI, SUM (RPHLPP) RPHLPP, SUM (RPHSO) RPHSO, "
-        // Sql += "SUM (RPHADJ) RPHADJ, SUM (RPHSEL) RPHSEL "
-        // Sql += "FROM (SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Sql += "KAT_NAMAKATEGORI, PRD_PRDCD, TO_CHAR (SOP_TGLSO, 'dd-MM-yyyy') SOP_TGLSO, "
-        // Sql += "CASE WHEN SOP_LOKASI = '01' THEN '01 - Barang Baik' ELSE CASE WHEN SOP_LOKASI = '02' THEN '02 - Barang Retur' "
-        // Sql += "ELSE '03 = Barang Rusak' END END LOKASI, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYLPP) RPHLPP, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYSO) RPHSO, "
-        // Sql += "(case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * coalesce (QTY_ADJ, 0)) RPHADJ, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * (SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP)) RPHSEL "
-        // Sql += "FROM TBMASTER_PRODMAST "
-        // Sql += "JOIN TBTR_BA_STOCKOPNAME "
-        // Sql += "   ON SOP_PRDCD = PRD_PRDCD  "
-        // Sql += "   AND sop_tglso = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "', 'DD-MM-YYYY') "
-        // Sql += "   AND SOP_LOKASI = '" & jenisbrg & "' "
-        // Sql += "LEFT JOIN TBMASTER_DEPARTEMENT "
-        // Sql += "   ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT   "
-        // Sql += "LEFT JOIN  TBMASTER_KATEGORI "
-        // Sql += "   ON KAT_KODEKATEGORI = PRD_KODEKATEGORIBARANG "
-        // Sql += "   AND KAT_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT "
-        // Sql += "LEFT JOIN "
-        // Sql += "  (SELECT   ADJ_KODEIGR, ADJ_TGLSO, ADJ_PRDCD, ADJ_LOKASI, SUM (coalesce (ADJ_QTY, 0)) QTY_ADJ "
-        // Sql += "   FROM TBTR_ADJUSTSO GROUP BY ADJ_KODEIGR, ADJ_TGLSO, ADJ_PRDCD, ADJ_LOKASI"
-        // Sql += "   )AS DATS "
-        // Sql += " ON ADJ_KODEIGR = SOP_KODEIGR "
-        // Sql += "    AND ADJ_TGLSO= SOP_TGLSO "
-        // Sql += "    AND ADJ_PRDCD = SOP_PRDCD "
-        // Sql += "    AND ADJ_LOKASI = SOP_LOKASI"
-        // Sql += " WHERE PRD_KODEDIVISI BETWEEN '" & div1 & "' AND '" & div2 & "' AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' AND '" & dept2 & "' "
-        // Sql += " AND PRD_KODEKATEGORIBARANG BETWEEN '" & kat1 & "' AND '" & kat2 & "' AND PRD_PRDCD LIKE '%0'"
-        // Sql += ") A "
-        // Sql += "GROUP BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, KAT_NAMAKATEGORI, SOP_TGLSO, LOKASI "
-        // Sql += "ORDER BY LOKASI, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG "
+    public function reportRingkasanBaso(ReportPerincianBasoRequest $request){
+        $query = '';
+        $query .= "SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "KAT_NAMAKATEGORI, SOP_TGLSO, LOKASI, SUM (RPHLPP) RPHLPP, SUM (RPHSO) RPHSO, ";
+        $query .= "SUM (RPHADJ) RPHADJ, SUM (RPHSEL) RPHSEL ";
+        $query .= "FROM (SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "KAT_NAMAKATEGORI, PRD_PRDCD, TO_CHAR (SOP_TGLSO, 'dd-MM-yyyy') SOP_TGLSO, ";
+        $query .= "CASE WHEN SOP_LOKASI = '01' THEN '01 - Barang Baik' ELSE CASE WHEN SOP_LOKASI = '02' THEN '02 - Barang Retur' ";
+        $query .= "ELSE '03 = Barang Rusak' END END LOKASI, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYLPP) RPHLPP, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * SOP_QTYSO) RPHSO, ";
+        $query .= "(case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * coalesce (QTY_ADJ, 0)) RPHADJ, (case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end * (SOP_QTYSO + coalesce (QTY_ADJ, 0) - SOP_QTYLPP)) RPHSEL ";
+        $query .= "FROM TBMASTER_PRODMAST ";
+        $query .= "JOIN TBTR_BA_STOCKOPNAME ";
+        $query .= "   ON SOP_PRDCD = PRD_PRDCD  ";
+        $query .= "   AND sop_tglso = TO_DATE('" & $request->tanggal_start_so & "', 'DD-MM-YYYY') ";
+        $query .= "   AND SOP_LOKASI = '" & $request->jenisbrg & "' ";
+        $query .= "LEFT JOIN TBMASTER_DEPARTEMENT ";
+        $query .= "   ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT   ";
+        $query .= "LEFT JOIN  TBMASTER_KATEGORI ";
+        $query .= "   ON KAT_KODEKATEGORI = PRD_KODEKATEGORIBARANG ";
+        $query .= "   AND KAT_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT ";
+        $query .= "LEFT JOIN ";
+        $query .= "  (SELECT   ADJ_KODEIGR, ADJ_TGLSO, ADJ_PRDCD, ADJ_LOKASI, SUM (coalesce (ADJ_QTY, 0)) QTY_ADJ ";
+        $query .= "   FROM TBTR_ADJUSTSO GROUP BY ADJ_KODEIGR, ADJ_TGLSO, ADJ_PRDCD, ADJ_LOKASI";
+        $query .= "   )AS DATS ";
+        $query .= " ON ADJ_KODEIGR = SOP_KODEIGR ";
+        $query .= "    AND ADJ_TGLSO= SOP_TGLSO ";
+        $query .= "    AND ADJ_PRDCD = SOP_PRDCD ";
+        $query .= "    AND ADJ_LOKASI = SOP_LOKASI";
+        $query .= " WHERE PRD_KODEDIVISI BETWEEN '" & $request->div1 & "' AND '" & $request->div2 & "' AND PRD_KODEDEPARTEMENT BETWEEN '" & $request->dept1 & "' AND '" & $request->dept2 & "' ";
+        $query .= " AND PRD_KODEKATEGORIBARANG BETWEEN '" & $request->kat1 & "' AND '" & $request->kat2 & "' AND PRD_PRDCD LIKE '%0'";
+        $query .= ") A ";
+        $query .= "GROUP BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, KAT_NAMAKATEGORI, SOP_TGLSO, LOKASI ";
+        $query .= "ORDER BY LOKASI, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG ";
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportDaftarItemYangSudahAdjust(){
-        // plu1 = "0"
-        // plu2 = "ZZZZZZZ"
-        // tglSO = Now
+    public function reportDaftarItemYangSudahAdjust(ReportDaftarItemAdjustRequest $request){
 
-        // Dim dt1 As New DataTable
-        // Sql = "SELECT adj_prdcd "
-        // Sql += "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast "
-        // Sql += "WHERE adj_tglso = TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND adj_lokasi = '" & jenisbrg & "' "
-        // Sql += "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" & Format(TglAdj1, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND TO_DATE('" & Format(TglAdj2, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND adj_prdcd BETWEEN '" & plu1 & "' AND '" & plu2 & "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd "
-        // Sql += "ORDER BY adj_create_dt "
-        // dt1 = QueryOra(Sql)
+        $query = '';
+        $query .= "SELECT adj_prdcd ";
+        $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
+        $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenisbrg . "' ";
+        $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','DD-MM-YYYY') AND TO_DATE('" . $request->tanggal_adjust_end . "','DD-MM-YYYY') ";
+        $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
+        $query .= "ORDER BY adj_create_dt ";
+        $dt1 = DB::select($query);
 
-        // Dim dtDATA As New DataTable()
-        // Sql = "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, "
-        // Sql += "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI "
-        // Sql += "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast "
-        // Sql += "WHERE adj_tglso = TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND adj_lokasi = '" & jenisbrg & "' "
-        // Sql += "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" & Format(TglAdj1, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND TO_DATE('" & Format(TglAdj2, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND adj_prdcd BETWEEN '" & plu1 & "' AND '" & plu2 & "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd "
-        // Sql += "ORDER BY adj_create_dt "
+        $query = '';
+        $query .= "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, ";
+        $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
+        $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
+        $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenisbrg . "' ";
+        $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','DD-MM-YYYY') AND TO_DATE('" . $request->tanggal_adjust_end . "','DD-MM-YYYY') ";
+        $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
+        $query .= "ORDER BY adj_create_dt ";
+        $dtDATA = DB::select($query);
 
-        // dtDATA = QueryOra(Sql)
-        // dtDATA.Rows.Clear()
-        // dtDATA.TableName = "DATA"
+        $array = [];
+        foreach($dt1 as $item){
+            $dtCek = collect($dtDATA)->where('adj_prdcd', $item->adj_prdcd)->first();
 
-        // Dim dt3 As New DataTable
-        // For i As Integer = 0 To dt1.Rows.Count - 1
-        //     Dim drcek As DataRow()
-        //     drcek = dtDATA.Select("adj_prdcd = '" & dt1.Rows(i).Item("adj_prdcd").ToString & "'")
-        //     If drcek.Length = 0 Then
-        //         Sql = "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, "
-        //         Sql += "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI "
-        //         Sql += "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast "
-        //         Sql += "WHERE adj_tglso = TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND adj_lokasi = '" & jenisbrg & "' "
-        //         Sql += "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" & Format(TglAdj1, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND TO_DATE('" & Format(TglAdj2, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        //         Sql += "AND adj_prdcd = '" & dt1.Rows(i).Item("adj_prdcd").ToString & "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd "
-        //         Sql += "ORDER BY adj_create_dt "
-        //         dt3 = QueryOra(Sql)
-        //         For j As Integer = 0 To dt3.Rows.Count - 1
-        //             Dim dr As DataRow
-        //             dr = dtDATA.NewRow
-        //             dr(0) = dt3.Rows(j).Item(0)
-        //             dr(1) = dt3.Rows(j).Item(1)
-        //             dr(2) = dt3.Rows(j).Item(2)
-        //             dr(3) = dt3.Rows(j).Item(3)
-        //             dr(4) = dt3.Rows(j).Item(4)
-        //             dr(5) = dt3.Rows(j).Item(5)
-        //             dr(6) = dt3.Rows(j).Item(6)
-        //             dr(7) = dt3.Rows(j).Item(7)
-        //             dtDATA.Rows.Add(dr)
-        //         Next
-        //     End If
-        // Next
+            if(!empty($dtCek)){
+                $query = '';
+                $query .= "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, ";
+                $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
+                $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
+                $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenisbrg . "' ";
+                $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','DD-MM-YYYY') AND TO_DATE('" . $request->tanggal_adjust_end . "','DD-MM-YYYY') ";
+                $query .= "AND adj_prdcd = '" . $item->adj_prdcd . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
+                $query .= "ORDER BY adj_create_dt ";
+                $data_detail = DB::select($query);
+
+                foreach($data_detail as $item_detail){
+                    $array[] = $item_detail;
+                }
+            }
+        }
+
+        return $array;
     }
 
-    public function reportDafterKksoAcost(){
-        // Sql = "SELECT TO_CHAR (LSO_TGLSO, 'dd-MM-yyyy') LSO_TGLSO, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, "
-        // Sql += "LSO_SHELVINGRAK, LSO_NOURUT, LSO_PRDCD, "
-        // Sql += "CASE WHEN LSO_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN LSO_LOKASI = '02' THEN '02 - BARANG RETUR' "
-        // Sql += "ELSE '03 - BARANG RUSAK' END END LOKASI, "
-        // Sql += "PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, PRD_KODETAG, "
-        // Sql += "FLOOR (LSO_QTY / PRD_FRAC) CTN, MOD (LSO_QTY, PRD_FRAC) PCS, LSO_QTY, ST_AVGCOST "
-        // Sql += "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST, TBMASTER_STOCK "
-        // Sql += "WHERE coalesce (LSO_RECID, '0') <> '1' "
-        // Sql += "AND LSO_KODERAK BETWEEN '" & koderak1 & "' AND '" & koderak2 & "' "
-        // Sql += "AND LSO_KODESUBRAK BETWEEN '" & subrak1 & "' AND '" & subrak2 & "' "
-        // Sql += "AND LSO_TIPERAK BETWEEN '" & tipe1 & "' AND '" & tipe2 & "' "
-        // Sql += "AND LSO_SHELVINGRAK BETWEEN '" & shelving1 & "' AND '" & shelving2 & "' "
-        // Sql += "AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND LSO_LOKASI = '" & jenisbrg & "' "
-        // Sql += "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR "
-        // Sql += "AND ST_PRDCD = LSO_PRDCD "
-        // Sql += "AND ST_LOKASI = LSO_LOKASI "
-        // Sql += "AND (coalesce(ST_AVGCOST,0) = 0 OR coalesce(ST_AVGCOST,0) < 0) "
-        // Sql += "ORDER BY LSO_TGLSO, LOKASI, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT "
+    public function reportDafterKksoAcost(ReportRequest $request){
+        $query = '';
+        $query .= "SELECT TO_CHAR (LSO_TGLSO, 'dd-MM-yyyy') LSO_TGLSO, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, ";
+        $query .= "LSO_SHELVINGRAK, LSO_NOURUT, LSO_PRDCD, ";
+        $query .= "CASE WHEN LSO_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN LSO_LOKASI = '02' THEN '02 - BARANG RETUR' ";
+        $query .= "ELSE '03 - BARANG RUSAK' END END LOKASI, ";
+        $query .= "PRD_DESKRIPSIPANJANG, PRD_UNIT || '/' || PRD_FRAC SATUAN, PRD_KODETAG, ";
+        $query .= "FLOOR (LSO_QTY / PRD_FRAC) CTN, MOD (LSO_QTY, PRD_FRAC) PCS, LSO_QTY, ST_AVGCOST ";
+        $query .= "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST, TBMASTER_STOCK ";
+        $query .= "WHERE coalesce (LSO_RECID, '0') <> '1' ";
+        $query .= "AND LSO_KODERAK BETWEEN '" . $request->koderak1 . "' AND '" . $request->koderak2 . "' ";
+        $query .= "AND LSO_KODESUBRAK BETWEEN '" . $request->subrak1 . "' AND '" . $request->subrak2 . "' ";
+        $query .= "AND LSO_TIPERAK BETWEEN '" . $request->tipe1 . "' AND '" . $request->tipe2 . "' ";
+        $query .= "AND LSO_SHELVINGRAK BETWEEN '" . $request->shelving1 . "' AND '" . $request->shelving2 . "' ";
+        $query .= "AND LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+        $query .= "AND ST_PRDCD = LSO_PRDCD ";
+        $query .= "AND ST_LOKASI = LSO_LOKASI ";
+        $query .= "AND (coalesce(ST_AVGCOST,0) = 0 OR coalesce(ST_AVGCOST,0) < 0) ";
+        $query .= "ORDER BY LSO_TGLSO, LOKASI, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ";
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportDaftarMasterLokasiSo(){
-        // plu1 = "0"
-        // '------------------
-        // If InputRpt8.PLUId1 <> "" Then
-        //     plu1 = InputRpt8.PLUId1
-        // End If
+    public function reportDaftarMasterLokasiSo(ReportMasterLokasiSoRequest $request){
 
-        // Sql = "SELECT   LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, "
-        // Sql += "LSO_SHELVINGRAK, LSO_PRDCD, LSO_LOKASI, "
-        // Sql += "PRD_DESKRIPSIPANJANG || ' - ' || PRD_UNIT || '/' || PRD_FRAC PRD_DESKRIPSIPANJANG, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Sql += "FLOOR (LSO_QTY / PRD_FRAC) CTN, MOD (LSO_QTY, PRD_FRAC) PCS, LSO_QTY "
-        // Sql += "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST "
-        // Sql += "WHERE coalesce (LSO_RECID, '0') <> '1' "
-        // Sql += "AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Sql += "AND LSO_PRDCD = '" & plu1 & "' "
-        // Sql += "AND LSO_LOKASI = '" & jenisbrg & "' "
-        // Sql += "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR "
-        // Sql += "ORDER BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_LOKASI  "
+        $query = '';
+        $query .= "SELECT   LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, ";
+        $query .= "LSO_SHELVINGRAK, LSO_PRDCD, LSO_LOKASI, ";
+        $query .= "PRD_DESKRIPSIPANJANG || ' - ' || PRD_UNIT || '/' || PRD_FRAC PRD_DESKRIPSIPANJANG, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "FLOOR (LSO_QTY / PRD_FRAC) CTN, MOD (LSO_QTY, PRD_FRAC) PCS, LSO_QTY ";
+        $query .= "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST ";
+        $query .= "WHERE coalesce (LSO_RECID, '0') <> '1' ";
+        $query .= "AND LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
+        $query .= "AND LSO_PRDCD = '" . $request->plu1 . "' ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+        $query .= "ORDER BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_LOKASI  ";
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportDaftarItemSo(){
-        // div1 = "0"
-        // dept1 = "0"
-        // kat1 = "0"
-        // div2 = "Z"
-        // dept2 = "ZZ"
-        // kat2 = "ZZ"
+    public function reportDaftarItemBelumAdaDiMaster(ReportDaftarItemBelumAdaDiMasterRequest $request){
 
-        // Sql += "SELECT * "
-        // Sql += "FROM (SELECT PRD_KODEDIVISI, "
-        // Sql += "DIV_NAMADIVISI, "
-        // Sql += "PRD_KODEDEPARTEMENT, "
-        // Sql += "DEP_NAMADEPARTEMENT, "
-        // Sql += "PRD_KODEKATEGORIBARANG, "
-        // Sql += "KAT_NAMAKATEGORI, "
-        // Sql += "PRD_DESKRIPSIPANJANG, "
-        // Sql += "PRD_UNIT || '/' || PRD_FRAC SATUAN, "
-        // Sql += "PRD_KODETAG, "
-        // Sql += "coalesce (LSO_PRDCD, '0000000') LSO_PRDCD, "
-        // Sql += "TGL_SO_SETTING LSO_TGLSO, "
-        // Sql += "ST_SALDOAKHIR, "
-        // Sql += "prd_prdcd, "
-        // Sql += "ST_AVGCOST, "
-        // Sql += " ( ST_SALDOAKHIR * ST_AVGCOST) TOTAL "
-        // Sql += "   FROM TBMASTER_PRODMAST "
-        // Sql += "   LEFT JOIN TBMASTER_DIVISI "
-        // Sql += "   ON DIV_KODEDIVISI = PRD_KODEDIVISI"
-        // Sql += "   LEFT JOIN TBMASTER_DEPARTEMENT "
-        // Sql += "   ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT "
-        // Sql += "   LEFT JOIN TBMASTER_KATEGORI "
-        // Sql += "   ON KAT_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT "
-        // Sql += "   AND KAT_KODEKATEGORI= PRD_KODEKATEGORIBARANG"
-        // Sql += "   LEFT JOIN TBMASTER_STOCK "
-        // Sql += "   ON ST_PRDCD = PRD_PRDCD "
-        // Sql += "   AND ST_LOKASI = '" & jenisbrg & "' "
-        // Sql += "   LEFT JOIN"
-        // Sql += " ( select TBTR_LOKASI_SO.* "
-        // Sql += "   from( "
-        // Sql += "        SELECT MAX(MSO_TGLSO) TGL_SO_SETTING "
-        // Sql += "        FROM tbmaster_Setting_so"
-        // Sql += "       ) C "
-        // Sql += "       join TBTR_LOKASI_SO on LSO_TGLSO = TGL_SO_SETTING"
-        // Sql += "       ) TBTR_LOKASI_SO "
-        // Sql += "    ON LSO_PRDCD = ST_PRDCD "
-        // Sql += "LEFT JOIN"
-        // Sql += "   (SELECT MAX(MSO_TGLSO) TGL_SO_SETTING "
-        // Sql += "     FROM tbmaster_Setting_so) SO_SETTING           "
-        // Sql += "   ON LSO_LOKASI  = ST_LOKASI "
-        // Sql += "   AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY')"
-        // Sql += ") A"
-        // Sql += " WHERE LSO_PRDCD = '0000000' "
-        // Sql += " AND PRD_KODEDIVISI BETWEEN '" & div1 & "' AND '" & div2 & "' "
-        // Sql += " AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' AND '" & dept2 & "' "
-        // Sql += " AND PRD_KODEKATEGORIBARANG BETWEEN '" & kat1 & "' AND '" & kat2 & "' "
-        // Sql += " AND PRD_PRDCD LIKE '%0' "
-        // Sql += " ORDER BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT,PRD_KODEKATEGORIBARANG,LSO_PRDCD "
+        $query = '';
+        $query .= "SELECT * ";
+        $query .= "FROM (SELECT PRD_KODEDIVISI, ";
+        $query .= "DIV_NAMADIVISI, ";
+        $query .= "PRD_KODEDEPARTEMENT, ";
+        $query .= "DEP_NAMADEPARTEMENT, ";
+        $query .= "PRD_KODEKATEGORIBARANG, ";
+        $query .= "KAT_NAMAKATEGORI, ";
+        $query .= "PRD_DESKRIPSIPANJANG, ";
+        $query .= "PRD_UNIT || '/' || PRD_FRAC SATUAN, ";
+        $query .= "PRD_KODETAG, ";
+        $query .= "coalesce (LSO_PRDCD, '0000000') LSO_PRDCD, ";
+        $query .= "TGL_SO_SETTING LSO_TGLSO, ";
+        $query .= "ST_SALDOAKHIR, ";
+        $query .= "prd_prdcd, ";
+        $query .= "ST_AVGCOST, ";
+        $query .= " ( ST_SALDOAKHIR * ST_AVGCOST) TOTAL ";
+        $query .= "   FROM TBMASTER_PRODMAST ";
+        $query .= "   LEFT JOIN TBMASTER_DIVISI ";
+        $query .= "   ON DIV_KODEDIVISI = PRD_KODEDIVISI";
+        $query .= "   LEFT JOIN TBMASTER_DEPARTEMENT ";
+        $query .= "   ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT ";
+        $query .= "   LEFT JOIN TBMASTER_KATEGORI ";
+        $query .= "   ON KAT_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT ";
+        $query .= "   AND KAT_KODEKATEGORI= PRD_KODEKATEGORIBARANG";
+        $query .= "   LEFT JOIN TBMASTER_STOCK ";
+        $query .= "   ON ST_PRDCD = PRD_PRDCD ";
+        $query .= "   AND ST_LOKASI = '" & $request->jenisbrg & "' ";
+        $query .= "   LEFT JOIN";
+        $query .= " ( select TBTR_LOKASI_SO.* ";
+        $query .= "   from( ";
+        $query .= "        SELECT MAX(MSO_TGLSO) TGL_SO_SETTING ";
+        $query .= "        FROM tbmaster_Setting_so";
+        $query .= "       ) C ";
+        $query .= "       join TBTR_LOKASI_SO on LSO_TGLSO = TGL_SO_SETTING";
+        $query .= "       ) TBTR_LOKASI_SO ";
+        $query .= "    ON LSO_PRDCD = ST_PRDCD ";
+        $query .= "LEFT JOIN";
+        $query .= "   (SELECT MAX(MSO_TGLSO) TGL_SO_SETTING ";
+        $query .= "     FROM tbmaster_Setting_so) SO_SETTING           ";
+        $query .= "   ON LSO_LOKASI  = ST_LOKASI ";
+        $query .= "   AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY')";
+        $query .= ") A";
+        $query .= " WHERE LSO_PRDCD = '0000000' ";
+        $query .= " AND PRD_KODEDIVISI BETWEEN '" & $request->div1 & "' AND '" & $request->div2 & "' ";
+        $query .= " AND PRD_KODEDEPARTEMENT BETWEEN '" & $request->dept1 & "' AND '" & $request->dept2 & "' ";
+        $query .= " AND PRD_KODEKATEGORIBARANG BETWEEN '" & $request->kat1 & "' AND '" & $request->kat2 & "' ";
+        $query .= " AND PRD_PRDCD LIKE '%0' ";
+        $query .= " ORDER BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT,PRD_KODEKATEGORIBARANG,LSO_PRDCD ";
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportRakBelumSo(){
-        // koderak1 = "0"
-        // subrak1 = "0"
-        // tipe1 = "0"
-        // shelving1 = "0"
-        // tglSO = Now
+    public function reportRakBelumSo(ReportLokasiRakBelumDiSoRequest $request){
 
-        // Sql = "SELECT lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, "
-        // Sql += "CASE WHEN lso_lokasi = '01' THEN 'BAIK' ELSE CASE WHEN lso_lokasi = '02' THEN 'RETUR' ELSE 'RUSAK' END END jenisbrg, "
-        // Sql += "lso_prdcd, prd_deskripsipanjang, prd_unit || '/' || prd_frac UNIT, "
-        // Sql += "CASE WHEN lso_flagsarana = 'H' THEN 'HandHeld' ELSE 'Kertas' END Sarana, lso_qty "
-        // Sql += "FROM tbtr_lokasi_so, tbmaster_prodmast "
-        // Sql += "WHERE lso_tglso = TO_DATE('" & Format(tglSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND lso_modify_by IS NULL "
+        $query = '';
+        $query .= "SELECT lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, ";
+        $query .= "CASE WHEN lso_lokasi = '01' THEN 'BAIK' ELSE CASE WHEN lso_lokasi = '02' THEN 'RETUR' ELSE 'RUSAK' END END jenisbrg, ";
+        $query .= "lso_prdcd, prd_deskripsipanjang, prd_unit || '/' || prd_frac UNIT, ";
+        $query .= "CASE WHEN lso_flagsarana = 'H' THEN 'HandHeld' ELSE 'Kertas' END Sarana, lso_qty ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_prodmast ";
+        $query .= "WHERE lso_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND lso_modify_by IS NULL ";
 
-        // If koderak1 <> "0" Then
-        //     Sql += " AND lso_koderak = '" & koderak1 & "' "
-        // End If
+        if($request->koderak1 <> '0'){
+            $query .= " AND lso_koderak = '" . $request->koderak1 . "' ";
+        }
 
-        // If subrak1 <> "0" Then
-        //     Sql += " AND lso_kodesubrak = ' " & subrak1 & "' "
-        // End If
+        if($request->subrak1 <> '0'){
+            $query .= " AND lso_kodesubrak = '" . $request->subrak1 . "' ";
+        }
 
-        // If tipe1 <> "0" Then
-        //     Sql += " AND lso_tiperak = ' " & tipe1 & "' "
-        // End If
+        if($request->tipe1 <> '0'){
+            $query .= " AND lso_tiperak = '" . $request->tipe1 . "' ";
+        }
 
-        // If shelving1 <> "0" Then
-        //     Sql += " AND lso_shelvingrak = ' " & shelving1 & "'"
-        // End If
+        if($request->shelving1 <> '0'){
+            $query .= " AND lso_shelvingrak = '" . $request->shelving1 . "' ";
+        }
 
-        // Sql += " AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR "
-        // If _flagTransferLokasi = "Y" Then
-        //     Sql += " AND LSO_FLAGLIMIT='Y' "
-        // End If
-        // Sql += "Order By lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, lso_lokasi, lso_prdcd "
+        $query .= " AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+
+        if($this->flagTransferLokasi == 'Y'){
+            $query .= " AND LSO_FLAGLIMIT='Y' ";
+        }
+
+        $query .= "Order By lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, lso_lokasi, lso_prdcd ";
+        $data = DB::select($query);
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
-    public function reportInqueryPlanoSonasExcel(){
-        // If inp.Flag = "N" Then
-        //     Exit Sub
-        // Else
-        //     PLU = inp.PLUId1
-        //     Lokasi = inp.JenisBrgId
-        //     If Lokasi.ToUpper = "R" Then
-        //         Lokasi = "03"
-        //     ElseIf Lokasi.ToUpper = "T" Then
-        //         Lokasi = "02"
-        //     ElseIf Lokasi.ToUpper = "B" Then
-        //         Lokasi = "01"
-        //     End If
-        // End If
+    public function reportInqueryPlanoSonasExcel(ReportInqueryPlanoSonasRequest $request){
 
-        // If Lokasi = "A" Then
-        //     dt = QueryOra("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_PRDCD = '" & PLU & "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy") & "', 'DD-MM-YYYY')")
-        // Else
-        //     dt = QueryOra("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_LOKASI = '" & Lokasi & "' AND LSO_PRDCD = '" & PLU & "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy") & "', 'DD-MM-YYYY')")
-        // End If
+        if($request->jenis_barang == 'A'){
+            $data = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_PRDCD = '" . $request->plu . "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY')");
+        }else{
+            $data = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_LOKASI = '" . $request->jenis_barang . "' AND LSO_PRDCD = '" . $request->plu . "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY')");
+        }
+
+        $data['data'] = $data;
+
+        return $data;
     }
 
     public function reportLppMonthEndExcel(){

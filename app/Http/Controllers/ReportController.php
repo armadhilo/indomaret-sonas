@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
+use App\Http\Requests\reportCetakDraftLhsoRequest;
+use App\Http\Requests\ReportCetakDraftReturSebelumLhsoRequest;
 use App\Http\Requests\ReportDaftarItemAdjustRequest;
 use App\Http\Requests\ReportDaftarItemBelumAdaDiMasterRequest;
 use App\Http\Requests\ReportInqueryPlanoSonasRequest;
 use App\Http\Requests\ReportLokasiRakBelumDiSoRequest;
+use App\Http\Requests\ReportLokasiSoRequest;
 use App\Http\Requests\ReportMasterLokasiSoRequest;
 use App\Http\Requests\ReportPerincianBasoRequest;
 use App\Http\Requests\ReportRequest;
@@ -44,7 +47,7 @@ class SetLimitSoController extends Controller
         $query .= "FROM tbtr_lokasi_so, tbmaster_prodmast ";
         $query .= "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" & $request->koderak1 & "' and '" & $request->koderak2 & "' ";
         $query .= "AND LSO_TGLSO = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
-        $query .= "AND LSO_LOKASI = '" & $request->jenisbrg & "'  ";
+        $query .= "AND LSO_LOKASI = '" & $request->jenis_barang & "'  ";
         $query .= "AND lso_kodesubrak between '" & $request->subrak1 & "' and '" & $request->subrak2 & "' ";
         $query .= "AND lso_tiperak between '" & $request->tipe1 & "' and '" & $request->tipe2 & "' ";
         $query .= "AND lso_shelvingrak between '" & $request->shelving1 & "' and '" & $request->shelving2 & "' ";
@@ -84,7 +87,7 @@ class SetLimitSoController extends Controller
         $query .= "AND lso_kodesubrak between '" . $request->subrak1 . "' and '" . $request->subrak2 . "' ";
         $query .= "AND lso_tiperak between '" . $request->tipe1 . "' and '" . $request->tipe2 . "' ";
         $query .= "AND lso_shelvingrak between '" . $request->shelving1 . "' and '" . $request->shelving2 . "' ";
-        $query .= "AND lso_lokasi = '" . $request->jenisbrg . "' ";
+        $query .= "AND lso_lokasi = '" . $request->jenis_barang . "' ";
         $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
         if($this->flagTransferLokasi == 'Y'){
             $query .= "AND LSO_FLAGLIMIT='Y' ";
@@ -135,7 +138,7 @@ class SetLimitSoController extends Controller
         $query .= "AND LSO_KODESUBRAK BETWEEN '" . $request->subrak1 . "' and '" . $request->subrak2 . "' ";
         $query .= "AND LSO_TIPERAK BETWEEN '" . $request->tipe1 . "' and '" . $request->tipe2 . "' ";
         $query .= "AND LSO_SHELVINGRAK BETWEEN '" . $request->shelving1 . "' and '" . $request->shelving2 . "' ";
-        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenis_barang . "' ";
         $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
         $query .= "AND ST_PRDCD = LSO_PRDCD AND ST_LOKASI = LSO_LOKASI ";
         $query .= "and sop_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
@@ -168,7 +171,7 @@ class SetLimitSoController extends Controller
         $query .= "WHERE coalesce (LSO_RECID, '0') <> '1' AND LSO_KODERAK BETWEEN '" & $request->koderak1 & "' and '" & $request->koderak2 & "' ";
         $query .= "AND LSO_TGLSO = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
         $query .= "AND LSO_KODESUBRAK BETWEEN '" & $request->subrak1 & "' and '" & $request->subrak2 & "' AND LSO_TIPERAK BETWEEN '" & $request->tipe1 & "' and '" & $request->tipe2 & "' ";
-        $query .= "AND LSO_SHELVINGRAK BETWEEN '" & $request->shelving1 & "' and '" & $request->shelving2 & "'  AND LSO_LOKASI = '" & $request->jenisbrg & "' ";
+        $query .= "AND LSO_SHELVINGRAK BETWEEN '" & $request->shelving1 & "' and '" & $request->shelving2 & "'  AND LSO_LOKASI = '" & $request->jenis_barang & "' ";
         if($this->flagTransferLokasi == 'Y'){
             $query .= "AND LSO_FLAGLIMIT='Y' ";
         }
@@ -196,7 +199,7 @@ class SetLimitSoController extends Controller
         $query .= " FROM TBMASTER_PRODMAST";
         $query .= " JOIN TBTR_BA_STOCKOPNAME";
         $query .= "      ON PRD_PRDCD = SOP_PRDCD ";
-        $query .= "      AND SOP_LOKASI = '" . $request->jenisbrg . "'";
+        $query .= "      AND SOP_LOKASI = '" . $request->jenis_barang . "'";
         $query .= "      AND SOP_TGLSO = TO_DATE('" . $request->tanggal_start_so . "', 'DD-MM-YYYY')";
         $query .= " JOIN TBMASTER_DEPARTEMENT ";
         $query .= "      ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT";
@@ -276,7 +279,7 @@ class SetLimitSoController extends Controller
         $query .= "JOIN TBTR_BA_STOCKOPNAME ";
         $query .= "   ON SOP_PRDCD = PRD_PRDCD  ";
         $query .= "   AND sop_tglso = TO_DATE('" & $request->tanggal_start_so & "', 'DD-MM-YYYY') ";
-        $query .= "   AND SOP_LOKASI = '" & $request->jenisbrg & "' ";
+        $query .= "   AND SOP_LOKASI = '" & $request->jenis_barang & "' ";
         $query .= "LEFT JOIN TBMASTER_DEPARTEMENT ";
         $query .= "   ON DEP_KODEDEPARTEMENT = PRD_KODEDEPARTEMENT   ";
         $query .= "LEFT JOIN  TBMASTER_KATEGORI ";
@@ -307,7 +310,7 @@ class SetLimitSoController extends Controller
         $query = '';
         $query .= "SELECT adj_prdcd ";
         $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
-        $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenisbrg . "' ";
+        $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenis_barang . "' ";
         $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','DD-MM-YYYY') AND TO_DATE('" . $request->tanggal_adjust_end . "','DD-MM-YYYY') ";
         $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
         $query .= "ORDER BY adj_create_dt ";
@@ -317,7 +320,7 @@ class SetLimitSoController extends Controller
         $query .= "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, ";
         $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
         $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
-        $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenisbrg . "' ";
+        $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenis_barang . "' ";
         $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','DD-MM-YYYY') AND TO_DATE('" . $request->tanggal_adjust_end . "','DD-MM-YYYY') ";
         $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
         $query .= "ORDER BY adj_create_dt ";
@@ -332,7 +335,7 @@ class SetLimitSoController extends Controller
                 $query .= "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, ";
                 $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
                 $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
-                $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenisbrg . "' ";
+                $query .= "WHERE adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') AND adj_lokasi = '" . $request->jenis_barang . "' ";
                 $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','DD-MM-YYYY') AND TO_DATE('" . $request->tanggal_adjust_end . "','DD-MM-YYYY') ";
                 $query .= "AND adj_prdcd = '" . $item->adj_prdcd . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
                 $query .= "ORDER BY adj_create_dt ";
@@ -362,7 +365,7 @@ class SetLimitSoController extends Controller
         $query .= "AND LSO_TIPERAK BETWEEN '" . $request->tipe1 . "' AND '" . $request->tipe2 . "' ";
         $query .= "AND LSO_SHELVINGRAK BETWEEN '" . $request->shelving1 . "' AND '" . $request->shelving2 . "' ";
         $query .= "AND LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
-        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenis_barang . "' ";
         $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
         $query .= "AND ST_PRDCD = LSO_PRDCD ";
         $query .= "AND ST_LOKASI = LSO_LOKASI ";
@@ -386,7 +389,7 @@ class SetLimitSoController extends Controller
         $query .= "WHERE coalesce (LSO_RECID, '0') <> '1' ";
         $query .= "AND LSO_TGLSO = TO_DATE('" . $request->tanggal_start_so . "','DD-MM-YYYY') ";
         $query .= "AND LSO_PRDCD = '" . $request->plu1 . "' ";
-        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenis_barang . "' ";
         $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
         $query .= "ORDER BY PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_LOKASI  ";
         $data = DB::select($query);
@@ -425,7 +428,7 @@ class SetLimitSoController extends Controller
         $query .= "   AND KAT_KODEKATEGORI= PRD_KODEKATEGORIBARANG";
         $query .= "   LEFT JOIN TBMASTER_STOCK ";
         $query .= "   ON ST_PRDCD = PRD_PRDCD ";
-        $query .= "   AND ST_LOKASI = '" & $request->jenisbrg & "' ";
+        $query .= "   AND ST_LOKASI = '" & $request->jenis_barang & "' ";
         $query .= "   LEFT JOIN";
         $query .= " ( select TBTR_LOKASI_SO.* ";
         $query .= "   from( ";
@@ -521,351 +524,249 @@ class SetLimitSoController extends Controller
         //! BELUM BERES
     }
 
-    public function reportCetakDraftLhso(){
-        // If InputRpt13.Flag = "Y" Then
-        //     If InputRpt13.RB1.Checked Then
-        //         LoadReport()
-        //     Else
-        //         LoadReport2()
-        //     End If
-        // End If
+    public function reportCetakDraftLhso(reportCetakDraftLhsoRequest $request){
 
+        //! GET NAMA PERUSAHAAN
+        $data['perusahaan'] = DB::table('tbmaster_perusahaan')
+            ->select('prs_kodeigr as kode_igr', 'prs_namacabang')
+            ->first();
 
+        $dtCek = DB::table('tbmaster_setting_so')
+            ->whereNull('mso_flagreset')
+            ->get();
+
+        if(count($dtCek) == 0){
+            return ApiFormatter::error(400, '-Draf Lhso Tahap ' . $request->tahap . '  belum di Proses-');
+        }
+
+        $FlagTahap = $dtCek[0]->mso_flagtahap;
+        $request->merge(['TglSO' => $dtCek[0]->mso_tglso]);
+
+        if($request->tahap != 1){
+
+            if($FlagTahap != $request->tahap){
+                return ApiFormatter::error(400, 'Saat ini Proses Tahap ke ' . $request->tahap . ' !');
+            }
+
+        }
+
+        if(isset($request->tahap)){
+            $request->merge(['tahap' => str_pad($request->tahap, 2, "0", STR_PAD_LEFT)]);
+        }
+
+        if(!isset($request->limit)){
+            $request->merge(['limit' => 100000]);
+        }
+
+        if($request->type == 'draft_lhso'){
+
+            $data['data'] = $this->loadReport($request);
+        }else{
+            $data['data'] = $this->LoadReport2($request);
+        }
     }
 
-    private function loadReport(){
-        // dtPer = QueryOra("select prs_kodeigr kode_igr, PRS_NAMACABANG from tbmaster_perusahaan ")
-        // NamaCabang = dtPer.Rows(0).Item("PRS_NAMACABANG")
+    private function loadReport($request){
 
-        // If tahap = 2 Or 3 Or 4 Or 5 Or 6 Then
-        //     dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
-        //     If dt.Rows.Count = 0 Then
-        //         MsgBox("-Draf Lhso Tahap '" & tahap & "'  belum di Proses-  ")
-        //         Exit Sub
-        //     Else
-        //         FlagTahap = Val(dt.Rows(0).Item("MSO_FLAGTAHAP").ToString)
+        $query = '';
+        $query .= "SELECT * FROM (";
+        $query .= "SELECT DISTINCT PLU, DESKRIPSI, AREAGUDANG, AREATOKO, (AREAGUDANG + AREATOKO) AS TOTAL, LPP, ((AREAGUDANG + AREATOKO  ) - LPP) AS SELISIH, ";
+        $query .= "(((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) AS NILAI_SELISIH, LSO_FLAGTAHAP, LSO_CREATE_BY, ";
+        $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori ";
+        $query .= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '" . $request->jenisbrg . "') AS AREAGUDANG, ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '" . $request->jenisbrg . "') AS AREATOKO,  ";
+        $query .= "(LSO_ST_SALDOAKHIR) AS LPP, LSO_FLAGTAHAP, LSO_CREATE_BY, LSO_AVGCOST, ";
+        $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, ";
+        $query .= "(select dep_namadepartement from tbmaster_departement where dep_kodedepartement = PRD_KODEDEPARTEMENT and dep_kodedivisi = PRD_KODEDIVISI) as dep_namadepartement, ";
+        $query .= "(select kat_namakategori from tbmaster_kategori where kat_kodekategori = PRD_KODEKATEGORIBARANG and kat_kodedepartement = PRD_KODEDEPARTEMENT ) as kat_namakategori ";
+        $query .= "FROM TBMASTER_PRODMAST, tbhistory_lhso_sonas, ";
+        $query .= "tbmaster_divisi, tbmaster_departement, tbmaster_kategori ";
+        $query .= "WHERE LSO_TGLSO = TO_DATE('" . $request->TglSO . "','DD-MM-YYYY') ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD ";
+        $query .= "AND PRD_KODEDIVISI = div_kodedivisi ";
+        $query .= "AND PRD_KODEDEPARTEMENT = dep_kodedepartement ";
+        $query .= "AND PRD_KODEKATEGORIBARANG = kat_kodekategori ";
+        $query .= "AND div_kodedivisi = dep_kodedivisi ";
+        $query .= "AND dep_kodedepartement = kat_kodedepartement ";
+        $query .= "AND LSO_FLAGTAHAP = '" . $request->tahap . "' ";
 
-        //         If FlagTahap <> tahap Then
-        //             MsgBox(" Saat ini Proses Tahap ke '" & FlagTahap & "' !  ")
-        //             Exit Sub
-        //         Else
-        //             FlagTahap = Val(dt.Rows(0).Item("MSO_FLAGTAHAP").ToString)
-        //         End If
+        if(!isset($request->div1)){
+            $query .= "";
+        }elseif(!isset($request->dept1)){
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+        }elseif(!isset($request->kat1)){
 
-        //     End If
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+            $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' and '" . $request->dept2 . "' ";
+        }else{
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+            $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' and '" . $request->dept2 . "' ";
+            $query .= "AND PRD_KODEKATEGORIBARANG BETWEEN  '" . $request->kat1 . "' and '" . $request->kat2 . "' ";
+        }
 
-        //     If tahap <> FlagTahap Then
-        //         MsgBox("-Draf Lhso Tahap '" & tahap & "'  belum di Proses-  ")
-        //         Exit Sub
-        //     Else
+        if(!isset($request->plu)){
+            $query .= "";
+        }else{
+            $query .= "AND LSO_PRDCD BETWEEN '" . $request->plu1 . "' and '" . $request->plu2 . "' ";
+        }
 
-        //     End If
+        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= ") q ";
+        $query .= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) <> 0 ";
+        $query .= ") p ORDER BY ABS(NILAI_SELISIH) DESC LIMIT " . $request->limit . "";
+        $data = DB::select($query);
 
-        // End If
-
-        // dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
-        // If dt.Rows.Count = 0 Then
-        //     MsgBox("-Draf Lhso Tahap '" & tahap & "'  belum di Proses- ")
-        //     Exit Sub
-        // Else
-        //     FlagTahap = dt.Rows(0).Item("MSO_FLAGTAHAP")
-        //     TglSO = dt.Rows(0).Item("MSO_TGLSO")
-        // End If
-
-
-        // If jenisbrg = "B" Then
-        //     jenisbrg = "01"
-        // ElseIf jenisbrg = "T" Then
-        //     jenisbrg = "02"
-        // ElseIf jenisbrg = "R" Then
-        //     jenisbrg = "03"
-        // End If
-
-        // If tahap > 0 Then
-        //     tahap = tahap.ToString.PadLeft(2, "0")
-        // End If
-
-        // If limit = "" Then
-        //     limit = "100000"
-        // End If
-
-        // If jenisbrg = "01" Then
-        //     ketlokasi = "Lokasi Barang Baik - 01"
-        // ElseIf jenisbrg = "02" Then
-        //     ketlokasi = "Lokasi Barang Retur - 02"
-        // Else
-        //     ketlokasi = "Lokasi Barang Rusak - 03"
-        // End If
-
-        // If div1 = "" Then
-        //     d1 = "1 - FOOD"
-        //     d2 = "6 - ELECTRONICS"
-        //     d3 = "01 - BREAKFAST FOOD"
-        //     d4 = "58 - SERVICE"
-        //     d5 = "01 - TEH CELUP"
-        //     d6 = "C1 - COUNTER UMUM"
-        // Else
-        //     d1 = ""
-        //     d2 = ""
-        //     d3 = ""
-        //     d4 = ""
-        //     d5 = ""
-        //     d6 = ""
-        // End If
-
-        // Str = "SELECT * FROM ("
-        // Str &= "SELECT DISTINCT PLU, DESKRIPSI, AREAGUDANG, AREATOKO, (AREAGUDANG + AREATOKO) AS TOTAL, LPP, ((AREAGUDANG + AREATOKO  ) - LPP) AS SELISIH, "
-        // Str &= "(((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) AS NILAI_SELISIH, LSO_FLAGTAHAP, LSO_CREATE_BY, "
-        // Str &= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori "
-        // Str &= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  "
-        // Str &= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" & tahap & "' AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '" & jenisbrg & "') AS AREAGUDANG, "
-        // Str &= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" & tahap & "' AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '" & jenisbrg & "') AS AREATOKO,  "
-        // Str &= "(LSO_ST_SALDOAKHIR) AS LPP, LSO_FLAGTAHAP, LSO_CREATE_BY, LSO_AVGCOST, "
-        // Str &= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Str &= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, "
-        // Str &= "(select dep_namadepartement from tbmaster_departement where dep_kodedepartement = PRD_KODEDEPARTEMENT and dep_kodedivisi = PRD_KODEDIVISI) as dep_namadepartement, "
-        // Str &= "(select kat_namakategori from tbmaster_kategori where kat_kodekategori = PRD_KODEKATEGORIBARANG and kat_kodedepartement = PRD_KODEDEPARTEMENT ) as kat_namakategori "
-        // Str &= "FROM TBMASTER_PRODMAST, tbhistory_lhso_sonas, "
-        // Str &= "tbmaster_divisi, tbmaster_departement, tbmaster_kategori "
-        // Str &= "WHERE LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Str &= "AND LSO_PRDCD = PRD_PRDCD "
-        // Str &= "AND PRD_KODEDIVISI = div_kodedivisi "
-        // Str &= "AND PRD_KODEDEPARTEMENT = dep_kodedepartement "
-        // Str &= "AND PRD_KODEKATEGORIBARANG = kat_kodekategori "
-        // Str &= "AND div_kodedivisi = dep_kodedivisi "
-        // Str &= "AND dep_kodedepartement = kat_kodedepartement "
-        // Str &= "AND LSO_FLAGTAHAP = '" & tahap & "' "
-        // If div1 = "" Then
-        //     Str &= ""
-        // ElseIf dept1 = "" Then
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        // ElseIf kat1 = "" Then
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        //     Str &= "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' and '" & dept2 & "' "
-        // Else
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        //     Str &= "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' and '" & dept2 & "' "
-        //     Str &= "AND PRD_KODEKATEGORIBARANG BETWEEN  '" & kat1 & "' and '" & kat2 & "' "
-        // End If
-        // If plu1 = "" Then
-        //     Str &= ""
-        // Else
-        //     Str &= "AND LSO_PRDCD BETWEEN '" & plu1 & "' and '" & plu2 & "' "
-        // End If
-        // Str &= "AND LSO_LOKASI = '" & jenisbrg & "' "
-        // Str &= ") q "
-        // Str &= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) <> 0 "
-        // Str &= ") p ORDER BY ABS(NILAI_SELISIH) DESC LIMIT " & limit & ""
+        return $data;
     }
 
-    private function LoadReport2(){
-        // If tahap > 1 Then
-        //     dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
-        //     If dt.Rows.Count = 0 Then
-        //         MsgBox("-Draf Lhso Tahap '" & tahap & "'  belum di Proses-  ")
-        //         Exit Sub
-        //     Else
-        //         FlagTahap = Val(dt.Rows(0).Item("MSO_FLAGTAHAP").ToString)
+    private function LoadReport2($request){
 
-        //         If FlagTahap <> tahap Then
-        //             MsgBox(" Saat ini Proses Tahap ke '" & FlagTahap & "' !  ")
-        //             Exit Sub
-        //         Else
-        //             FlagTahap = Val(dt.Rows(0).Item("MSO_FLAGTAHAP").ToString)
-        //         End If
+        $query = '';
+        $query .= "SELECT * FROM (";
+        $query .= "SELECT DISTINCT PLU, DESKRIPSI, AREAGUDANG, AREATOKO, (AREAGUDANG + AREATOKO) AS TOTAL, LPP, ((AREAGUDANG + AREATOKO  ) - LPP) AS SELISIH, ";
+        $query .= "(((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) AS NILAI_SELISIH, LSO_FLAGTAHAP, LSO_CREATE_BY, ";
+        $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori ";
+        $query .= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '" . $request->jenisbrg . "') AS AREAGUDANG, ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '" . $request->jenisbrg . "') AS AREATOKO,  ";
+        $query .= "(LSO_ST_SALDOAKHIR) AS LPP, LSO_FLAGTAHAP, LSO_CREATE_BY, LSO_AVGCOST, ";
+        $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, ";
+        $query .= "(select dep_namadepartement from tbmaster_departement where dep_kodedepartement = PRD_KODEDEPARTEMENT and dep_kodedivisi = PRD_KODEDIVISI) as dep_namadepartement, ";
+        $query .= "(select kat_namakategori from tbmaster_kategori where kat_kodekategori = PRD_KODEKATEGORIBARANG and kat_kodedepartement = PRD_KODEDEPARTEMENT ) as kat_namakategori ";
+        $query .= "FROM TBMASTER_PRODMAST, tbhistory_lhso_sonas, ";
+        $query .= "tbmaster_divisi, tbmaster_departement, tbmaster_kategori ";
+        $query .= "WHERE LSO_TGLSO = TO_DATE('" . $request->TglSO . "','DD-MM-YYYY') ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD ";
+        $query .= "AND PRD_KODEDIVISI = div_kodedivisi ";
+        $query .= "AND PRD_KODEDEPARTEMENT = dep_kodedepartement ";
+        $query .= "AND PRD_KODEKATEGORIBARANG = kat_kodekategori ";
+        $query .= "AND div_kodedivisi = dep_kodedivisi ";
+        $query .= "AND dep_kodedepartement = kat_kodedepartement ";
+        $query .= "AND LSO_FLAGTAHAP = '" . $request->tahap . "' ";
+        if(!isset($request->div1)){
+            $query .= "";
+        }elseif(!isset($request->dept1)){
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+        }elseif(!isset($request->kat1)){
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+            $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' and '" . $request->dept2 . "' ";
+        }else{
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+            $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' and '" . $request->dept2 . "' ";
+            $query .= "AND PRD_KODEKATEGORIBARANG BETWEEN  '" . $request->kat1 . "' and '" . $request->kat2 . "' ";
+        }
 
-        //     End If
+        if(!isset($request->plu)){
+            $query .= "";
+        }else{
+            $query .= "AND LSO_PRDCD BETWEEN '" . $request->plu1 . "' and '" . $request->plu2 . "' ";
+        }
 
-        //     If tahap <> FlagTahap Then
-        //         MsgBox("-Draf Lhso Tahap '" & tahap & "'  belum di Proses-  ")
-        //         Exit Sub
-        //     Else
+        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= ") q ";
+        $query .= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) <> 0 ";
+        $query .= ") p ORDER BY ABS(NILAI_SELISIH) DESC limit " . $request->limit . "";
+        $data = DB::select($query);
 
-        //     End If
-
-        // End If
-
-        // dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
-        // If dt.Rows.Count = 0 Then
-        //     MsgBox("-Draf Lhso Tahap '" & tahap & "'  belum di Proses- ")
-        //     Exit Sub
-        // Else
-        //     FlagTahap = dt.Rows(0).Item("MSO_FLAGTAHAP")
-        //     TglSO = dt.Rows(0).Item("MSO_TGLSO")
-        // End If
-
-
-        // If jenisbrg = "B" Then
-        //     jenisbrg = "01"
-        // ElseIf jenisbrg = "T" Then
-        //     jenisbrg = "02"
-        // ElseIf jenisbrg = "R" Then
-        //     jenisbrg = "03"
-        // End If
-
-        // If tahap = 1 Then
-        //     tahap = "01"
-        // ElseIf tahap = 2 Then
-        //     tahap = "02"
-        // ElseIf tahap = 3 Then
-        //     tahap = "03"
-        // ElseIf tahap = 4 Then
-        //     tahap = "04"
-        // ElseIf tahap = 5 Then
-        //     tahap = "05"
-        // ElseIf tahap = 6 Then
-        //     tahap = "06"
-        // End If
-
-        // If limit = "" Then
-        //     limit = "100000"
-        // End If
-
-        // Str = "SELECT * FROM ("
-        // Str &= "SELECT DISTINCT PLU, DESKRIPSI, AREAGUDANG, AREATOKO, (AREAGUDANG + AREATOKO) AS TOTAL, LPP, ((AREAGUDANG + AREATOKO  ) - LPP) AS SELISIH, "
-        // Str &= "(((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) AS NILAI_SELISIH, LSO_FLAGTAHAP, LSO_CREATE_BY, "
-        // Str &= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori "
-        // Str &= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  "
-        // Str &= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" & tahap & "' AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '" & jenisbrg & "') AS AREAGUDANG, "
-        // Str &= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" & tahap & "' AND LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '" & jenisbrg & "') AS AREATOKO,  "
-        // Str &= "(LSO_ST_SALDOAKHIR) AS LPP, LSO_FLAGTAHAP, LSO_CREATE_BY, LSO_AVGCOST, "
-        // Str &= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Str &= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, "
-        // Str &= "(select dep_namadepartement from tbmaster_departement where dep_kodedepartement = PRD_KODEDEPARTEMENT and dep_kodedivisi = PRD_KODEDIVISI) as dep_namadepartement, "
-        // Str &= "(select kat_namakategori from tbmaster_kategori where kat_kodekategori = PRD_KODEKATEGORIBARANG and kat_kodedepartement = PRD_KODEDEPARTEMENT ) as kat_namakategori "
-        // Str &= "FROM TBMASTER_PRODMAST, tbhistory_lhso_sonas, "
-        // Str &= "tbmaster_divisi, tbmaster_departement, tbmaster_kategori "
-        // Str &= "WHERE LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Str &= "AND LSO_PRDCD = PRD_PRDCD "
-        // Str &= "AND PRD_KODEDIVISI = div_kodedivisi "
-        // Str &= "AND PRD_KODEDEPARTEMENT = dep_kodedepartement "
-        // Str &= "AND PRD_KODEKATEGORIBARANG = kat_kodekategori "
-        // Str &= "AND div_kodedivisi = dep_kodedivisi "
-        // Str &= "AND dep_kodedepartement = kat_kodedepartement "
-        // Str &= "AND LSO_FLAGTAHAP = '" & tahap & "' "
-        // If div1 = "" Then
-        //     Str &= ""
-        // ElseIf dept1 = "" Then
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        // ElseIf kat1 = "" Then
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        //     Str &= "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' and '" & dept2 & "' "
-        // Else
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        //     Str &= "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' and '" & dept2 & "' "
-        //     Str &= "AND PRD_KODEKATEGORIBARANG BETWEEN  '" & kat1 & "' and '" & kat2 & "' "
-        // End If
-        // If plu1 = "" Then
-        //     Str &= ""
-        // Else
-        //     Str &= "AND LSO_PRDCD BETWEEN '" & plu1 & "' and '" & plu2 & "' "
-        // End If
-        // Str &= "AND LSO_LOKASI = '" & jenisbrg & "' "
-        // Str &= ") q "
-        // Str &= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) <> 0 "
-        // Str &= ") p ORDER BY ABS(NILAI_SELISIH) DESC limit " & limit & ""
+        return $data;
     }
 
-    public function reportCetakDraftReturSebelumLhso(){
-        // divdeptkat = "-"
+    public function reportCetakDraftReturSebelumLhso(ReportCetakDraftReturSebelumLhsoRequest $request){
 
-        // dtPer = QueryOra("select prs_kodeigr kode_igr, PRS_NAMACABANG from tbmaster_perusahaan ")
-        // NamaCabang = dtPer.Rows(0).Item("PRS_NAMACABANG")
+        //! GET NAMA PERUSAHAAN
+        $data['perusahaan'] = DB::table('tbmaster_perusahaan')
+            ->select('prs_kodeigr as kode_igr', 'prs_namacabang')
+            ->first();
 
-        // dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_FLAGRESET IS NULL")
-        // If dt.Rows.Count = 0 Then
-        //     MsgBox("-Draf Lhso belum di Proses- ")
-        //     Exit Sub
-        // Else
-        //     FlagTahap = dt.Rows(0).Item("MSO_FLAGTAHAP")
-        //     TglSO = dt.Rows(0).Item("MSO_TGLSO")
-        // End If
+        $dtCek = DB::table('tbmaster_setting_so')
+            ->whereNull('mso_flagreset')
+            ->get();
 
-        // If div1 = "" Then
-        //     d1 = "1 - FOOD"
-        //     d2 = "6 - ELECTRONICS"
-        //     d3 = "01 - BREAKFAST FOOD"
-        //     d4 = "58 - SERVICE"
-        //     d5 = "01 - TEH CELUP"
-        //     d6 = "C1 - COUNTER UMUM"
-        // Else
-        //     d1 = ""
-        //     d2 = ""
-        //     d3 = ""
-        //     d4 = ""
-        //     d5 = ""
-        //     d6 = ""
-        // End If
+            if(count($dtCek) == 0){
+            return ApiFormatter::error(400, '-Draf Lhso belum di Proses- ');
+        }
 
-        // Str = "SELECT * FROM ("
-        // Str &= "SELECT DISTINCT PLU, DESKRIPSI, AREAGUDANG, AREATOKO, (AREAGUDANG + AREATOKO) AS TOTAL, LPP, ((AREAGUDANG + AREATOKO  ) - LPP) AS SELISIH, "
-        // Str &= "(((AREAGUDANG + AREATOKO ) - LPP ) * ACOST) AS NILAI_SELISIH,  LSO_CREATE_BY, "
-        // Str &= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori "
-        // Str &= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  "
-        // Str &= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM TBTR_LOKASI_SO WHERE   LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '02') AS AREAGUDANG, "
-        // Str &= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM TBTR_LOKASI_SO WHERE   LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '02') AS AREATOKO,  "
-        // Str &= "(SELECT (case when prd_unit='KG' then st_avgcost/1000  else st_avgcost  end) ST_AVGCOST FROM TBMASTER_STOCK, TBMASTER_PRODMAST WHERE ST_PRDCD = PRD_PRDCD AND ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD and ST_AVGCOST IS NOT NULL LIMIT 1) AS ACOST, "
-        // Str &= "(SELECT coalesce (ST_SALDOAKHIR, 0) FROM TBMASTER_STOCK WHERE ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD and ST_SALDOAKHIR IS NOT NULL LIMIT 1 ) AS LPP, LSO_CREATE_BY,  "
-        // Str &= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, "
-        // Str &= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, "
-        // Str &= "(select dep_namadepartement from tbmaster_departement where dep_kodedepartement = PRD_KODEDEPARTEMENT and dep_kodedivisi = PRD_KODEDIVISI) as dep_namadepartement, "
-        // Str &= "(select kat_namakategori from tbmaster_kategori where kat_kodekategori = PRD_KODEKATEGORIBARANG and kat_kodedepartement = PRD_KODEDEPARTEMENT ) as kat_namakategori "
-        // Str &= "FROM TBMASTER_PRODMAST, TBTR_LOKASI_SO, "
-        // Str &= "tbmaster_divisi, tbmaster_departement, tbmaster_kategori "
-        // Str &= "WHERE LSO_TGLSO = TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Str &= "AND LSO_PRDCD = PRD_PRDCD "
-        // Str &= "AND PRD_KODEDIVISI = div_kodedivisi "
-        // Str &= "AND PRD_KODEDEPARTEMENT = dep_kodedepartement "
-        // Str &= "AND PRD_KODEKATEGORIBARANG = kat_kodekategori "
-        // Str &= "AND div_kodedivisi = dep_kodedivisi "
-        // Str &= "AND dep_kodedepartement = kat_kodedepartement "
-        // If div1 = "" Then
-        //     Str &= ""
-        // ElseIf dept1 = "" Then
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        // ElseIf kat1 = "" Then
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        //     Str &= "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' and '" & dept2 & "' "
-        // Else
-        //     Str &= "AND PRD_KODEDIVISI BETWEEN '" & div1 & "' and '" & div2 & "'  "
-        //     Str &= "AND PRD_KODEDEPARTEMENT BETWEEN '" & dept1 & "' and '" & dept2 & "' "
-        //     Str &= "AND PRD_KODEKATEGORIBARANG BETWEEN  '" & kat1 & "' and '" & kat2 & "' "
-        // End If
-        // If plu1 = "" Then
-        //     Str &= ""
-        // Else
-        //     Str &= "AND LSO_PRDCD BETWEEN '" & plu1 & "' and '" & plu2 & "' "
-        // End If
-        // Str &= "AND LSO_LOKASI = '02' )t "
-        // Str &= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * ACOST) <> 0 "
-        // Str &= ") p ORDER BY ABS(NILAI_SELISIH) DESC "
+        $FlagTahap = $dtCek[0]->mso_flagtahap;
+        $TglSO = $dtCek[0]->mso_tglso;
+
+        $query = '';
+        $query .= "SELECT * FROM (";
+        $query .= "SELECT DISTINCT PLU, DESKRIPSI, AREAGUDANG, AREATOKO, (AREAGUDANG + AREATOKO) AS TOTAL, LPP, ((AREAGUDANG + AREATOKO  ) - LPP) AS SELISIH, ";
+        $query .= "(((AREAGUDANG + AREATOKO ) - LPP ) * ACOST) AS NILAI_SELISIH,  LSO_CREATE_BY, ";
+        $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori ";
+        $query .= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM TBTR_LOKASI_SO WHERE   LSO_TGLSO = TO_DATE('" . $TglSO . "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '02') AS AREAGUDANG, ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM TBTR_LOKASI_SO WHERE   LSO_TGLSO = TO_DATE('" . $TglSO . "','DD-MM-YYYY') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '02') AS AREATOKO,  ";
+        $query .= "(SELECT (case when prd_unit='KG' then st_avgcost/1000  else st_avgcost  end) ST_AVGCOST FROM TBMASTER_STOCK, TBMASTER_PRODMAST WHERE ST_PRDCD = PRD_PRDCD AND ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD and ST_AVGCOST IS NOT NULL LIMIT 1) AS ACOST, ";
+        $query .= "(SELECT coalesce (ST_SALDOAKHIR, 0) FROM TBMASTER_STOCK WHERE ST_LOKASI = LSO_LOKASI AND ST_PRDCD = LSO_PRDCD and ST_SALDOAKHIR IS NOT NULL LIMIT 1 ) AS LPP, LSO_CREATE_BY,  ";
+        $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
+        $query .= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, ";
+        $query .= "(select dep_namadepartement from tbmaster_departement where dep_kodedepartement = PRD_KODEDEPARTEMENT and dep_kodedivisi = PRD_KODEDIVISI) as dep_namadepartement, ";
+        $query .= "(select kat_namakategori from tbmaster_kategori where kat_kodekategori = PRD_KODEKATEGORIBARANG and kat_kodedepartement = PRD_KODEDEPARTEMENT ) as kat_namakategori ";
+        $query .= "FROM TBMASTER_PRODMAST, TBTR_LOKASI_SO, ";
+        $query .= "tbmaster_divisi, tbmaster_departement, tbmaster_kategori ";
+        $query .= "WHERE LSO_TGLSO = TO_DATE('" . $TglSO . "','DD-MM-YYYY') ";
+        $query .= "AND LSO_PRDCD = PRD_PRDCD ";
+        $query .= "AND PRD_KODEDIVISI = div_kodedivisi ";
+        $query .= "AND PRD_KODEDEPARTEMENT = dep_kodedepartement ";
+        $query .= "AND PRD_KODEKATEGORIBARANG = kat_kodekategori ";
+        $query .= "AND div_kodedivisi = dep_kodedivisi ";
+        $query .= "AND dep_kodedepartement = kat_kodedepartement ";
+        if(!isset($request->div1)){
+            $query .= "";
+        }elseif(!isset($request->dept1)){
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+        }elseif(!isset($request->kat1)){
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+            $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' and '" . $request->dept2 . "' ";
+        }else{
+            $query .= "AND PRD_KODEDIVISI BETWEEN '" . $request->div1 . "' and '" . $request->div2 . "'  ";
+            $query .= "AND PRD_KODEDEPARTEMENT BETWEEN '" . $request->dept1 . "' and '" . $request->dept2 . "' ";
+            $query .= "AND PRD_KODEKATEGORIBARANG BETWEEN  '" . $request->kat1 . "' and '" . $request->kat2 . "' ";
+        }
+
+        if(!isset($request->plu)){
+            $query .= "";
+        }else{
+            $query .= "AND LSO_PRDCD BETWEEN '" . $request->plu1 . "' and '" . $request->plu2 . "' ";
+        }
+        $query .= "AND LSO_LOKASI = '02' )t ";
+        $query .= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * ACOST) <> 0 ";
+        $query .= ") p ORDER BY ABS(NILAI_SELISIH) DESC ";
+        $data['data'] = DB::select($query);
+
+        return $data;
     }
 
-    public function reportLokasiSo(){
-        // If sarana = "H" Then
-        //     flagsarana = "Handheld"
-        // Else
-        //     flagsarana = "Kertas"
-        // End If
+    public function reportLokasiSo(ReportLokasiSoRequest $request){
 
-        // dtPer = QueryOra("select prs_kodeigr kode_igr, PRS_NAMACABANG from tbmaster_perusahaan ")
-        // NamaCabang = dtPer.Rows(0).Item("PRS_NAMACABANG")
+        //! GET NAMA PERUSAHAAN
+        $data['perusahaan'] = DB::table('tbmaster_perusahaan')
+            ->select('prs_kodeigr as kode_igr', 'prs_namacabang')
+            ->first();
 
-        // Str = "select lso_koderak, lso_kodesubrak, lso_tiperak || '.' || lso_shelvingrak || '.' || lso_nourut as lokasi, "
-        // Str &= "lso_prdcd, prd_deskripsipanjang, lso_tglso, lso_flagsarana "
-        // Str &= "from TBTR_LOKASI_SO, TBMASTER_PRODMAST "
-        // Str &= "where LSO_PRDCD = PRD_PRDCD "
-        // If subrak <> "" Then
-        //     koderak = Split(subrak, ".")(0)
-        //     kodesubrak = Split(subrak, ".")(1)
-        //     Str &= "and lso_koderak = '" & koderak & "' "
-        //     Str &= "and lso_kodesubrak= '" & kodesubrak & "' "
-        // Else
-        //     Str &= ""
-        // End If
-        // Str &= "and lso_flagsarana= '" & sarana & "' "
-        // Str &= "and lso_flaglimit= 'Y' "
-        // Str &= "and DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" & Format(TanggalSO, "dd-MM-yyyy").ToString & "','DD-MM-YYYY') "
-        // Str &= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut "
+        $query = '';
+        $query .= "select lso_koderak, lso_kodesubrak, lso_tiperak || '.' || lso_shelvingrak || '.' || lso_nourut as lokasi, ";
+        $query .= "lso_prdcd, prd_deskripsipanjang, lso_tglso, lso_flagsarana ";
+        $query .= "from TBTR_LOKASI_SO, TBMASTER_PRODMAST ";
+        $query .= "where LSO_PRDCD = PRD_PRDCD ";
+        if(isset($request->raksubrak)){
+            $koderak = explode('.', $request->raksubrak)[0];
+            $kodesubrak = explode('.', $request->raksubrak)[1];
+            $query .= "and lso_koderak = '" . $koderak . "' ";
+            $query .= "and lso_kodesubrak= '" . $kodesubrak . "' ";
+        }else{
+            $query .= "";
+        }
+        $query .= "and lso_flagsarana= '" & $request->sarana & "' ";
+        $query .= "and lso_flaglimit= 'Y' ";
+        $query .= "and DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
+        $query .= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut ";
+        $data['data'] = DB::select($query);
+
+        return $data;
     }
 }

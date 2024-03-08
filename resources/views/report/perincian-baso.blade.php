@@ -150,21 +150,6 @@
             $(this).val($(this).val().charAt(0).toUpperCase() + $(this).val().slice(1));
         });
     });
-
-    function cancelAction(){
-        Swal.fire({
-            title: 'Cancel action saat ini ?',
-            text: `Semua input yg anda masukkan akan dihapus...`,
-            icon: 'warning',
-            showCancelButton: true,
-            cancelButtonText: 'Kembali',
-            confirmButtonText: 'Ya, Cancel'
-        })
-        .then((result) => {
-            if (result.value) {
-                window.location.href = '/report/';
-            }
-        });
-    }
 </script>
+<script src="{{ asset('js/report-action.js') }}"></script>
 @endpush

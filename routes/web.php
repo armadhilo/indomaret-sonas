@@ -114,6 +114,7 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'perincian-baso'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'ringkasan-baso'], function(){

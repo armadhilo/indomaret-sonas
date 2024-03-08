@@ -104,10 +104,14 @@ class ReportController extends Controller
             )
         );
 
-        $currentView = 'pdf.' .  $this->processRoutePrefix($request->route()->getPrefix());
+        $currentView = $this->processRoutePrefix($request->route()->getPrefix());
         $data['data'] = $data;
 
-        $pdf = PDF::loadView($currentView, $data);
+        $pdf = PDF::loadView('pdf.' . $currentView, $data);
+        if($currentView == "perincian-baso"){
+            $customPaper = array(0,0,1000, 500);
+            $pdf->setPaper($customPaper);
+        }
         return $pdf->stream();
 
     }

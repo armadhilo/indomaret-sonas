@@ -144,6 +144,7 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'lokasi-rak-belum-di-so'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'inquiry-plano-sonas'], function(){

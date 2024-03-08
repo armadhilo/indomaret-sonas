@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>PDF DAFTAR ITEM BLM ADA DI MASTER</title>
+    <title>PDF LOKASI RAK BELUM DI SO</title>
     <style>
         body{
             font-family: sans-serif;
@@ -75,34 +75,21 @@
             </div>
 
             <div class="body">
-                <p style="text-align: center; font-size: .85rem; margin-top: 0px"><b>DAFTAR CHECK ITEM YANG BELUM ADA DI MASTER LOKASI SO</b></p>
-                <div style="margin: 15px 0 0 0; width: 100%">
-                    <div style="float: left">
-                        <p style="margin-bottom: 5px;">DIVISI : 01</p>
-                        <p>Kategori : Lorem ipsum dolor sit amet.</p>
-                    </div>
-                    <div style="float: right">
-                        <p>Departement : 05</p>
-                    </div>
-                </div>
-                <table border="1" style="border-collapse: collapse; margin-top:40px" class="table-center" cellpadding="2">
+                <p style="text-align: center; font-size: .85rem; margin-top: 0px"><b>DAFTAR ITEM YANG BELUM DI SO</b><br>Lokasi : 01/01/02/2131</p>
+                <table border="1" style="border-collapse: collapse; margin-top:10px" class="table-center" cellpadding="2">
                     <thead>
                         <tr>
-                            <th style="width: 9%">No. Urut</th>
+                            <th style="width: 9%">No.</th>
                             <th style="width: 9%">PLU</th>
+                            <th>Jenis Brg</th>
                             <th style="width: 34%">Deskripsi</th>
-                            <th>Satuan</th>
-                            <th>Tag</th>
-                            <th>Qty</th>
-                            <th>ACost</th>
-                            <th style="width: 15%">Total</th>
+                            <th>Unit</th>
+                            <th>Sarana </th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($data as $item)
                         <tr>
-                            <td>123</td>
-                            <td>123</td>
                             <td>123</td>
                             <td>123</td>
                             <td>123</td>

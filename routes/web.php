@@ -129,14 +129,17 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'daftar-kkso-acost-0'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'daftar-master-lokasi-so'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'daftar-item-tidak-di-master'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'lokasi-rak-belum-di-so'], function(){

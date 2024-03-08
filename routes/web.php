@@ -119,10 +119,12 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'ringkasan-baso'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'daftar-item-adjustment'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
         Route::group(['prefix' => 'daftar-kkso-acost-0'], function(){

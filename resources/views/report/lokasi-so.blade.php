@@ -48,7 +48,7 @@
                         <div id="header_tb">
                             <h5 class="m-0">Lokasi SO</h5>
                         </div>
-                        <form action="">
+                        <form id="form_report">
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode">Kode Rak dan SubRak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
@@ -90,21 +90,7 @@
             $(this).val($(this).val().charAt(0).toUpperCase() + $(this).val().slice(1));
         });
     });
-
-    function cancelAction(){
-        Swal.fire({
-            title: 'Cancel action saat ini ?',
-            text: `Semua input yg anda masukkan akan dihapus...`,
-            icon: 'warning',
-            showCancelButton: true,
-            cancelButtonText: 'Kembali',
-            confirmButtonText: 'Ya, Cancel'
-        })
-        .then((result) => {
-            if (result.value) {
-                window.location.href = '/report/';
-            }
-        });
-    }
 </script>
+
+<script src="{{ asset('js/report-action.js') }}"></script>
 @endpush

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    <h1 class="pagetitle">CETAK DRAFT LHSO</h1>
+    <h1 class="pagetitle">CETAK DRAFT RETR SEBELUM LHSO</h1>
 @endsection
 
 @section('css')
@@ -54,29 +54,9 @@
                 <div class="card shadow mb-4 vertical-center w-100">
                     <div class="card-body">
                         <div id="header_tb">
-                            <h5 class="m-0">Draft LHSO</h5>
+                            <h5 class="m-0">Draft Retur Sebelum LHSO</h5>
                         </div>
                         <form id="form_report">
-                            <div class="form-group d-flex align-items-center justify-content-center" style="gap: 50px; margin-top: 16px">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="type-draft-lhso" id="type-draft-lhso1" checked>
-                                    <label class="form-check-label" for="type-draft-lhso1">
-                                        Draft LHSO
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="type-draft-lhso" id="type-draft-lhso2">
-                                    <label class="form-check-label" for="type-draft-lhso2">
-                                        Draft LHSO All
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="tahap">Tahap <span>:</span></label>
-                                <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control" style="width: 100px">
-                                </div>
-                            </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="divisi">Divisi <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
@@ -110,20 +90,6 @@
                                     <input type="text" class="form-control">
                                     S/D
                                     <input type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="jenis-barang">Jenis Barang <span>:</span></label>
-                                <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" id="jenis_barang" name="jenis-barang" class="form-control" style="width: 50px">
-                                    <p class="m-0 fw-semibold">[ B - Baik / T - Retur / R - Rusak ]</p>
-                                </div>
-                            </div>
-                            <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="limit">Limit <span>:</span></label>
-                                <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" id="limit" name="limit" class="form-control" style="width: 100px">
-                                    <p class="m-0 fw-semibold">[ Kosong - ALL ]</p>
                                 </div>
                             </div>
                             <div class="float-right">

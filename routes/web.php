@@ -157,14 +157,16 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'cetak-draft-lhso'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
 
-        Route::group(['prefix' => 'list'], function(){
+        Route::group(['prefix' => 'cetak-draft-sebelum-lhso'], function(){
             Route::get('/', [ReportController::class, 'index']);
         });
 
         Route::group(['prefix' => 'lokasi-so'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
         });
     });
 });

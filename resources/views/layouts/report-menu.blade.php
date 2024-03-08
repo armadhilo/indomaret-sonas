@@ -19,7 +19,7 @@
             <li><a href="{{ url('/report/inquiry-plano-sonas') }}" class="@if($sub_url == 'inquiry-plano-sonas') active @endif">Inquiry Plano SONAS (Excel)</a></li>
             <li><a href="{{ url('list') }}" class="@if($sub_url == 'list') active @endif">LPP Month End (Excel)</a></li>
             <li><a href="{{ url('/report/cetak-draft-lhso') }}" class="@if($sub_url == 'cetak-draft-lhso') active @endif">Cetak Draft LHSO</a></li>
-            <li><a href="{{ url('list') }}" class="@if($sub_url == 'list') active @endif">Cetak Draft Retur Sebelum LHSO</a></li>
+            <li><a href="{{ url('/report/cetak-draft-sebelum-lhso') }}" class="@if($sub_url == 'cetak-draft-sebelum-lhso') active @endif">Cetak Draft Retur Sebelum LHSO</a></li>
             <li><a href="{{ url('/report/lokasi-so') }}" class="@if($sub_url == 'lokasi-so') active @endif">Lokasi SO</a></li>
         </ul>
     </div>

@@ -76,7 +76,7 @@
                 <p style="text-align: center; font-size: .85rem"><b>KERTAS KERJA STOCK OPNAME</b><br>LOKASI : TOKO / GUDANG</p>
                 <div style="margin: 0 0 40px 0">
                     <div style="float: left">
-                        <p style="margin-bottom: 5px;">Jenis Barang : 01 - Barang Baik</p>
+                        <p style="margin-bottom: 5px;">Jenis Barang : {{ $data[0]->lokasi }}</p>
                         <p>Kode Lokasi : CRK / 01</p>
                     </div>
                 </div>
@@ -96,11 +96,11 @@
                         @foreach ($data as $item)
                         <tr>
                             <td class="text-center">{{ 'Z / ' . '01/ ' . $loop->iteration }}</td>
-                            <td>{{ $item['lso_prdcd'] }}</td>
-                            <td style="text-align: unset!important">{{ $item['prd_deskripsipanjang']  }}</td>
-                            <td>{{ $item['lso_tmp_qtyctn'] }}</td>
-                            <td>{{ $item['lso_tmp_qtypcs'] }}</td>
-                            <td>{{ $item['satuan'] }}</td>
+                            <td>{{ $item->lso_prdcd }}</td>
+                            <td style="text-align: unset!important">{{ $item->prd_deskripsipanjang  }}</td>
+                            <td>{{ $item->lso_tmp_qtyctn }}</td>
+                            <td>{{ $item->lso_tmp_qtypcs }}</td>
+                            <td>{{ $item->satuan }}</td>
                             <td>{{ '' }}</td>
                         </tr>
                         @endforeach

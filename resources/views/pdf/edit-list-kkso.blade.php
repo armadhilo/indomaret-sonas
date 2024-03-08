@@ -72,7 +72,7 @@
         <div style="width: 100%">
             <div class="header">
                 <div style="float: left;">
-                    <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
+                    <p style="font-size: .8rem;"><b>{{ strtoupper($perusahaan->prs_namacabang) }}</b></p>
                 </div>
                 <div style="float: right">
                     <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
@@ -102,16 +102,16 @@
                     <tbody>
                         @foreach ($data as $item)
                         <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td style="text-align: right;">Rp. 15.000.000</td>
-                            <td>123</td>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->lso_prdcd }}</td>
+                            <td>{{ $item->prd_deskripsipanjang }}</td>
+                            <td>{{ $item->satuan }}</td>
+                            <td>{{ $item->ctn }}</td>
+                            <td>{{ $item->pcs }}</td>
+                            <td>{{ $item->lso_qty }}</td>
+                            <td>{{ $item->st_avgcostmonthend }}</td>
+                            <td style="text-align: right;">{{ $item->total }}</td>
+                            <td>USER</td>
                         </tr>
                         @endforeach
                     </tbody>

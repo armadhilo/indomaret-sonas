@@ -84,7 +84,7 @@
                 <p style="text-align: center; font-size: .85rem"><b>Berita Acara Stock Opname Sementara</b><br>Tanggal SO : 08-03-2024</p>
                 <div style="margin: 0 0 40px 0">
                     <div style="float: left">
-                        <p style="margin-bottom: 5px;">Jenis Barang : 01 - Barang Baik</p>
+                        <p style="margin-bottom: 5px;">Jenis Barang : {{ $data[0]->lokasi }}</p>
                     </div>
                 </div>
                 <table style="border-collapse: collapse; margin-top:10px" class="table-border-outside table-center" cellpadding="2">
@@ -94,21 +94,22 @@
                             <th>NILAI LPP</th>
                             <th>NILAI SO</th>
                             <th>NILAI ADJ</th>
-                            <th>NILAI SEL???</th>
+                            <th>NILAI SEL</th>
                         </tr>
                     </thead>
                     <tbody>
+
                         <tr>
                             <td colspan="5" style="padding: 10px 0!important;font-size: .8rem;text-align: left">Departemen : <b>01</b> BREAKFEST FOOD</td>
                         </tr>
                         @foreach ($data as $item)
-                        <tr>
-                            <td style="text-align: left">{{ $loop->iteration . '123' }}</td>
-                            <td>{{ '123' }}</td>
-                            <td>{{ '123' }}</td>
-                            <td>{{ '123' }}</td>
-                            <td>{{ '123' }}</td>
-                        </tr>
+                            <tr>
+                                <td style="text-align: left">{{ $item->prd_kodekategoribarang .' '. $item->kat_namakategori }}</td>
+                                <td style="text-align: right">{{ $item->rphlpp }}</td>
+                                <td style="text-align: right">{{ $item->rphso }}</td>
+                                <td style="text-align: right">{{ $item->rphadj }}</td>
+                                <td style="text-align: right">{{ $item->rphsel }}</td>
+                            </tr>
                         @endforeach
                     </tbody>
                     <tfoot>

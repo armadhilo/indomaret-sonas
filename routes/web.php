@@ -91,18 +91,18 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'list-form-kkso'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::get('/pdf', [ReportController::class, 'reportListFormKkso']);
         });
 
         Route::group(['prefix' => 'register-kkso'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
-            
+            Route::get('/pdf', [ReportController::class, 'reportRegisterKkso1']);
+
         });
 
         Route::group(['prefix' => 'edit-list-kkso'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::get('/pdf', [ReportController::class, 'reportEditListKkso']);
 
         });
 
@@ -119,7 +119,7 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'ringkasan-baso'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::get('/pdf', [ReportController::class, 'reportRingkasanBaso']);
         });
 
         Route::group(['prefix' => 'daftar-item-adjustment'], function(){
@@ -129,17 +129,17 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'daftar-kkso-acost-0'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::get('/pdf', [ReportController::class, 'reportDafterKksoAcost']);
         });
 
         Route::group(['prefix' => 'daftar-master-lokasi-so'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::get('/pdf', [ReportController::class, 'reportDaftarMasterLokasiSo']);
         });
 
         Route::group(['prefix' => 'daftar-item-tidak-di-master'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::get('/pdf', [ReportController::class, 'reportDaftarItemBelumAdaDiMaster']);
         });
 
         Route::group(['prefix' => 'lokasi-rak-belum-di-so'], function(){

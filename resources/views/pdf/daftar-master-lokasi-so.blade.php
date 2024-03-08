@@ -73,7 +73,7 @@
                 </div>
                 <hr style="margin-top: 40px">
             </div>
-            
+
             <div class="body">
                 <p style="text-align: center; font-size: .85rem; margin-top: 0px"><b>DAFTAR MASTER LOKASI SO (STOCK OPNAME)</b></p>
                 <table border="1" style="border-collapse: collapse; margin-top:10px" class="table-center" cellpadding="2">
@@ -97,19 +97,19 @@
                     <tbody>
                         @foreach ($data as $item)
                         <tr>
-                            <td><b>123</b></td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
+                            <td><b>{{ $item->lso_prdcd }}</b></td>
+                            <td>{{ $item->prd_deskripsipanjang }}</td>
+                            <td>{{ $item->prd_kodedivisi }}</td>
+                            <td>{{ $item->prd_kodedepartement }}</td>
+                            <td>{{ $item->prd_kodekategoribarang }}</td>
+                            <td>{{ $item->lso_koderak }}</td>
+                            <td>{{ $item->lso_kodesubrak }}</td>
+                            <td>{{ $item->lso_tiperak }}</td>
+                            <td>{{ $item->lso_shelvingrak }}</td>
+                            <td>{{ $item->lso_lokasi }}</td>
+                            <td>{{ $item->ctn }}</td>
+                            <td>{{ $item->pcs }}</td>
+                            <td>{{ $item->lso_qty }}</td>
                         </tr>
                         @endforeach
                     </tbody>

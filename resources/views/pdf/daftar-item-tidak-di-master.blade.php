@@ -101,14 +101,14 @@
                     <tbody>
                         @foreach ($data as $item)
                         <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->lso_prdcd }}</td>
+                            <td>{{ $item->prd_deskripsipanjang }}</td>
+                            <td>{{ $item->satuan }}</td>
+                            <td>{{ $item->prd_kodetag }}</td>
+                            <td>{{ '1' }}</td>
+                            <td>{{ $item->st_avgcost }}</td>
+                            <td>{{ $item->total }}</td>
                         </tr>
                         @endforeach
                     </tbody>

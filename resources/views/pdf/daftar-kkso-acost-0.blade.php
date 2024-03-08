@@ -71,7 +71,7 @@
                         <p style="text-align: right;"> Hal : <span class="page-number"></span></p>
                     </div>
                 </div>
-                <p style="text-align: center; font-size: .85rem; margin-top: 30px"><b>KKSO dengan AVG Cost 0</b><br>Tanggal SO : 08-03-2024<br>Jenis Barang : Jenis Barang : 01 - Barang Baik</p>
+                <p style="text-align: center; font-size: .85rem; margin-top: 30px"><b>KKSO dengan AVG Cost 0</b><br>Tanggal SO : 08-03-2024<br>Jenis Barang : Jenis Barang : {{ $data[0]->lokasi }}</p>
                 <hr style="margin-top: 10px">
             </div>
 
@@ -91,13 +91,13 @@
                     <tbody>
                         @foreach ($data as $item)
                         <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
+                            <td>{{ $item->lso_nourut }}</td>
+                            <td>{{ $item->lso_prdcd }}</td>
+                            <td>{{ $item->prd_deskripsipanjang }}</td>
+                            <td>{{ $item->satuan }}</td>
+                            <td>{{ $item->ctn }}</td>
+                            <td>{{ $item->pcs }}</td>
+                            <td>{{ $item->lso_qty }}</td>
                         </tr>
                         @endforeach
                     </tbody>

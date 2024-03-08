@@ -36,56 +36,68 @@ class MonitoringSoController extends Controller
 
     public function getMonitoring(){
         //! TOKO
-        // sql = "select ROUND((total_so / total_lokasi) * 100, 2) "
-        // sql += "|| '%' || '  (' || total_so || '/' || total_lokasi || ')' progress "
-        // sql += "FROM (SELECT   lso_koderak, "
-        // sql += "COUNT(1) total_lokasi, "
-        // sql += "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so "
-        // sql += "FROM tbtr_lokasi_so, tbmaster_setting_so "
-        // sql += "WHERE lso_tglso = mso_tglso    "
-        // sql += "AND Lso_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') "
+        $query = '';
+        $query .= "select ROUND((total_so / total_lokasi) * 100, 2) ";
+        $query .= "|| '%' || '  (' || total_so || '/' || total_lokasi || ')' progress ";
+        $query .= "FROM (SELECT   lso_koderak, ";
+        $query .= "COUNT(1) total_lokasi, ";
+        $query .= "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso    ";
+        $query .= "AND Lso_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') ";
+        $data['toko'] = DB::select($query);
         //* _toko = dr.Item("PROGRESS").ToString
 
         //! DETAIL TOKO
-        // sql = "select lso_koderak, ROUND((total_so / total_lokasi) * 100, 2) "
-        // sql += "|| '%' || '  (' || nvl(total_so,0) || '/' || total_lokasi || ')' progress "
-        // sql += "FROM (SELECT   lso_koderak, "
-        // sql += "COUNT(1) total_lokasi, "
-        // sql += "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so "
-        // sql += "FROM tbtr_lokasi_so, tbmaster_setting_so "
-        // sql += "WHERE lso_tglso = mso_tglso    "
-        // sql += "AND Lso_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' "
-        // sql += "GROUP BY lso_koderak "
-        // sql += "ORDER BY lso_koderak) "
+        $query = '';
+        $query .= "select lso_koderak, ROUND((total_so / total_lokasi) * 100, 2) ";
+        $query .= "|| '%' || '  (' || nvl(total_so,0) || '/' || total_lokasi || ')' progress ";
+        $query .= "FROM (SELECT   lso_koderak, ";
+        $query .= "COUNT(1) total_lokasi, ";
+        $query .= "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso    ";
+        $query .= "AND Lso_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' ";
+        $query .= "GROUP BY lso_koderak ";
+        $query .= "ORDER BY lso_koderak) ";
+        $data['detail_toko'] = DB::select($query);
         //* nod.Name = dr.Item("LSO_KODERAK").ToString
         //*         nod.Text = dr.Item("LSO_KODERAK").ToString.PadRight(7) & _
         //*                     " " & dr.Item("PROGRESS").ToString
 
         //! GUDANG
-        // sql = "select ROUND((total_so / total_lokasi) * 100, 2) "
-        // sql += "|| '%' || '  (' || total_so || '/' || total_lokasi || ')' progress "
-        // sql += "FROM (SELECT   lso_koderak, "
-        // sql += "COUNT(1) total_lokasi, "
-        // sql += "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so "
-        // sql += "FROM tbtr_lokasi_so, tbmaster_setting_so "
-        // sql += "WHERE lso_tglso = mso_tglso    "
-        // sql += "AND Lso_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') "
+        $query = '';
+        $query .= "select ROUND((total_so / total_lokasi) * 100, 2) ";
+        $query .= "|| '%' || '  (' || total_so || '/' || total_lokasi || ')' progress ";
+        $query .= "FROM (SELECT   lso_koderak, ";
+        $query .= "COUNT(1) total_lokasi, ";
+        $query .= "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso    ";
+        $query .= "AND Lso_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') ";
+        $data['gudang'] = DB::select($query);
+
         //* _toko = dr.Item("PROGRESS").ToString
 
 
         //! DETAIL GUDANG
-        // sql = "select lso_koderak, ROUND((total_so / total_lokasi) * 100, 2) "
-        // sql += "|| '%' || '  (' || total_so || '/' || total_lokasi || ')' progress "
-        // sql += "FROM (SELECT   lso_koderak, "
-        // sql += "COUNT(1) total_lokasi, "
-        // sql += "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so "
-        // sql += "FROM tbtr_lokasi_so, tbmaster_setting_so "
-        // sql += "WHERE lso_tglso = mso_tglso   "
-        // sql += "AND Lso_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' "
-        // sql += "GROUP BY lso_koderak "
-        // sql += "ORDER BY lso_koderak) "
+        $query = '';
+        $query .= "select lso_koderak, ROUND((total_so / total_lokasi) * 100, 2) ";
+        $query .= "|| '%' || '  (' || total_so || '/' || total_lokasi || ')' progress ";
+        $query .= "FROM (SELECT   lso_koderak, ";
+        $query .= "COUNT(1) total_lokasi, ";
+        $query .= "SUM(CASE WHEN lso_modify_by IS NULL THEN 0 ELSE 1 END) total_so ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso   ";
+        $query .= "AND Lso_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' ";
+        $query .= "GROUP BY lso_koderak ";
+        $query .= "ORDER BY lso_koderak) ";
+        $data['detail_gudang'] = DB::select($query);
+
         //* nod.Name = dr.Item("LSO_KODERAK").ToString
         //* nod.Text = dr.Item("LSO_KODERAK").ToString.PadRight(7) & _
         //*            " " & dr.Item("PROGRESS").ToString
+
+        return $data;
     }
 }

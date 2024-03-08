@@ -54,6 +54,11 @@
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Proses BA SO</span></a>
     </li>
+    <li class="nav-item @if($sub_url == 'report') active @endif">
+        <a class="nav-link" href="{{ url('/report') }}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Report</span></a>
+    </li>
     {{-- <li class="nav-item">
         <a class="nav-link" href="{{ url('/reset-so') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>

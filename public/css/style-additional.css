@@ -41,6 +41,56 @@ label{
     text-align: center;
 }
 
+.list-report{
+    list-style: none;
+    margin: 0 !important;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    gap: 5px;
+    height: calc(100vh - 205px);
+}
+
+.list-report li{
+    width: 100%!important;
+    flex: 1;
+    text-align: center;
+    list-style: none;
+    margin: 0 !important;
+    padding: 0;
+    border: 1px solid #cbcbcb;
+}
+
+.fw-semibold{
+    font-weight: 600;
+}
+
+.list-report li a{
+    vertical-align: middle!important;
+    vertical-align: -webkit-baseline-middle;
+    text-decoration: none!important;
+    color: white;
+    background-color: #517ec1;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.list-report li a:hover{
+    cursor: pointer;
+    background-color: #3165b2;
+}
+
+.list-report li a.active{
+    background-color: #284e87;
+}
+
+
+
 .btn{
     font-size: 14px;
 }

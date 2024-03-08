@@ -17,8 +17,9 @@ use App\Http\Requests\ReportRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
-class SetLimitSoController extends Controller
+class ReportController extends Controller
 {
     private $FlagTahap;
     private $flagTransferLokasi;
@@ -26,7 +27,91 @@ class SetLimitSoController extends Controller
         DatabaseConnection::setConnection(session('KODECABANG'), "PRODUCTION");
     }
 
-    public function index(){
+    private function processRoutePrefix($route){
+        if (strpos($route, 'report/') === 0) {
+            $route = substr($route, 7);
+        }
+        
+        if ($route === "/report") {
+            $route = "index";
+        }
+
+        return $route;
+    }
+
+        public function dummyData(Request $request){
+        $data = array(
+            array(
+                "lso_tglso" => "2023-12-11 00:00:00",
+                "lso_koderak" => "111",
+                "lso_kodesubrak" => "111",
+                "lso_tiperak" => "111",
+                "lso_shelvingrak" => "111",
+                "lso_nourut" => 1,
+                "lso_prdcd" => "2017820",
+                "lokasi" => "01 - BARANG BAIK",
+                "prd_deskripsipanjang" => "KELLOGGS CEREAL FROOT LOOPS PCH 55g",
+                "satuan" => "PCS/1",
+                "prd_kodetag" => null,
+                "lso_tmp_qtyctn" => null,
+                "lso_tmp_qtypcs" => null,
+            ),
+            array(
+                "lso_tglso" => "2023-12-11 00:00:00",
+                "lso_koderak" => "111",
+                "lso_kodesubrak" => "111",
+                "lso_tiperak" => "111",
+                "lso_shelvingrak" => "111",
+                "lso_nourut" => 1,
+                "lso_prdcd" => "2017820",
+                "lokasi" => "01 - BARANG BAIK",
+                "prd_deskripsipanjang" => "RHINO STICKER PUFFY  PCK ",
+                "satuan" => "PCS/1",
+                "prd_kodetag" => " ",
+                "lso_tmp_qtyctn" => null,
+                "lso_tmp_qtypcs" => null,
+            ),
+            array(
+                "lso_tglso" => "2023-12-11 00:00:00",
+                "lso_koderak" => "111",
+                "lso_kodesubrak" => "111",
+                "lso_tiperak" => "111",
+                "lso_shelvingrak" => "111",
+                "lso_nourut" => 1,
+                "lso_prdcd" => "2017820",
+                "lokasi" => "01 - BARANG BAIK",
+                "prd_deskripsipanjang" => "RHINO STICKER PUFFY  PCK ",
+                "satuan" => "PCS/1",
+                "prd_kodetag" => " ",
+                "lso_tmp_qtyctn" => null,
+                "lso_tmp_qtypcs" => null,
+            ),
+            array(
+                "lso_tglso" => "2023-12-11 00:00:00",
+                "lso_koderak" => "111",
+                "lso_kodesubrak" => "111",
+                "lso_tiperak" => "111",
+                "lso_shelvingrak" => "111",
+                "lso_nourut" => 1,
+                "lso_prdcd" => "2017820",
+                "lokasi" => "01 - BARANG BAIK",
+                "prd_deskripsipanjang" => "*20016864 BABY WIPES NATURALLY REFRESHING PCK 2x/3x45'S",
+                "satuan" => "PCS/1",
+                "prd_kodetag" => "X",
+                "lso_tmp_qtyctn" => null,
+                "lso_tmp_qtypcs" => null,
+            )
+        );
+
+        $currentView = 'pdf.' .  $this->processRoutePrefix($request->route()->getPrefix());
+        $data['data'] = $data;
+
+        $pdf = PDF::loadView($currentView, $data);
+        return $pdf->stream();
+
+    }
+
+    public function index(Request $request){
 
         $dtCek = DB::select("SELECT DATE_TRUNC('DAY',MSO_TGLSO) MSO_TGLSO, MSO_FLAG_CREATELSO FROM TBMASTER_SETTING_SO ORDER BY MSO_TGLSO DESC");
         if(count($dtCek) == 0){
@@ -34,10 +119,13 @@ class SetLimitSoController extends Controller
         }
 
         $data['TanggalSO'] = $dtCek[0]->mso_tglso;
-        $this->flagTransferLokasi = $dtCek[0]->mso_flag_createlso;
+        $data['flagTransferLokasi'] = $dtCek[0]->mso_flag_createlso;
+        
+        $currentView = $this->processRoutePrefix($request->route()->getPrefix());
 
-        return view('proses-ba-so', $data);
+        return view('report.' . $currentView, $data);
     }
+
 
     public function reportListFormKkso(ReportRequest $request){
 
@@ -45,31 +133,34 @@ class SetLimitSoController extends Controller
         $query .= "SELECT lso_tglso, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, ";
         $query .= "lso_prdcd, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi, prd_deskripsipanjang, prd_unit || '/' || prd_frac satuan, prd_kodetag, lso_tmp_qtyctn, lso_tmp_qtypcs ";
         $query .= "FROM tbtr_lokasi_so, tbmaster_prodmast ";
-        $query .= "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" & $request->koderak1 & "' and '" & $request->koderak2 & "' ";
-        $query .= "AND LSO_TGLSO = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
-        $query .= "AND LSO_LOKASI = '" & $request->jenis_barang & "'  ";
-        $query .= "AND lso_kodesubrak between '" & $request->subrak1 & "' and '" & $request->subrak2 & "' ";
-        $query .= "AND lso_tiperak between '" & $request->tipe1 & "' and '" & $request->tipe2 & "' ";
-        $query .= "AND lso_shelvingrak between '" & $request->shelving1 & "' and '" & $request->shelving2 & "' ";
-        $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
-        $query .= "AND coalesce(lso_flagsarana, 'K') = 'K' ";
+        // $query .= "WHERE coalesce(lso_recid,'0') <> '1' and lso_koderak between '" & $request->koderak1 & "' and '" & $request->koderak2 & "' ";
+        // $query .= "AND LSO_TGLSO = TO_DATE('" & $request->tanggal_start_so & "','DD-MM-YYYY') ";
+        // $query .= "AND LSO_LOKASI = '" & $request->jenis_barang & "'  ";
+        // $query .= "AND lso_kodesubrak between '" & $request->subrak1 & "' and '" & $request->subrak2 & "' ";
+        // $query .= "AND lso_tiperak between '" & $request->tipe1 & "' and '" & $request->tipe2 & "' ";
+        // $query .= "AND lso_shelvingrak between '" & $request->shelving1 & "' and '" & $request->shelving2 & "' ";
+        // $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR ";
+        // $query .= "AND coalesce(lso_flagsarana, 'K') = 'K' ";
         if($this->flagTransferLokasi == 'Y'){
             $query .= "AND LSO_FLAGLIMIT='Y' ";
         }
-        $query .= "Order By lso_lokasi, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut  ";
+        $query .= "Order By lso_lokasi, lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut  LIMIT 10";
         $data = DB::select($query);
 
         //! UPDATE
-        foreach($data as $item){
-            DB::table('tbtr_lokasi_so')
-                ->whereDate('lso_tglso', $request->tanggal_start_so)
-                ->where('lso_prdcd', $item->lso_prdcd)
-                ->update(['lso_flagkkso' => 'Y']);
-        }
+        // foreach($data as $item){
+        //     DB::table('tbtr_lokasi_so')
+        //         ->whereDate('lso_tglso', $request->tanggal_start_so)
+        //         ->where('lso_prdcd', $item->lso_prdcd)
+        //         ->update(['lso_flagkkso' => 'Y']);
+        // }
+
+        
 
         $data['data'] = $data;
 
-        return $data;
+        $pdf = PDF::loadView('pdf.register-kkso-2', $data);
+        return $pdf->stream();
     }
 
     public function reportRegisterKkso1(ReportRequest $request){

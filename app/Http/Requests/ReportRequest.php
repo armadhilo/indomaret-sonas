@@ -25,7 +25,7 @@ class ReportRequest extends FormRequest
     public function rules()
     {
         return [
-            'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
+            // 'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
             'koderak1' => ['nullable'],
             'subrak1' => ['nullable','min:2'],
             'tiperak1' => ['nullable'],
@@ -34,7 +34,7 @@ class ReportRequest extends FormRequest
             'subrak2' => ['nullable','min:2'],
             'tiperak2' => ['nullable'],
             'shelving2' => ['nullable'],
-            'jenis_barang' => ['required','in:B,T,R'],
+            // 'jenis_barang' => ['required','in:B,T,R'],
         ];
     }
 

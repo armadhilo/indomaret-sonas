@@ -6,8 +6,10 @@ use App\Http\Controllers\InputKksoController;
 use App\Http\Controllers\InputLokasiController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProsesBaSoController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingJalur;
 use App\Http\Controllers\SettingJalurHHController;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -81,6 +83,81 @@ Route::middleware(['mylogin'])->group(function () {
         Route::group(['prefix' => 'action'], function(){
             Route::post('/draft-action', [ProsesBaSoController::class, 'action']);
             Route::post('/proses-ba-so', [ProsesBaSoController::class, 'prosesBaSo']);
+        });
+    });
+
+    Route::group(['prefix' => 'report'], function(){
+        Route::get('/', [ReportController::class, 'index']);
+
+        Route::group(['prefix' => 'list-form-kkso'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
+        });
+
+        Route::group(['prefix' => 'register-kkso'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            
+        });
+
+        Route::group(['prefix' => 'edit-list-kkso'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
+
+        });
+
+        Route::group(['prefix' => 'register-kkso-2'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+            Route::get('/pdf', [ReportController::class, 'dummyData']);
+
+        });
+
+        Route::group(['prefix' => 'perincian-baso'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'ringkasan-baso'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'daftar-item-adjustment'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'daftar-kkso-acost-0'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'daftar-master-lokasi-so'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'daftar-item-tidak-di-master'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'lokasi-rak-belum-di-so'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'inquiry-plano-sonas'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'list'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'cetak-draft-lhso'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'list'], function(){
+            Route::get('/', [ReportController::class, 'index']);
+        });
+
+        Route::group(['prefix' => 'lokasi-so'], function(){
+            Route::get('/', [ReportController::class, 'index']);
         });
     });
 });

@@ -107,8 +107,8 @@ class ResetSoController extends Controller
         $query .= "      sop_prdcd, ";
         $query .= "      sop_lokasi, ";
         $query .= "      sop_qtyso + coalesce(qty_adj, 0) - sop_qtylpp as qty, ";
-        $query .= "      case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end as acost,";
-        $query .= "      sop_qtyso + coalesce(qty_adj, 0) - sop_qtylpp * case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end as total";
+        $query .= "      case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end as acost, ";
+        $query .= "      sop_qtyso + coalesce(qty_adj, 0) - sop_qtylpp * case when prd_unit = 'KG' then sop_newavgcost / 1000 else sop_newavgcost end as total ";
         $query .= "    FROM ";
         $query .= "    ( ";
         $query .= "      SELECT ";
@@ -130,7 +130,7 @@ class ResetSoController extends Controller
         $query .= "         AND sop_tglso = adj_tglso ";
         $query .= "         AND sop_prdcd = adj_prdcd ";
         $query .= "         AND sop_lokasi = adj_lokasi ";
-        $query .= "         AND sop_tglso = to_date('" . $TglSO . "', 'DD-MM-YYYY')";
+        $query .= "         AND DATE_TRUNC('DAY',lso_tglso) = '" . $TglSO . "' ";
         $query .= "     LEFT JOIN ";
         $query .= "     (select prd_unit, prd_prdcd ";
         $query .= "      from tbmaster_prodmast ";

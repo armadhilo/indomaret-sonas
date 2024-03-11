@@ -50,7 +50,7 @@ class InputKksoController extends Controller
         $query = '';
         $query .= "SELECT LSO_NOURUT, LSO_JENISRAK, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, LSO_QTY, LSO_TMP_QTYCTN, LSO_TMP_QTYPCS, coalesce(ST_AVGCOST, 0) AS ST_AVGCOST, LSO_MODIFY_BY ";
         $query .= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI AND LSO_KODEIGR = ST_KODEIGR, TBMASTER_PRODMAST ";
-        // $query .= "WHERE TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "' ";
+        // $query .= "WHERE DATE_TRUNC('DAY',lso_tglso) = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "' ";
         $query .= "WHERE LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' ";
         if($this->flagCopyLokasi == 'Y'){
             $query .= "AND (coalesce(LSO_FLAGLIMIT, 'N') = 'Y' OR LSO_LOKASI = '02' OR LSO_LOKASI = '03') ";
@@ -169,7 +169,7 @@ class InputKksoController extends Controller
                 $query .= "LSO_TIPERAK = '" . $TipeRak . "' AND ";
                 $query .= "LSO_SHELVINGRAK = '" . $Shelving . "' AND ";
                 $query .= "LSO_NOURUT = '" . $NoUrut . "' AND ";
-                $query .= "TO_CHAR(LSO_TGLSO, 'DD-MM-YYYY') = '" . $request->tanggal_start_so . "' ";
+                $query .= "DATE_TRUNC('DAY',lso_tglso) = '" . $request->tanggal_start_so . "' ";
 
                 $firstCharacter = strtoupper(substr($KodeRak, 0, 1));
 

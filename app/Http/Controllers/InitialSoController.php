@@ -317,7 +317,7 @@ class InitialSoController extends Controller
                     UPDATE tbtr_lokasi_so
                     set lso_tmp_qtyctn = lso_qty / (select prd_frac from tbmaster_prodmast where prd_prdcd = lso_prdcd),
                     lso_tmp_qtypcs = mod(lso_qty, (select prd_frac from tbmaster_prodmast where prd_prdcd = lso_prdcd)) where
-                    lso_tglso = TO_DATE('" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "', 'DD-MM-YYYY') and coalesce(lso_jenisrak, 'N') <> 'T'
+                    DATE_TRUNC('DAY',lso_tglso) = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d H:i:s') . "' and coalesce(lso_jenisrak, 'N') <> 'T'
                 ");
 
                 return ApiFormatter::success(200, $procedure);

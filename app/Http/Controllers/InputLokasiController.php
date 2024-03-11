@@ -61,9 +61,9 @@ class InputLokasiController extends Controller
         $dtCek = DB::table('tbtr_lokasi_so')
             ->select('lso_lokasi')
             ->where('lso_koderak', $request->kode_rak)
-            ->whereRaw("to_char(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('d-m-Y') . "'")
+            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) = '" . Carbon::parse($request->tanggal_start_so)->format('d-m-Y') . "'")
             ->first();
-    
+
         if(!empty($dtCek)){
             if($dtCek->lso_lokasi == '01' &&  $request->jenis_barang == 'Baik'){
                 return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Baik');
@@ -73,7 +73,7 @@ class InputLokasiController extends Controller
                 return ApiFormatter::error(400, 'Kode Rak sudah terisi barang Rusak');
             }
         }
-        
+
         //? akan buka halaman baru untuk menambah produk dan daftar lokas
         return ApiFormatter::success(200, 'Lokasi SO Berhasil Ditambahkan..!', $request);
     }
@@ -93,7 +93,7 @@ class InputLokasiController extends Controller
                 'lso_tiperak' => $request->tipe_rak,
                 'lso_shelvingrak' => $request->shelving_rak,
             ])
-            ->whereRaw("TO_CHAR(lso_tglso, 'DD-MM-YYYY') = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "'")
+            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) = '" . Carbon::parse($request->tanggal_start_so)->format('Y-m-d') . "'")
             ->first();
 
         return ApiFormatter::success(200, 'Berhasil menampilkan last number', $data);

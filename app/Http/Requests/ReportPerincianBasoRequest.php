@@ -35,8 +35,8 @@ class ReportPerincianBasoRequest extends FormRequest
             'plu1' => ['nullable'],
             'plu2' => ['nullable'],
             'jenis_barang' => ['required','in:B,T,R'],
-            'selisih_so' => ['required','in:1,2,3'],
-            'check_rpt_audit' => ['required','in:0,1'],
+            'selisih_so' => ['nullable','in:1,2,3'],
+            'check_rpt_audit' => ['nullable','in:0,1'],
         ];
     }
 
@@ -66,7 +66,7 @@ class ReportPerincianBasoRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'code' => 400,
             'errors' => $array,
-            'message' => 'Input validation error'
+            'message' => 'Terdapat Input yang belum diisi',
         ], 400));
     }
 }

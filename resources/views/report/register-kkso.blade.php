@@ -43,48 +43,49 @@
                 @include('layouts.report-menu')
             </div>
             <div class="col-md-5 col-lg-6 offset-1">
-                <div class="card shadow mb-4 vertical-center w-100">
-                    <div class="card-body">
+                <div class="card shadow mb-4 vertical-center w-100" id="report_container">
+                    <div class="card-body" id="report_content">
                         <div id="header_tb">
                             <h5 class="m-0">Tanda Terima KKSO</h5>
                         </div>
-                        <form id="form_report">
+                        <form id="form_report" method="POST" action="/report/register-kkso/show-pdf">
+                            <input type="hidden" name="tanggal_start_so" value="{{ $TanggalSO }}">
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode_rak">Kode Rak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="koderak1">
                                     S/D
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="koderak2">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode_subrak">Kode Sub Rak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="subrak1">
                                     S/D
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="subrak2">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="tipe_rak">Tipe Rak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="tipe1">
                                     S/D
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="tipe2">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode_shelving">Kode Shelving <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="shelving1">
                                     S/D
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="shelving2">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="jenis-barang">Jenis Barang <span>:</span></label>
+                                <label class="label-form" for="jenis_barang">Jenis Barang <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" id="jenis_barang" name="jenis-barang" class="form-control" style="width: 50px">
+                                    <input type="text" id="jenis_barang" name="jenis_barang" class="form-control" style="width: 70px">
                                     <p class="m-0">[ B - Baik / T - Retur / R - Rusak ]</p>
                                 </div>
                             </div>
@@ -101,18 +102,5 @@
 @endsection
 
 @push('page-script')
-<script>
-    $(document).ready(function(){
-        $('#jenis_barang').on('input', function(){
-            var words = $(this).val().split(' ')[0];
-            if (words.length > 1) {
-                $(this).val(words[0]);
-            }
-            // Capitalize the input
-            $(this).val($(this).val().charAt(0).toUpperCase() + $(this).val().slice(1));
-        });
-    });
-
-</script>
 <script src="{{ asset('js/report-action.js') }}"></script>
 @endpush

@@ -43,24 +43,31 @@
                 @include('layouts.report-menu')
             </div>
             <div class="col-md-5 col-lg-6 offset-1">
-                <div class="card shadow mb-4 vertical-center w-100">
-                    <div class="card-body">
+                <div class="card shadow mb-4 vertical-center w-100" id="report_container">
+                    <div class="card-body" id="report_content">
                         <div id="header_tb">
                             <h5 class="m-0">Register KKSO II</h5>
                         </div>
-                        <form id="form_report">
+                        <form id="form_report" method="POST" action="/report/register-kkso-2/show-pdf">
+                            <input type="hidden" name="tanggal_start_so" value="{{ $TanggalSO }}">
                             <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="lokasi">Lokasi <span>:</span></label>
-                                <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
-                                    S/D
-                                    <input type="text" class="form-control">
+                                <label class="label-form" style="width: 115px; flex-shrink: 0;" for="lokasi">Lokasi <span>:</span></label>
+                                <div class="d-flex align-items-center">
+                                    <input type="text" class="form-control" style="border-radius: .35rem 0 0 .35rem" name="koderak1">
+                                    <input type="text" class="form-control border-radius-none" name="subrak1">
+                                    <input type="text" class="form-control border-radius-none" name="tipe1">
+                                    <input type="text" class="form-control" style="border-radius: 0 .35rem .35rem 0" name="shelving1">
+                                    <span style="margin: 0 15px">S/D</span>
+                                    <input type="text" class="form-control" style="border-radius: .35rem 0 0 .35rem" name="koderak2">
+                                    <input type="text" class="form-control border-radius-none" name="subrak2">
+                                    <input type="text" class="form-control border-radius-none" name="tipe2">
+                                    <input type="text" class="form-control" style="border-radius: 0 .35rem .35rem 0" name="shelving2">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="jenis-barang">Jenis Barang <span>:</span></label>
+                                <label class="label-form" for="jenis_barang">Jenis Barang <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" id="jenis_barang" name="jenis-barang" class="form-control" style="width: 50px">
+                                    <input type="text" id="jenis_barang" name="jenis_barang" class="form-control" style="width: 50px">
                                     <p class="m-0">[ B - Baik / T - Retur / R - Rusak ]</p>
                                 </div>
                             </div>
@@ -77,17 +84,5 @@
 @endsection
 
 @push('page-script')
-<script>
-    $(document).ready(function(){
-        $('#jenis_barang').on('input', function(){
-            var words = $(this).val().split(' ')[0];
-            if (words.length > 1) {
-                $(this).val(words[0]);
-            }
-            // Capitalize the input
-            $(this).val($(this).val().charAt(0).toUpperCase() + $(this).val().slice(1));
-        });
-    });
-</script>
 <script src="{{ asset('js/report-action.js') }}"></script>
 @endpush

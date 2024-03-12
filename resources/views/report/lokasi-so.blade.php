@@ -43,23 +43,24 @@
                 @include('layouts.report-menu')
             </div>
             <div class="col-md-5 col-lg-6 offset-1">
-                <div class="card shadow mb-4 vertical-center w-100">
-                    <div class="card-body">
+                <div class="card shadow mb-4 vertical-center w-100" id="report_container">
+                    <div class="card-body" id="report_content">
                         <div id="header_tb">
                             <h5 class="m-0">Lokasi SO</h5>
                         </div>
-                        <form id="form_report">
+                        <form id="form_report" method="POST" action="/report/lokasi-so/show-pdf">
+                            <input type="hidden" name="tanggal_start_so" value="{{ $TanggalSO }}">
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode">Kode Rak dan SubRak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control" style="width: 180px">
+                                    <input type="text" class="form-control" name="raksubrak" style="width: 180px">
                                     <p class="m-0 fw-semibold">[ R01.01 / Kosong = All ]</p>
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="sarana_so">Sarana SO <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control" id="sarana_so" style="width: 180px">
+                                    <input type="text" class="form-control" name="sarana" id="sarana_so" style="width: 180px">
                                     <p class="m-0 fw-semibold">[ H / K ]</p>
                                 </div>
                             </div>
@@ -81,14 +82,16 @@
 @push('page-script')
 <script>
     $(document).ready(function(){
-        $('#sarana_so').on('input', function(){
-            var words = $(this).val().split(' ')[0];
-            if (words.length > 1) {
-                $(this).val(words[0]);
+        $('#report_content').on('input', "#sarana_so", function(){
+            var input = $(this).val().trim(); 
+            
+            // Ensure input consists of only 'H' or 'K'
+            if (!/^[HKhk]$/.test(input)) {
+                $(this).val('');
+            } else {
+                $(this).val(input.toUpperCase());
             }
-            // Capitalize the input
-            $(this).val($(this).val().charAt(0).toUpperCase() + $(this).val().slice(1));
-        });
+        })
     });
 </script>
 

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Requests;
+
+use App\Helper\ApiFormatter;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
@@ -25,16 +27,16 @@ class ReportRequest extends FormRequest
     public function rules()
     {
         return [
-            // 'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
+            'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
             'koderak1' => ['nullable'],
             'subrak1' => ['nullable','min:2'],
-            'tiperak1' => ['nullable'],
+            'tipe1' => ['nullable'],
             'shelving1' => ['nullable'],
             'koderak2' => ['nullable'],
             'subrak2' => ['nullable','min:2'],
-            'tiperak2' => ['nullable'],
+            'tipe2' => ['nullable'],
             'shelving2' => ['nullable'],
-            // 'jenis_barang' => ['required','in:B,T,R'],
+            'jenis_barang' => ['required','in:B,T,R'],
         ];
     }
 
@@ -81,10 +83,11 @@ class ReportRequest extends FormRequest
                 ];
             }
         }
+
         throw new HttpResponseException(response()->json([
             'code' => 400,
             'errors' => $array,
-            'message' => 'Input validation error'
+            'message' => 'Terdapat Input yang belum diisi'
         ], 400));
     }
 }

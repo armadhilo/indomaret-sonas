@@ -67,6 +67,27 @@ label{
     font-weight: 600;
 }
 
+.border-radius-none{
+    border-radius: unset!important;
+}
+
+#report_content.display-pdf{
+    height: calc(100vh - 120px);
+}
+
+.header-pdf{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.header-pdf p {
+    font-size: 24px;
+    color: #012970;
+    font-weight: 600;
+    margin: 0;
+}
+
 .list-report li a{
     vertical-align: middle!important;
     vertical-align: -webkit-baseline-middle;

@@ -43,40 +43,40 @@
                 @include('layouts.report-menu')
             </div>
             <div class="col-md-5 col-lg-6 offset-1">
-                <div class="card shadow mb-4 vertical-center w-100">
-                    <div class="card-body">
+                <div class="card shadow mb-4 vertical-center w-100" id="report_container">
+                    <div class="card-body" id="report_content">
                         <div id="header_tb">
                             <h5 class="m-0">Daftar Item Yang Belum di SO</h5>
                         </div>
-                        <form id="form_report">
+                        <form id="form_report" method="POST" action="/report/lokasi-rak-belum-di-so/show-pdf"> 
                             <div class="form-group d-flex align-items-center">
                                 <label for="tanggal_start_so" class="label-form">Tanggal SO <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px; width: 480px">
-                                    <input type="date" class="form-control">
+                                    <input type="date" class="form-control" name="tanggal_start_so" value="{{ $TanggalSO }}">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode_rak">Kode Rak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="koderak1">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode_subrak">Kode Sub Rak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="subrak1">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="tipe_rak">Tipe Rak <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="tipe1">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kode_shelving">Kode Shelving <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="shelving1">
                                 </div>
                                 <div id="header_tb" style="border: 0; border-radius: 5px; margin-bottom: 0; padding: 6px; border: unset!important; margin-left: 25px;">
                                     <p class="m-0" style="font-weight: 700">*Kosong = ALL</p>

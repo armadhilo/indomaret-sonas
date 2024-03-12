@@ -14,8 +14,22 @@ function cancelAction(){
     });
 }
 
-$("#form_report").submit(function(e){
+$('#report_content').on('input', "#jenis_barang", function(){
+    var input = $(this).val().trim(); 
+    var words = input.split(' ');
+
+    if (!/^[BTR]$/i.test(input)) {
+        $(this).val('');
+    } else {
+        $(this).val(input.toUpperCase());
+    }
+});
+
+let formReportHTML = '';
+let currentRequestData = '';
+$("#report_content").on("submit", "#form_report", function(e) {
     e.preventDefault();
+    $('.form-control').removeClass('is-invalid');
     let this_form = this;
     Swal.fire({
         title: `Yakin ingin melanjutkan ?`,
@@ -27,34 +41,76 @@ $("#form_report").submit(function(e){
     })
     .then((result) => {
         if (result.value) {
-            // $('#modal_loading').modal('show');
-                    var currentURL = window.location.href;
-            
-            // Append "/pdf" to the current URL
-            var pdfURL = currentURL + "/pdf";
-            
-            // Open the PDF URL in a new tab or window
-            window.open(pdfURL, '_blank');
-            // $.ajax({
-            //     url: $(this).attr('action'),
-            //     type: $(this).attr('method'),
-            //     data: $(this).serialize(),
-            //     success: function(response) {
-            //         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-            //         Swal.fire('Good job!',response.message,'success').then(function(){
-            //             window.location.href = '/report/';
-            //         });
-            //     }, error: function(jqXHR, textStatus, errorThrown) {
-            //         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-            //         Swal.fire({
-            //             text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
-            //                 ? jqXHR.responseJSON.message
-            //                 : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
-            //             icon: "error"
-            //         });
-            //     }
-            // });
+            $('#modal_loading').modal('show');
+            currentRequestData = $(this).serialize();
+            $.ajax({
+                url: $(this).attr('action'),
+                type: $(this).attr('method'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                    var pdfContent = response.pdf;
+                    formReportHTML = $('#report_content').html();
+                    $('#report_container').removeClass('vertical-center');
+                    $('#report_content').addClass('display-pdf');
+                    $('#report_content').html(`
+                        <div class="header-pdf">
+                            <p>DISPLAY REPORT</p>
+                            <div>
+                                <button class="btn btn-danger mr-2" onclick="cancelShowPDF()">Cancel</button>
+                                <button class="btn btn-warning" onclick="openInNewTabPDF()">Open in New Tab</button>
+                            </div>
+                        </div>
+                        <div style="height: calc(100% - 55px); border: 6px solid #323639;">
+                            <object data="data:application/pdf;base64,${pdfContent}" type="application/pdf" style="width:100%;height:100%;"></object>
+                        </div>
+                    `);
+                },error: function(jqXHR, textStatus, errorThrown) {
+                    setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                    Swal.fire({
+                        text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
+                            ? jqXHR.responseJSON.message
+                            : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                        icon: "error"
+                    });
+                    currentRequestData = '';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.code === 400){
+                        Object.keys(jqXHR.responseJSON.errors).forEach(function (key) {
+                            var responseError = jqXHR.responseJSON.errors[key];
+                            var elem_name = $(this_form).find('[name=' + responseError['field'] + ']');
+                            elem_name.addClass('is-invalid');
+                        });
+                    }
+                }
+            });
         }
     });
-
 });
+
+function cancelShowPDF(){
+    Swal.fire({
+        title: `Yakin ?`,
+        text: 'Yakin ingin kembali ke form input...?',
+        icon: 'warning',
+        showCancelButton: true,
+        cancelButtonText: 'Tidak',
+        confirmButtonText: 'Ya, Kembali'
+    })
+    .then((result) => {
+        if (result.value) {
+            $('#report_content').html(formReportHTML);
+            $('#report_container').addClass('vertical-center');
+            $('#report_content').removeClass('display-pdf');
+            formReportHTML = '';
+            currentRequestData = '';
+        }
+    });
+}
+
+function openInNewTabPDF(){
+    var currentURL = window.location.href;
+    var pdfURL = currentURL + "/pdf";
+
+    pdfURL += '?' + currentRequestData;
+    window.open(pdfURL, '_blank');
+}

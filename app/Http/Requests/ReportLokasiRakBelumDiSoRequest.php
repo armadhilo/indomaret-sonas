@@ -30,19 +30,11 @@ class ReportLokasiRakBelumDiSoRequest extends FormRequest
             'subrak1' => ['nullable'],
             'tipe1' => ['nullable'],
             'shelving1' => ['nullable'],
-            'jenis_barang' => ['required','in:B,T,R'],
         ];
     }
 
     protected function passedValidation()
     {
-        if($this->jenis_barang == 'B'){
-            $this->merge(['jenis_barang' => '01']);
-        }elseif($this->jenis_barang == 'T'){
-            $this->merge(['jenis_barang' => '02']);
-        }else{
-            $this->merge(['jenis_barang' => '03']);
-        }
 
         $koderak1 = isset($koderak1) ? $koderak1 : "0";
         $subrak1 = isset($subrak1) ? $subrak1 : "0";

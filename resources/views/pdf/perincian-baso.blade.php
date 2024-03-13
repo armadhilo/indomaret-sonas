@@ -72,23 +72,28 @@
                     </div>
                 </div>
                 <div style="width: 100%; display: block; margin-top: 30px">
-                    <p style="text-align: center; font-size: .85rem"><b>*** Berita Acara Stock Opname Sementara ***<br>Tanggal SO : 09-03-2023<br>Selisih SO : ALL</b></p>
+                    @php
+                        $selisih_so = '> 1 juta';
+                        if($request['selisih_so'] == '1'){
+                            $selisih_so = 'ALL';
+                        }elseif($request['selisih_so'] == '2'){
+                            $selisih_so = '< 1 juta';
+                        }
+                    @endphp
+                    <p style="text-align: center; font-size: .85rem"><b>*** Berita Acara Stock Opname Sementara ***<br>Tanggal SO : {{ $request['tanggal_start_so'] }}<br>Selisih SO : {{ $selisih_so }}</b></p>
                 </div>
                 <hr style="margin-top: 20px">
             </div>
 
             <div class="body">
-                
-                <table border="1" style="border-collapse: collapse; margin-top:10px; margin-bottom: 10px" class="table-center" cellpadding="2">
+
+                <table border="1" style="border-collapse: collapse; margin-top:10px; margin-bottom: 10px" cellpadding="2">
                     <thead>
                         <tr>
                             <th style="width: 2%">No.</th>
                             <th>PLU</th>
-                            <th>MERK</th>
-                            <th>NAMA</th>
-                            <th>FLAVOURS</th>
-                            <th>KMS</th>
-                            <th>SIZE</th>
+                            <th>MERK NAMA FLAVOURS KMS SIZE</th>
+                            <th>SATUAN</th>
                             <th>QTY</th>
                             <th>STOCK SO LPP Fr</th>
                             <th>Nilai</th>
@@ -106,30 +111,93 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $item)
-                        <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                        </tr>
+                        @foreach ($data as $department)
+                            @foreach ($department as $kategori)
+                            <tr>
+                                <td colspan="18">
+                                    Departemen : {{ $kategori[0]->prd_kodedepartement }} - {{ $kategori[0]->dep_namadepartement }} <br>
+                                    Kategori : {{ $kategori[0]->prd_kodekategoribarang }} - {{ $kategori[0]->kat_namakategori }} <br>
+                                    Jenis Barang : {{ $kategori[0]->lokasi }} <br>
+                                </td>
+                            </tr>
+
+                            @php
+                                $total_nilai1 = 0;
+                                $total_nilai2 = 0;
+                                $total_nilai3 = 0;
+                                $total_nilai4 = 0;
+                                $total_plu1 = 0;
+                                $total_plu2 = 0;
+                                $total_plu3 = 0;
+                                $total_plu4 = 0;
+                            @endphp
+
+                            @foreach ($kategori as $item)
+
+                                @php
+                                    if($item->rphlpp > 0){
+                                        $total_nilai1 += $item->rphlpp;
+                                        $total_plu1++;
+                                    }
+
+                                    if($item->rphso > 0){
+                                        $total_nilai2 += $item->rphso;
+                                        $total_plu2++;
+                                    }
+
+                                    if($item->rphadj > 0){
+                                        $total_nilai3 += $item->rphadj;
+                                        $total_plu3++;
+                                    }
+
+                                    if($item->rphsel > 0){
+                                        $total_nilai4 += $item->rphsel;
+                                        $total_plu4++;
+                                    }
+                                @endphp
+
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->prd_prdcd }}</td>
+                                    <td>{{ $item->prd_deskripsipanjang }}</td>
+                                    <td>{{ $item->satuan }}</td>
+                                    <td style="text-align: right">{{ $item->ctnlpp }}</td>
+                                    <td style="text-align: right">{{ $item->pcslpp }}</td>
+                                    <td style="text-align: right">{{ number_format($item->rphlpp, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ $item->ctnso }}</td>
+                                    <td style="text-align: right">{{ $item->pcsso }}</td>
+                                    <td style="text-align: right">{{ number_format($item->rphso, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ $item->ctnadj }}</td>
+                                    <td style="text-align: right">{{ $item->pcsadj }}</td>
+                                    <td style="text-align: right">{{ number_format($item->rphadj, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ $item->ctnsel }}</td>
+                                    <td style="text-align: right">{{ $item->pcssel }}</td>
+                                    <td style="text-align: right">{{ number_format($item->rphsel, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ number_format($item->sop_lastavgcost, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ number_format($item->hpp, 2, '.', '') }}</td>
+                                </tr>
+                            @endforeach
+
+                            <tr>
+                                <td colspan="6" style="text-align: right">Total Nilai Per Kategori :</td>
+                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai1, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai2, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai3, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai4, 2, '.', '') }}</td>
+                            </tr>
+                            {{-- <tr>
+                                <td colspan="4">Selisih (+) :</td>
+                                <td colspan="4" style="text-align: right">Rp. 50000</td>
+                                <td colspan="2" style="text-align: right">Selisih (-):</td>
+                            </tr> --}}
+                            <tr>
+                                <td colspan="6" style="text-align: right">Total PLU Per Kategori :</td>
+                                <td colspan="3" style="text-align: right">{{ $total_plu1 }}</td>
+                                <td colspan="3" style="text-align: right">{{ $total_plu2 }}</td>
+                                <td colspan="3" style="text-align: right">{{ $total_plu3 }}</td>
+                                <td colspan="3" style="text-align: right">{{ $total_plu4 }}</td>
+                            </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>

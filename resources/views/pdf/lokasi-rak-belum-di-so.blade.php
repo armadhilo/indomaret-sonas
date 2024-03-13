@@ -88,15 +88,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $item)
-                        <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                        </tr>
+                        @foreach ($data as $key => $location)
+                            <tr>
+                                <td colspan="6"  style="text-align: left">Lokasi : {{ $key }}</td>
+                            </tr>
+                            @foreach ($location as $item)
+                                <tr>
+                                    <td>{{ $item->lso_nourut }}</td>
+                                    <td>{{ $item->lso_prdcd }}</td>
+                                    <td>{{ $item->jenisbrg }}</td>
+                                    <td  style="text-align: left">{{ $item->prd_deskripsipanjang }}</td>
+                                    <td>{{ $item->unit }}</td>
+                                    <td>{{ $item->sarana }}</td>
+                                </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>

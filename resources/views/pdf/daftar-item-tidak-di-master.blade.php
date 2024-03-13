@@ -76,15 +76,6 @@
 
             <div class="body">
                 <p style="text-align: center; font-size: .85rem; margin-top: 0px"><b>DAFTAR CHECK ITEM YANG BELUM ADA DI MASTER LOKASI SO</b></p>
-                <div style="margin: 15px 0 0 0; width: 100%">
-                    <div style="float: left">
-                        <p style="margin-bottom: 5px;">DIVISI : 01</p>
-                        <p>Kategori : Lorem ipsum dolor sit amet.</p>
-                    </div>
-                    <div style="float: right">
-                        <p>Departement : 05</p>
-                    </div>
-                </div>
                 <table border="1" style="border-collapse: collapse; margin-top:40px" class="table-center" cellpadding="2">
                     <thead>
                         <tr>
@@ -99,17 +90,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $item)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->lso_prdcd }}</td>
-                            <td>{{ $item->prd_deskripsipanjang }}</td>
-                            <td>{{ $item->satuan }}</td>
-                            <td>{{ $item->prd_kodetag }}</td>
-                            <td>{{ '1' }}</td>
-                            <td>{{ $item->st_avgcost }}</td>
-                            <td>{{ $item->total }}</td>
-                        </tr>
+                        @foreach ($data as $key1 => $divisi)
+                            @foreach ($divisi as $key2 => $department)
+                                @foreach ($department as $key3 => $kategori)
+                                    @foreach ($kategori as $item)
+                                        @if ($loop->first)
+                                            <tr>
+                                                <td colspan="8" style="text-align: left">
+                                                    DIVISI : {{ $key1 }} <br>
+                                                    DEPARTEMEN : {{ $key2 }} <br>
+                                                    KATEGORI : {{ $key3 }} <br>
+                                                </td>
+                                            </tr>
+                                        @endif
+
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $item->lso_prdcd }}</td>
+                                            <td style="text-align: left">{{ $item->prd_deskripsipanjang }}</td>
+                                            <td>{{ $item->satuan }}</td>
+                                            <td>{{ $item->prd_kodetag }}</td>
+                                            <td  style="text-align: right">{{ number_format($item->st_saldoakhir, 2, '.', '') }}</td>
+                                            <td  style="text-align: right">{{ number_format($item->st_avgcost, 2, '.', '') }}</td>
+                                            <td  style="text-align: right">{{ number_format($item->total, 2, '.', '') }}</td>
+                                        </tr>
+                                    @endforeach
+                                @endforeach
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>

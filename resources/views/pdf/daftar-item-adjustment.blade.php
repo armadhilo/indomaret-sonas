@@ -92,22 +92,37 @@
                         </tr>
                     </thead>
                     <tbody>
+
+                        @php
+                            $total_total = 0;
+                        @endphp
+
                         @foreach ($data as $item)
+
+                        @php
+                            $total_total +=  $item->total;
+                        @endphp
+
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><b>123</b></td>
-                            <td>213</td>
-                            <td>213</td>
-                            <td>213</td>
-                            <td>213</td>
-                            <td>213</td>
-                            <td>213</td>
+                            <td><b>{{ $item->adj_prdcd }}</b></td>
+                            <td colspan="6" style="text-align: left">{{ $item->prd_deskripsipanjang }}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>{{ $loop->iteration }}.1</td>
+                            <td>{{ $item->adj_qty }}</td>
+                            <td>{{ number_format($item->sop_lastavgcost, 2, '.', '') }}</td>
+                            <td>{{ number_format($item->total, 2, '.', '') }}</td>
+                            <td>{{ $item->adj_create_dt }}</td>
+                            <td>{{ $item->adj_keterangan }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <td colspan="4" style="text-align: right">Total : </td>
-                        <td colspan="2" style="text-align: right"><b>1.600.000</b></td>
+                        <td colspan="2" style="text-align: right"><b>{{ number_format($total_total, 2, '.', '') }}</b></td>
                         <td colspan="2"></td>
                     </tfoot>
                 </table>

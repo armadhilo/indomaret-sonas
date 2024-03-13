@@ -115,7 +115,7 @@
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="jenis-barang">Jenis Barang <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" id="jenis_barang" name="jenis-barang" class="form-control" style="width: 50px">
+                                    <input type="text" id="jenis_barang" name="jenis-barang" class="form-control" style="width: 70px">
                                     <p class="m-0 fw-semibold">[ B - Baik / T - Retur / R - Rusak ]</p>
                                 </div>
                             </div>

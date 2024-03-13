@@ -49,6 +49,22 @@ class ReportPerincianBasoRequest extends FormRequest
         }else{
             $this->merge(['jenis_barang' => '03']);
         }
+
+        $div1 = isset($div1) ? $div1 : "0";
+        $div2 = isset($div2) ? $div2 : "0";
+        $dept1 = isset($dept1) ? $dept1 : "0";
+        $dept2 = isset($dept2) ? $dept2 : "Z";
+        $kat1 = isset($kat1) ? $kat1 : "ZZ";
+        $kat2 = isset($kat2) ? $kat2 : "ZZ";
+
+        $this->merge([
+            'div1' => $div1,
+            'div2' => $div2,
+            'dept1' => $dept1,
+            'dept2' => $dept2,
+            'kat1' => $kat1,
+            'kat2' => $kat2,
+        ]);
     }
 
     protected function failedValidation(Validator $validator) {

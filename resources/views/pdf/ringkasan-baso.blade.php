@@ -84,7 +84,7 @@
                 <p style="text-align: center; font-size: .85rem"><b>Berita Acara Stock Opname Sementara</b><br>Tanggal SO : 08-03-2024</p>
                 <div style="margin: 0 0 40px 0">
                     <div style="float: left">
-                        <p style="margin-bottom: 5px;">Jenis Barang : {{ $data[0]->lokasi }}</p>
+                        <p style="margin-bottom: 5px;">Jenis Barang : {{ $textJenisBarang }}</p>
                     </div>
                 </div>
                 <table style="border-collapse: collapse; margin-top:10px" class="table-border-outside table-center" cellpadding="2">
@@ -99,28 +99,61 @@
                     </thead>
                     <tbody>
 
-                        <tr>
-                            <td colspan="5" style="padding: 10px 0!important;font-size: .8rem;text-align: left">Departemen : <b>01</b> BREAKFEST FOOD</td>
-                        </tr>
-                        @foreach ($data as $item)
+                        @foreach ($data as $key1 => $department)
+
                             <tr>
-                                <td style="text-align: left">{{ $item->prd_kodekategoribarang .' '. $item->kat_namakategori }}</td>
-                                <td style="text-align: right">{{ $item->rphlpp }}</td>
-                                <td style="text-align: right">{{ $item->rphso }}</td>
-                                <td style="text-align: right">{{ $item->rphadj }}</td>
-                                <td style="text-align: right">{{ $item->rphsel }}</td>
+                                <td colspan="5" style="padding: 10px 0!important;font-size: .8rem;text-align: left">Departemen : <b>{{ $key1 }}</b></td>
                             </tr>
+
+                            @php
+                                $total_rphlpp = 0;
+                                $total_rphso = 0;
+                                $total_rphadj = 0;
+                                $total_rphsel = 0;
+                            @endphp
+
+                            @foreach ($department as $key2 => $kategori)
+
+                                @php
+                                    $rphlpp = 0;
+                                    $rphso = 0;
+                                    $rphadj = 0;
+                                    $rphsel = 0;
+                                @endphp
+
+                                @foreach ($kategori as $item)
+                                    @php
+                                        $rphlpp += $item->rphlpp;
+                                        $rphso += $item->rphso;
+                                        $rphadj += $item->rphadj;
+                                        $rphsel += $item->rphsel;
+
+                                        $total_rphlpp += $item->rphlpp;
+                                        $total_rphso += $item->rphso;
+                                        $total_rphadj += $item->rphadj;
+                                        $total_rphsel += $item->rphsel;
+                                    @endphp
+                                @endforeach
+
+                                <tr>
+                                    <td style="text-align: left">{{ $key2 }}</td>
+                                    <td style="text-align: right">{{ number_format($rphlpp, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ number_format($rphso, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ number_format($rphadj, 2, '.', '') }}</td>
+                                    <td style="text-align: right">{{ number_format($rphsel, 2, '.', '') }}</td>
+                                </tr>
+                            @endforeach
+
+                            <tr>
+                                <td>** Total Nilai Per Dept. :</td>
+                                <td style="text-align: right"><b>{{ number_format($total_rphlpp, 2, '.', '') }}</b></td>
+                                <td style="text-align: right"><b>{{ number_format($total_rphso, 2, '.', '') }}</b></td>
+                                <td style="text-align: right"><b>{{ number_format($total_rphadj, 2, '.', '') }}</b></td>
+                                <td style="text-align: right"><b>{{ number_format($total_rphsel, 2, '.', '') }}</b></td>
+                            </tr>
+
                         @endforeach
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <td>** Total Nilai Per Dept. :</td>
-                            <td><b>0.00</b></td>
-                            <td><b>0.00</b></td>
-                            <td><b>0.00</b></td>
-                            <td><b>0.00</b></td>
-                        </tr>
-                    </tfoot>
                 </table>
                 <table class="table" width="100%" cellpadding="2" style="margin-top: 30px">
                     <thead>

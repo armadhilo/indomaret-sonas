@@ -109,36 +109,36 @@
                             <td>{{ $item->ctn }}</td>
                             <td>{{ $item->pcs }}</td>
                             <td>{{ $item->lso_qty }}</td>
-                            <td>{{ $item->st_avgcostmonthend }}</td>
+                            <td>{{ number_format($item->st_avgcostmonthend, 2, '.', '') }}</td>
                             <td style="text-align: right;">{{ $item->total }}</td>
-                            <td>USER</td>
+                            <td>{{ $item->lso_modify_by }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Shelving</td>
-                            <td style="text-align: right;">Rp. 15.000.000</td>
+                            <td style="text-align: right;">Rp. 00 (dummy)</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Tipe Rak</td>
-                            <td style="text-align: right;">Rp. 15.000.000</td>
+                            <td style="text-align: right;">Rp. 00 (dummy)</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Sub Rak</td>
-                            <td style="text-align: right;">Rp. 15.000.000</td>
+                            <td style="text-align: right;">Rp. 00 (dummy)</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Kode Rak</td>
-                            <td style="text-align: right;">Rp. 15.000.000</td>
+                            <td style="text-align: right;">Rp. 00 (dummy)</td>
                             <td></td>
                         </tr>
                         <tr style="border: 1px solid gray; background: #E9E7E7">
                             <td colspan="8" style="text-align: center; font-weight: 700">TOTAL AKHIR</td>
-                            <td style="text-align: right; font-weight: 700">Rp. 15.000.000</td>
+                            <td style="text-align: right; font-weight: 700">Rp. 00 (dummy)</td>
                             <td></td>
                         </tr>
                     </tfoot>

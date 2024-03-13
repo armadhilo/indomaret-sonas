@@ -76,14 +76,14 @@
                 <p style="text-align: center; font-size: .85rem"><b>REGISTER KKSO II</b></p>
                 <div style="margin: 0 0 40px 0">
                     <div style="float: left">
-                        <p style="margin-bottom: 5px;">Tanggal SO : 12 Maret 2023</p>
-                        <p style="margin-bottom: 5px;">Kode Rak : 01 s/d 20</p>
-                        <p style="margin-bottom: 5px;">Kode Type : 01 s/d 20</p>
+                        <p style="margin-bottom: 5px;">Tanggal SO : {{ $request['tanggal_start_so'] }}</p>
+                        <p style="margin-bottom: 5px;">Kode Rak : {{ $request['koderak1'] }} s/d {{ $request['koderak1'] }}</p>
+                        <p style="margin-bottom: 5px;">Kode Type : {{ $request['tipe1'] }} s/d {{ $request['tipe2'] }}</p>
                     </div>
                     <div style="float: right">
-                        <p style="margin-bottom: 5px;">Jenis Barang : 01 - Barang Baik</p>
-                        <p style="margin-bottom: 5px;">Kode SubRak : 01 s/d 20</p>
-                        <p style="margin-bottom: 5px;">Kode Shelving : 01 s/d 20</p>
+                        <p style="margin-bottom: 5px;">Jenis Barang : {{ $data[0]->lokasi }}</p>
+                        <p style="margin-bottom: 5px;">Kode SubRak : {{ $request['subrak1'] }} s/d {{ $request['subrak2'] }}</p>
+                        <p style="margin-bottom: 5px;">Kode Shelving : {{ $request['shelving1'] }} s/d {{ $request['shelving2'] }}</p>
                     </div>
                 </div>
                 <table border="1" style="border-collapse: collapse; margin-top:60px; margin-bottom: 10px" class="table-center" cellpadding="2">
@@ -100,30 +100,45 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $total_lbr = 0;
+                            $total_item = 0;
+                            $total_terinput = 0;
+                            $total_selisih = 0;
+                        @endphp
+
                         @foreach ($data as $item)
-                        <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                        </tr>
+
+                            @php
+                                $total_lbr += $item->lbr;
+                                $total_item += $item->item;
+                                $total_terinput += $item->so;
+                                $total_selisih += $item->selisih;
+                            @endphp
+
+                            <tr>
+                                <td>{{ $item->lso_koderak }}</td>
+                                <td>{{ $item->lso_kodesubrak }}</td>
+                                <td>{{ $item->lso_tiperak }}</td>
+                                <td>{{ $item->lso_shelvingrak }}</td>
+                                <td>{{ $item->lbr }}</td>
+                                <td>{{ $item->item }}</td>
+                                <td>{{ $item->so }}</td>
+                                <td>{{ $item->selisih }}</td>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
                 <p style="text-align: right">** Akhir Dari Laporan **</p>
                 <table style="margin-top: 15px; width: 100%">
                     <tr>
-                        <td><span>Total Lembar</span><b style="margin-left: 40px">1</b></td>
-                        
-                        <td style="text-align: center;"><span>Total Item</span><b style="margin-left: 40px">1</b></td>
-                        
-                        <td style="text-align: center;"><span>Total Terinput</span><b style="margin-left: 40px">1</b></td>
-                        
-                        <td style="text-align: right"><span>Total Selisih</span><b style="margin-left: 40px">1</b></td>
+                        <td><span>Total Lembar</span><b style="margin-left: 40px">{{ $total_lbr }}</b></td>
+
+                        <td style="text-align: center;"><span>Total Item</span><b style="margin-left: 40px">{{ $total_item }}</b></td>
+
+                        <td style="text-align: center;"><span>Total Terinput</span><b style="margin-left: 40px">{{ $total_terinput }}</b></td>
+
+                        <td style="text-align: right"><span>Total Selisih</span><b style="margin-left: 40px">{{ $total_selisih }}</b></td>
                     </tr>
                 </table>
             </div>

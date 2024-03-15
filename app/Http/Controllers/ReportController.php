@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\InquiryPlanoExport;
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
 use App\Http\Requests\reportCetakDraftLhsoRequest;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -47,6 +49,9 @@ class ReportController extends Controller
         $pdf = PDF::loadView('pdf.' . $currentView, $data);
         if($currentView == "perincian-baso"){
             $customPaper = array(0,0,1000, 500);
+            $pdf->setPaper($customPaper);
+        } else if($currentView == "cetak-draft-lhso"){
+            $customPaper = array(0, 0, 795, 620);
             $pdf->setPaper($customPaper);
         }
         return $pdf->stream();
@@ -146,6 +151,7 @@ class ReportController extends Controller
 
     //! MINUS
     //? data total per Shelving, Tipe Rak, Sub Rak, Kode Rak -> KURANG PAHAM DAPET DARIMANA
+    // * ??
     public function reportEditListKkso(ReportRequest $request){
 
         $FlagReset = 'N';
@@ -236,6 +242,7 @@ class ReportController extends Controller
     //! MINUS
     //? styling pdf
     //? footer pdf
+    // * check
     public function reportPerincianBaso(ReportPerincianBasoRequest $request){
         $query = '';
         $query .= "SELECT * FROM (SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
@@ -314,8 +321,9 @@ class ReportController extends Controller
 
         $data['data'] = collect(DB::select($query))->groupBy(['dep_namadepartement','kat_namakategori'])->toArray();
         $data['request'] = $request->all();
-
+        
         $pdf = PDF::loadView('pdf.perincian-baso', $data);
+        $pdf->getDomPDF()->set_option("enable_php", true);
         $customPaper = array(0,0,1000, 500);
         $pdf->setPaper($customPaper);
         if ($request->method() === 'GET') {
@@ -327,6 +335,7 @@ class ReportController extends Controller
 
     //!  MINUS
     //? footer pdf
+    // * check
     public function reportRingkasanBaso(ReportPerincianBasoRequest $request){
         $query = '';
         $query .= "SELECT PRD_KODEDIVISI, PRD_KODEDEPARTEMENT || ' - ' || DEP_NAMADEPARTEMENT as DEP_NAMADEPARTEMENT, PRD_KODEKATEGORIBARANG || ' - ' || KAT_NAMAKATEGORI as KAT_NAMAKATEGORI, ";
@@ -377,6 +386,7 @@ class ReportController extends Controller
         $data['textJenisBarang'] = $textJenisBarang;
 
         $pdf = PDF::loadView('pdf.ringkasan-baso', $data);
+        $pdf->getDomPDF()->set_option("enable_php", true);
         if ($request->method() === 'GET') {
             return $pdf->stream('BASO RINGKASAN ' . $textJenisBarang . ' - RESET.pdf');
         }
@@ -386,14 +396,15 @@ class ReportController extends Controller
 
     //! MINUS
     //? kurang disesuaikan header
+    // * LOADING TERUS....
     public function reportDaftarItemYangSudahAdjust(ReportDaftarItemAdjustRequest $request){
-
+        
         $query = '';
         $query .= "SELECT adj_prdcd ";
         $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
         $query .= "WHERE adj_lokasi = '" . $request->jenis_barang . "' ";
-        // $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
-        // $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
+        $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
+        $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
         $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
         $query .= "ORDER BY adj_create_dt ";
         $dt1 = DB::select($query);
@@ -403,8 +414,8 @@ class ReportController extends Controller
         $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
         $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
         $query .= "WHERE adj_lokasi = '" . $request->jenis_barang . "' ";
-        // $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
-        // $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
+        $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
+        $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
         $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
         $query .= "ORDER BY adj_create_dt ";
         $dtDATA = DB::select($query);
@@ -419,8 +430,8 @@ class ReportController extends Controller
                 $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
                 $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
                 $query .= "WHERE adj_lokasi = '" . $request->jenis_barang . "' ";
-                // $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
-                // $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
+                $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
+                $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
                 $query .= "AND adj_prdcd = '" . $item->adj_prdcd . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
                 $query .= "ORDER BY adj_create_dt ";
                 $data_detail = DB::select($query);
@@ -606,21 +617,23 @@ class ReportController extends Controller
         return response()->json(['pdf' => base64_encode($pdfContent)]);
     }
 
-    public function reportInqueryPlanoSonasExcel(ReportInqueryPlanoSonasRequest $request){
+    //* Data Masih DUMMY
+    public function reportInqueryPlanoSonasExcel(Request $request){
 
         if($request->jenis_barang == 'A'){
-            $data = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_PRDCD = '" . $request->plu . "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD')");
+            // $query = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_PRDCD = '" . $request->plu . "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD')");
+            $query = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD LIMIT 15"); //!! DUMMY DATA 
         }else{
-            $data = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_LOKASI = '" . $request->jenis_barang . "' AND LSO_PRDCD = '" . $request->plu . "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD')");
+            $query = DB::select("SELECT * FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST WHERE LSO_PRDCD = PRD_PRDCD AND LSO_LOKASI = '" . $request->jenis_barang . "' AND LSO_PRDCD = '" . $request->plu . "' AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD')");
         }
 
-        $data['data'] = $data;
+        $data['data'] = $query;
 
-        return $data;
+        return Excel::download(new InquiryPlanoExport($data), 'INQUIRY PLANO SONAS.xls');
+
     }
 
     public function reportLppMonthEndExcelActionCetak(Request $request){
-
         //? jika checklist all PLU maka parameter plu isi array kosong aja
 
         if($request->jenis_barang == 'B' || $request->jenis_barang == 'A'){
@@ -685,7 +698,7 @@ class ReportController extends Controller
             $data['lpp_rusak'] = DB::select($query);
         }
 
-        return $data;
+
 
         // rowData.CreateCell(0).SetCellValue(dt.Rows(i).Item("LRS_KODEIGR").ToString)
         // rowData.CreateCell(1).SetCellValue(Format(dt.Rows(i).Item("LRS_TGL1"), "yyyy-MM-dd").ToString)
@@ -732,9 +745,6 @@ class ReportController extends Controller
         return DataTables::of($data)
             ->addIndexColumn()
             ->make(true);
-
-        // PRD_PRDCD
-        // PRD_DESKRIPSIPANJANG
     }
 
     //! new bikin action baru aja
@@ -746,7 +756,7 @@ class ReportController extends Controller
     }
 
     public function reportLppMonthEndExcelActionSimpanDataPlu(Request $request){
-        DB::table('TBMASTER_PLU_SONAS')
+        DB::table('tbmaster_plu_sonas')
             ->insert([
                 'prd_kodeigr' => session('KODECABANG'),
                 'prd_prdcd' => $request->prd_prdcd,
@@ -756,6 +766,7 @@ class ReportController extends Controller
             ]);
     }
 
+    //* PDF Belum Diintegrasikan dengan $data
     public function reportCetakDraftLhso(reportCetakDraftLhsoRequest $request){
 
         //! GET NAMA PERUSAHAAN
@@ -787,15 +798,23 @@ class ReportController extends Controller
         }
 
         if(!isset($request->limit)){
-            $request->merge(['limit' => 100000]);
+            $request->merge(['limit' => 10]);
         }
 
         if($request->type == 'draft_lhso'){
-
             $data['data'] = $this->loadReport($request);
         }else{
             $data['data'] = $this->LoadReport2($request);
         }
+
+        $pdf = PDF::loadView('pdf.cetak-draft-lhso', $data);
+        $customPaper = array(0, 0, 795, 620);
+        $pdf->setPaper($customPaper);
+        if ($request->method() === 'GET') {
+            return $pdf->stream('DRAFT LHSO - .pdf');
+        }
+        $pdfContent = $pdf->output();
+        return response()->json(['pdf' => base64_encode($pdfContent)]);
     }
 
     private function loadReport($request){
@@ -806,8 +825,8 @@ class ReportController extends Controller
         $query .= "(((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) AS NILAI_SELISIH, LSO_FLAGTAHAP, LSO_CREATE_BY, ";
         $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, div_namadivisi, dep_namadepartement, kat_namakategori ";
         $query .= "FROM (SELECT PRD_AVGCOST, PRD_PRDCD AS PLU, PRD_DESKRIPSIPANJANG AS DESKRIPSI,  ";
-        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','YYYY-MM-DD') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '" . $request->jenisbrg . "') AS AREAGUDANG, ";
-        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','YYYY-MM-DD') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '" . $request->jenisbrg . "') AS AREATOKO,  ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','YYYY-MM-DD') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%') AND LSO_LOKASI = '" . $request->jenis_barang . "') AS AREAGUDANG, ";
+        $query .= "(SELECT coalesce(SUM(LSO_QTY), 0) FROM tbhistory_lhso_sonas WHERE LSO_FLAGTAHAP = '" . $request->tahap . "' AND LSO_TGLSO = TO_DATE('" . $request->TglSO . "','YYYY-MM-DD') AND LSO_PRDCD = PRD_PRDCD AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%') AND LSO_LOKASI = '" . $request->jenis_barang . "') AS AREATOKO,  ";
         $query .= "(LSO_ST_SALDOAKHIR) AS LPP, LSO_FLAGTAHAP, LSO_CREATE_BY, LSO_AVGCOST, ";
         $query .= "PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, ";
         $query .= "(select div_namadivisi from tbmaster_divisi where div_kodedivisi = PRD_KODEDIVISI) as div_namadivisi, ";
@@ -844,7 +863,7 @@ class ReportController extends Controller
             $query .= "AND LSO_PRDCD BETWEEN '" . $request->plu1 . "' and '" . $request->plu2 . "' ";
         }
 
-        $query .= "AND LSO_LOKASI = '" . $request->jenisbrg . "' ";
+        $query .= "AND LSO_LOKASI = '" . $request->jenis_barang . "' ";
         $query .= ") q ";
         $query .= "WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) <> 0 ";
         $query .= ") p ORDER BY ABS(NILAI_SELISIH) DESC LIMIT " . $request->limit . "";
@@ -906,6 +925,7 @@ class ReportController extends Controller
         return $data;
     }
 
+    //* FOTO PDF BELUM DIKIRIM
     public function reportCetakDraftReturSebelumLhso(ReportCetakDraftReturSebelumLhsoRequest $request){
 
         //! GET NAMA PERUSAHAAN
@@ -973,6 +993,7 @@ class ReportController extends Controller
         return $data;
     }
 
+    //* PDF Belum Diintegrasikan dengan $data
     public function reportLokasiSo(ReportLokasiSoRequest $request){
 
         //! GET NAMA PERUSAHAAN
@@ -996,7 +1017,7 @@ class ReportController extends Controller
         $query .= "and lso_flagsarana= '" & $request->sarana & "' ";
         $query .= "and lso_flaglimit= 'Y' ";
         $query .= "and DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" & $request->tanggal_start_so & "','YYYY-MM-DD') ";
-        $query .= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut ";
+        $query .= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut LIMIT 4";
         $data['data'] = DB::select($query);
 
         $pdf = PDF::loadView('pdf.lokasi-so', $data);

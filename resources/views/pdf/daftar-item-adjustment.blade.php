@@ -33,6 +33,10 @@
             text-align: center
         }
 
+        .table-striped tbody tr:nth-child(odd), .table-striped tfoot tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
         .tr-not-center td {
             text-align: start!important;
         }
@@ -43,10 +47,6 @@
 
         .title > *{
             text-align: center;
-        }
-
-        .body{
-            margin-top: 20px;
         }
 
         .text-center{
@@ -60,25 +60,27 @@
         table tfoot td{
             border: none!important;
         }
+
+        @page { margin: 120px 25px 0px 25px; }
+        .header { position: fixed; top: -90px; left: 0px; right: 0px; height: 120px; }
     </style>
 </head>
 <body>
+    <header class="header">
+        <div style="float: left;">
+            <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
+        </div>
+        <div style="float: right">
+            <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
+            <p style="text-align: right;"> Hal : <span class="page-number"></span></p>
+        </div>
+        <hr style="margin: 30px 0 15px 0;">
+        <p style="text-align: center; font-size: .85rem"><b>DAFTAR ITEM YANG SUDAH DI ADJUSTMENT</b><br>Jenis Barang : 01 - Barang Baik</p>
+    </header>
     <div class="container-fluid">
         <div style="width: 100%">
-            <div class="header">
-                <div style="float: left;">
-                    <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
-                </div>
-                <div style="float: right">
-                    <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
-                    <p style="text-align: right;"> Hal : <span class="page-number"></span></p>
-                </div>
-                <hr style="margin-top: 30px">
-            </div>
-
             <div class="body">
-                <p style="text-align: center; font-size: .85rem"><b>DAFTAR ITEM YANG SUDAH DI ADJUSTMENT</b><br>Jenis Barang : 01 - Barang Baik</p>
-                <table border="1" style="border-collapse: collapse; margin-top:10px" class="table-center" cellpadding="2">
+                <table border="1" style="border-collapse: collapse; margin-top:10px" class="table-center table-striped" cellpadding="2">
                     <thead>
                         <tr>
                             <th style="width: 9%">No</th>

@@ -157,15 +157,24 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'inquiry-plano-sonas'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/download-excel', [ReportController::class, 'reportInqueryPlanoSonasExcel']);
         });
 
-        Route::group(['prefix' => 'list'], function(){
+        Route::group(['prefix' => 'lpp-month-end'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::get('/datatables', [ReportController::class, 'reportLppMonthEndExcelDatatables']);
+
+            Route::group(['prefix' => 'action'], function(){
+                Route::post('/cetak-lpp', [ReportController::class, 'reportLppMonthEndExcelActionCetak']);
+                Route::post('/simpan-data', [ReportController::class, 'reportLppMonthEndExcelActionSimpanDataPlu']);
+                Route::delete('/reset-data', [ReportController::class, 'reportLppMonthEndExcelActionResetData']);
+            });
         });
 
         Route::group(['prefix' => 'cetak-draft-lhso'], function(){
             Route::get('/', [ReportController::class, 'index']);
-            Route::get('/pdf', [ReportController::class, 'dummyData']);
+            Route::post('/show-pdf', [ReportController::class, 'reportCetakDraftLhso']);
+            Route::get('/pdf', [ReportController::class, 'reportCetakDraftLhso']);
         });
 
         Route::group(['prefix' => 'cetak-draft-sebelum-lhso'], function(){

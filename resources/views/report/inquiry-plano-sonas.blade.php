@@ -43,22 +43,23 @@
                 @include('layouts.report-menu')
             </div>
             <div class="col-md-5 col-lg-6 offset-1">
-                <div class="card shadow mb-4 vertical-center w-100">
-                    <div class="card-body">
+                <div class="card shadow mb-4 vertical-center w-100" id="report_container">
+                    <div class="card-body" id="report_content">
                         <div id="header_tb">
                             <h5 class="m-0">Export Plano SONAS to EXCEL</h5>
                         </div>
-                        <form action="">
+                        <form id="form_report_excel" method="GET" action="/report/inquiry-plano-sonas/download-excel">
+                            <input type="hidden" value="{{ $TanggalSO }}" name="tanggal_start_so">
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="plu">PLU <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="plu">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
-                                <label class="label-form" for="jenis-barang">Jenis Barang <span>:</span></label>
+                                <label class="label-form" for="jenis_barang_cust">Jenis Barang <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px">
-                                    <input type="text" id="jenis_barang" name="jenis-barang" class="form-control" style="width: 70px">
+                                    <input type="text" id="jenis_barang_cust" name="jenis_barang" class="form-control" style="width: 70px">
                                     <p class="m-0">[ A - All / B - Baik / T - Retur / R - Rusak ]</p>
                                 </div>
                             </div>
@@ -80,30 +81,17 @@
 @push('page-script')
 <script>
     $(document).ready(function(){
-        $('#jenis_barang').on('input', function(){
-            var words = $(this).val().split(' ')[0];
-            if (words.length > 1) {
-                $(this).val(words[0]);
+        $('#report_content').on('input', "#jenis_barang_cust", function(){
+            var input = $(this).val().trim(); 
+            var words = input.split(' ');
+
+            if (!/^[ABTR]$/i.test(input)) {
+                $(this).val('');
+            } else {
+                $(this).val(input.toUpperCase());
             }
-            // Capitalize the input
-            $(this).val($(this).val().charAt(0).toUpperCase() + $(this).val().slice(1));
         });
     });
-
-    function cancelAction(){
-        Swal.fire({
-            title: 'Cancel action saat ini ?',
-            text: `Semua input yg anda masukkan akan dihapus...`,
-            icon: 'warning',
-            showCancelButton: true,
-            cancelButtonText: 'Kembali',
-            confirmButtonText: 'Ya, Cancel'
-        })
-        .then((result) => {
-            if (result.value) {
-                window.location.href = '/report/';
-            }
-        });
-    }
 </script>
+<script src="{{ asset("js/report-action.js") }}"></script>
 @endpush

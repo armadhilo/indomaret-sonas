@@ -45,10 +45,6 @@
             text-align: center;
         }
 
-        .body{
-            margin-top: 20px;
-        }
-
         .text-center{
             text-align: center;
         }
@@ -56,43 +52,66 @@
         .page-number:before {
             content: counter(page);
         }
+
+        @page { margin: 120px 25px 140px 25px; }
+        .header { position: fixed; top: -100px; left: 0px; right: 0px; height: 120px; }
+        .footer { position: fixed; bottom: -140px; left: 0px; right: 0px; height: 140px; }
     </style>
 </head>
 <body>
+    <header class="header">
+        <div style="width: 100%;">
+            <div style="float: left;">
+                <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
+            </div>
+            <div style="float: right">
+                <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
+                {{-- <p style="text-align: right;"> Page : <span class="page-number"></span> of {PAGE_NUM}</p> --}}
+            </div>
+        </div>
+        <div style="width: 100%; display: block; margin-top: 30px">
+            @php
+                $selisih_so = '> 1 juta';
+                if($request['selisih_so'] == '1'){
+                    $selisih_so = 'ALL';
+                }elseif($request['selisih_so'] == '2'){
+                    $selisih_so = '< 1 juta';
+                }
+            @endphp
+            <p style="text-align: center; font-size: .85rem"><b>*** Berita Acara Stock Opname Sementara ***<br>Tanggal SO : {{ $request['tanggal_start_so'] }}<br>Selisih SO : {{ $selisih_so }}</b></p>
+        </div>
+        <hr style="margin-top: 20px">
+    </header>
+    <footer class="footer">
+        <table class="table" width="100%" cellpadding="2" style="margin-top: 30px">
+            <thead>
+                <tr>
+                    <td>Nama Kota : <div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                    <td width="25%" style="text-align: center; font-size: .8rem">AUDIT</td>
+                    <td width="25%" style="text-align: center; font-size: .8rem">SAM</td>
+                    <td width="25%" style="text-align: center; font-size: .8rem">SM</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Tanggal : <div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                    <td width="25%" style="padding-top: 60px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                    <td width="25%" style="padding-top: 60px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                    <td width="25%" style="padding-top: 60px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </footer>
     <div class="container-fluid">
         <div style="width: 100%">
-            <div class="header">
-                <div style="width: 100%;">
-                    <div style="float: left;">
-                        <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
-                    </div>
-                    <div style="float: right">
-                        <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
-                        <p style="text-align: right;"> Hal : <span class="page-number"></span></p>
-                    </div>
-                </div>
-                <div style="width: 100%; display: block; margin-top: 30px">
-                    @php
-                        $selisih_so = '> 1 juta';
-                        if($request['selisih_so'] == '1'){
-                            $selisih_so = 'ALL';
-                        }elseif($request['selisih_so'] == '2'){
-                            $selisih_so = '< 1 juta';
-                        }
-                    @endphp
-                    <p style="text-align: center; font-size: .85rem"><b>*** Berita Acara Stock Opname Sementara ***<br>Tanggal SO : {{ $request['tanggal_start_so'] }}<br>Selisih SO : {{ $selisih_so }}</b></p>
-                </div>
-                <hr style="margin-top: 20px">
-            </div>
 
             <div class="body">
-
-                <table border="1" style="border-collapse: collapse; margin-top:10px; margin-bottom: 10px" cellpadding="2">
+                <table border="1" style="border-collapse: collapse;" cellpadding="2">
                     <thead>
                         <tr>
                             <th style="width: 2%">No.</th>
                             <th>PLU</th>
-                            <th>MERK NAMA FLAVOURS KMS SIZE</th>
+                            <th style="width: 30%">MERK NAMA FLAVOURS KMS SIZE</th>
                             <th>SATUAN</th>
                             <th>QTY</th>
                             <th>STOCK SO LPP Fr</th>
@@ -111,6 +130,11 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if(empty($data))
+                        <tr>
+                            <td colspan="18" style="text-align: center">Tiida Ada Data</td>
+                        </tr>
+                        @endif
                         @foreach ($data as $department)
                             @foreach ($department as $kategori)
                             <tr>
@@ -201,36 +225,18 @@
                         @endforeach
                     </tbody>
                 </table>
-                <table class="table" width="100%" cellpadding="2" style="margin-top: 30px">
-                    <thead>
-                        <tr>
-                            <td>Nama Kota : <div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="text-align: center; font-size: .8rem">AUDIT</td>
-                            <td width="25%" style="text-align: center; font-size: .8rem">SAM</td>
-                            <td width="25%" style="text-align: center; font-size: .8rem">SM</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Tanggal : <div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="padding-top: 80px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="padding-top: 80px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="padding-top: 80px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 
     <script type="text/php">
         if (isset($pdf)) {
-            $text = "page {PAGE_NUM} / {PAGE_COUNT}";
-            $size = 10;
+            $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
+            $size = 8;
             $font = $fontMetrics->getFont("Verdana");
             $width = $fontMetrics->get_text_width($text, $font, $size) / 2;
-            $x = ($pdf->get_width() - $width) / 2;
-            $y = $pdf->get_height() - 35;
+            $x = ($pdf->get_width() - $width + 10);
+            $y = 25;
             $pdf->page_text($x, $y, $text, $font, $size);
         }
     </script>

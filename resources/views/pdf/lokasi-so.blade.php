@@ -64,7 +64,7 @@
             <div class="header">
                 <div>
                     <div style="float: left;">
-                        <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
+                        <p style="font-size: .8rem;"><b>{{ $perusahaan->prs_namacabang }}</b></p>
                     </div>
                     <div style="float: right">
                         <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
@@ -95,23 +95,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $item)
+                        @if(empty($data))
                         <tr>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
-                            <td>123</td>
+                            <td colspan="13" style="text-align: center">Tidak Ada Data</td>
                         </tr>
-                        @endforeach
+                        @endif
                     </tbody>
                 </table>
                 <p style="width: 100%; text-align: right; margin-top: 5px;">** Akhir Dari Laporan **</p>

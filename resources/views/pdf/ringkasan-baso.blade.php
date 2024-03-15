@@ -45,10 +45,6 @@
             text-align: center;
         }
 
-        .body{
-            margin-top: 20px;
-        }
-
         .text-center{
             text-align: center;
         }
@@ -60,34 +56,55 @@
         .table-border-outside tbody tr:nth-child(even), .table-border-outside tfoot tr:nth-child(even) {
             background-color: #f2f2f2;
         }
-
         .page-number:before {
             content: counter(page);
         }
+        @page { margin: 120px 25px 140px 25px; }
+        .header { position: fixed; top: -110px; left: 0px; right: 0px; height: 120px; }
+        .footer { position: fixed; bottom: -140px; left: 0px; right: 0px; height: 140px; }
     </style>
 </head>
 <body>
+    <header class="header">
+        <div style="float: left;">
+            <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
+        </div>
+        <div style="float: right">
+            <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
+            {{-- <p style="text-align: right;"> Hal : <span class="page-number"></span></p> --}}
+        </div>
+        <hr style="margin: 30px 0">
+        <p style="text-align: center; font-size: .85rem"><b>Berita Acara Stock Opname Sementara</b><br>Tanggal SO : 08-03-2024</p>
+        <div style="margin: 0 0 25px 0">
+            <div style="float: left">
+                <p style="margin-bottom: 5px;">Jenis Barang : {{ $textJenisBarang }}</p>
+            </div>
+        </div>
+    </header>
+    <footer class="footer">
+        <table class="table" width="100%" cellpadding="2" style="margin-top: 20px">
+            <thead>
+                <tr>
+                    <td>Nama Kota : <div style="margin: auto; border-bottom: 1px solid black; width: 37%"></div></td>
+                    <td width="25%" style="text-align: center; font-size: .8rem">AUDIT</td>
+                    <td width="25%" style="text-align: center; font-size: .8rem">SAM</td>
+                    <td width="25%" style="text-align: center; font-size: .8rem">SM</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Tanggal : <div style="margin: auto; border-bottom: 1px solid black; width: 42%"></div></td>
+                    <td width="25%" style="padding-top: 60px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                    <td width="25%" style="padding-top: 60px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                    <td width="25%" style="padding-top: 60px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </footer>
     <div class="container-fluid">
         <div style="width: 100%">
-            <div class="header">
-                <div style="float: left;">
-                    <p style="font-size: .8rem;"><b>INDOGROSIR</b></p>
-                </div>
-                <div style="float: right">
-                    <p>Tanggal : {{ \Carbon\Carbon::now()->format('d-m-Y') . ' | Pukul :  ' . \Carbon\Carbon::now()->format('H:i:s') }}</p>
-                    <p style="text-align: right;"> Hal : <span class="page-number"></span></p>
-                </div>
-                <hr style="margin-top: 30px">
-            </div>
-
             <div class="body">
-                <p style="text-align: center; font-size: .85rem"><b>Berita Acara Stock Opname Sementara</b><br>Tanggal SO : 08-03-2024</p>
-                <div style="margin: 0 0 40px 0">
-                    <div style="float: left">
-                        <p style="margin-bottom: 5px;">Jenis Barang : {{ $textJenisBarang }}</p>
-                    </div>
-                </div>
-                <table style="border-collapse: collapse; margin-top:10px" class="table-border-outside table-center" cellpadding="2">
+                <table style="border-collapse: collapse;" class="table-border-outside table-center table-m-1" cellpadding="2">
                     <thead>
                         <tr>
                             <th>KATEGORI</th>
@@ -155,36 +172,19 @@
                         @endforeach
                     </tbody>
                 </table>
-                <table class="table" width="100%" cellpadding="2" style="margin-top: 30px">
-                    <thead>
-                        <tr>
-                            <td>Nama Kota : <div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="text-align: center; font-size: .8rem">AUDIT</td>
-                            <td width="25%" style="text-align: center; font-size: .8rem">SAM</td>
-                            <td width="25%" style="text-align: center; font-size: .8rem">SM</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Tanggal : <div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="padding-top: 80px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="padding-top: 80px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                            <td width="25%" style="padding-top: 80px;"><div style="margin: auto; border-bottom: 1px solid black; width: 60%"></div></td>
-                        </tr>
-                    </tbody>
-                </table>
+                
             </div>
         </div>
     </div>
 
     <script type="text/php">
         if (isset($pdf)) {
-            $text = "page {PAGE_NUM} / {PAGE_COUNT}";
-            $size = 10;
+            $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
+            $size = 8;
             $font = $fontMetrics->getFont("Verdana");
             $width = $fontMetrics->get_text_width($text, $font, $size) / 2;
-            $x = ($pdf->get_width() - $width) / 2;
-            $y = $pdf->get_height() - 35;
+            $x = ($pdf->get_width() - $width + 10);
+            $y = 18;
             $pdf->page_text($x, $y, $text, $font, $size);
         }
     </script>

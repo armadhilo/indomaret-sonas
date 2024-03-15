@@ -340,11 +340,17 @@
                     },
                     success: function(response) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-                        var blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                        var link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = 'LPP MONTH END.xlsx';
-                        link.click();
+                        var contentType = response.type;
+                        var blob = new Blob([response], { type: contentType });
+                        var downloadUrl = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = downloadUrl;    
+                        var fileName = 'LPP_MONTH_END.xlsx';
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(downloadUrl);
+                        document.body.removeChild(a);
                     },error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire({

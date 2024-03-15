@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\InquiryPlanoExport;
+use App\Exports\LppMonthEndExport;
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
 use App\Http\Requests\reportCetakDraftLhsoRequest;
@@ -636,69 +637,84 @@ class ReportController extends Controller
     public function reportLppMonthEndExcelActionCetak(Request $request){
         //? jika checklist all PLU maka parameter plu isi array kosong aja
 
-        if($request->jenis_barang == 'B' || $request->jenis_barang == 'A'){
-            $query = '';
-            $query .= "SELECT LPP_KODEIGR, LPP_TGL1, LPP_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC,  ";
-            $query .= "LPP_QTYBEGBAL, LPP_RPHBEGBAL, LPP_QTYBELI, LPP_RPHBELI, LPP_QTYBONUS, LPP_RPHBONUS, LPP_QTYTRMCB, LPP_RPHTRMCB, LPP_QTYRETURSALES, ";
-            $query .= "LPP_RPHRETURSALES, LPP_RPHRAFAK, LPP_QTYREPACK, LPP_RPHREPACK, LPP_QTYLAININ, LPP_RPHLAININ, LPP_QTYSALES, LPP_RPHSALES, ";
-            $query .= "LPP_QTYKIRIM, LPP_RPHKIRIM, LPP_QTYPREPACKING, LPP_RPHPREPACKING, LPP_QTYHILANG, LPP_RPHHILANG, LPP_QTYLAINOUT, LPP_RPHLAINOUT, ";
-            $query .= "LPP_QTYINTRANSIT, LPP_RPHINTRANSIT, LPP_QTYADJ, LPP_RPHADJ, LPP_SOADJ, LPP_QTYAKHIR, LPP_RPHAKHIR, LPP_AVGCOST, LPP_QTY_SELISIH_SO, LPP_RPH_SELISIH_SO, LPP_QTY_SELISIH_SOIC, LPP_RPH_SELISIH_SOIC, ";
-            $query .= "coalesce(lpp_rphakhir,0) - (coalesce(lpp_rphbegbal,0) + coalesce(lpp_rphbeli,0) + coalesce(lpp_rphbonus,0) + coalesce(lpp_rphtrmcb,0) + ";
-            $query .= "coalesce(lpp_rphretursales,0) + coalesce(lpp_rph_selisih_so, 0) + coalesce(lpp_rphrepack,0) + coalesce(lpp_rphlainin,0) - coalesce(lpp_rphrafak,0) - ";
-            $query .= "coalesce(lpp_rphsales,0) - coalesce(lpp_rphkirim,0) - coalesce(lpp_rphprepacking,0) - ";
-            $query .= "coalesce(lpp_rphhilang,0) - coalesce(lpp_rphlainout,0) + coalesce(lpp_rphintransit,0) + coalesce(lpp_rphadj, 0) + coalesce(lpp_soadj, 0)) koreksi ";
-            $query .= "FROM TBTR_LPP, TBMASTER_PRODMAST ";
-            $query .= "WHERE LPP_PRDCD = PRD_PRDCD AND LPP_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LPP_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
-            if(count($request->plu) == 0){
-                $query .= "";
-            }else{
-                $query .= "AND LPP_PRDCD in ( " & implode(',', $request->plu) & " ) ";
-            }
-            $query .= "ORDER BY LPP_PRDCD ";
-            $data['lpp_baik'] = DB::select($query);
+        // if($request->jenis_barang == 'B' || $request->jenis_barang == 'A'){
+        //     $query = '';
+        //     $query .= "SELECT LPP_KODEIGR, LPP_TGL1, LPP_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC,  ";
+        //     $query .= "LPP_QTYBEGBAL, LPP_RPHBEGBAL, LPP_QTYBELI, LPP_RPHBELI, LPP_QTYBONUS, LPP_RPHBONUS, LPP_QTYTRMCB, LPP_RPHTRMCB, LPP_QTYRETURSALES, ";
+        //     $query .= "LPP_RPHRETURSALES, LPP_RPHRAFAK, LPP_QTYREPACK, LPP_RPHREPACK, LPP_QTYLAININ, LPP_RPHLAININ, LPP_QTYSALES, LPP_RPHSALES, ";
+        //     $query .= "LPP_QTYKIRIM, LPP_RPHKIRIM, LPP_QTYPREPACKING, LPP_RPHPREPACKING, LPP_QTYHILANG, LPP_RPHHILANG, LPP_QTYLAINOUT, LPP_RPHLAINOUT, ";
+        //     $query .= "LPP_QTYINTRANSIT, LPP_RPHINTRANSIT, LPP_QTYADJ, LPP_RPHADJ, LPP_SOADJ, LPP_QTYAKHIR, LPP_RPHAKHIR, LPP_AVGCOST, LPP_QTY_SELISIH_SO, LPP_RPH_SELISIH_SO, LPP_QTY_SELISIH_SOIC, LPP_RPH_SELISIH_SOIC, ";
+        //     $query .= "coalesce(lpp_rphakhir,0) - (coalesce(lpp_rphbegbal,0) + coalesce(lpp_rphbeli,0) + coalesce(lpp_rphbonus,0) + coalesce(lpp_rphtrmcb,0) + ";
+        //     $query .= "coalesce(lpp_rphretursales,0) + coalesce(lpp_rph_selisih_so, 0) + coalesce(lpp_rphrepack,0) + coalesce(lpp_rphlainin,0) - coalesce(lpp_rphrafak,0) - ";
+        //     $query .= "coalesce(lpp_rphsales,0) - coalesce(lpp_rphkirim,0) - coalesce(lpp_rphprepacking,0) - ";
+        //     $query .= "coalesce(lpp_rphhilang,0) - coalesce(lpp_rphlainout,0) + coalesce(lpp_rphintransit,0) + coalesce(lpp_rphadj, 0) + coalesce(lpp_soadj, 0)) koreksi ";
+        //     $query .= "FROM TBTR_LPP, TBMASTER_PRODMAST ";
+        //     $query .= "WHERE LPP_PRDCD = PRD_PRDCD AND LPP_KODEIGR = PRD_KODEIGR ";
+        //     $query .= "AND TO_CHAR(LPP_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
+        //     if(count($request->plu) == 0){
+        //         $query .= "";
+        //     }else{
+        //         $query .= "AND LPP_PRDCD in ( " & implode(',', $request->plu) & " ) ";
+        //     }
+        //     $query .= "ORDER BY LPP_PRDCD LIMIT 10";
+        //     $data['lpp_baik'] = DB::select($query);
 
 
-        }elseif($request->jenis_barang == 'T' || $request->jenis_barang == 'A'){
-            $query = '';
-            $query .= "select LRT_KODEIGR ,LRT_TGL1, LRT_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, ";
-            $query .= "LRT_QTYBEGBAL, LRT_RPHBEGBAL, LRT_QTYBAIK, LRT_RPHBAIK, LRT_QTYRUSAK, LRT_RPHRUSAK, LRT_QTYSUPPLIER, LRT_RPHSUPPLIER, ";
-            $query .= "LRT_QTYHILANG, LRT_RPHHILANG, LRT_QTYLBAIK, LRT_RPHLBAIK, LRT_QTYLRUSAK, LRT_RPHLRUSAK, LRT_QTYADJ, LRT_RPHADJ, ";
-            $query .= "LRT_SOADJ, LRT_QTYAKHIR, LRT_RPHAKHIR, LRT_AVGCOST1, LRT_AVGCOST, LRT_QTY_SELISIH_SO, LRT_RPH_SELISIH_SO, LRT_QTY_SELISIH_SOIC, LRT_RPH_SELISIH_SOIC, ";
-            $query .= "coalesce(lrt_rphakhir,0) - (coalesce(lrt_rphbegbal,0) + coalesce(lrt_rphbaik,0) + coalesce(lrt_rphrusak,0) + coalesce(lrt_rphadj,0) + coalesce(lrt_rph_selisih_so, 0) ";
-            $query .= "+ coalesce(lrt_soadj, 0) - coalesce(lrt_rphsupplier,0) - coalesce(lrt_rphhilang,0) - coalesce(lrt_rphlbaik,0) - coalesce(lrt_rphlrusak,0)) koreksi ";
-            $query .= "FROM TBTR_LPPRT, TBMASTER_PRODMAST ";
-            $query .= "WHERE LRT_PRDCD = PRD_PRDCD AND LRT_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LRT_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
-            if(count($request->plu) == 0){
-                $query .= "";
-            }else{
-                $query .= "AND LRT_PRDCD in ( " & implode(',', $request->plu) & " ) ";
-            }
-            $query .= "ORDER BY LRT_PRDCD ";
-            $data['lpp_retur'] = DB::select($query);
+        // }elseif($request->jenis_barang == 'T' || $request->jenis_barang == 'A'){
+        //     $query = '';
+        //     $query .= "select LRT_KODEIGR ,LRT_TGL1, LRT_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, ";
+        //     $query .= "LRT_QTYBEGBAL, LRT_RPHBEGBAL, LRT_QTYBAIK, LRT_RPHBAIK, LRT_QTYRUSAK, LRT_RPHRUSAK, LRT_QTYSUPPLIER, LRT_RPHSUPPLIER, ";
+        //     $query .= "LRT_QTYHILANG, LRT_RPHHILANG, LRT_QTYLBAIK, LRT_RPHLBAIK, LRT_QTYLRUSAK, LRT_RPHLRUSAK, LRT_QTYADJ, LRT_RPHADJ, ";
+        //     $query .= "LRT_SOADJ, LRT_QTYAKHIR, LRT_RPHAKHIR, LRT_AVGCOST1, LRT_AVGCOST, LRT_QTY_SELISIH_SO, LRT_RPH_SELISIH_SO, LRT_QTY_SELISIH_SOIC, LRT_RPH_SELISIH_SOIC, ";
+        //     $query .= "coalesce(lrt_rphakhir,0) - (coalesce(lrt_rphbegbal,0) + coalesce(lrt_rphbaik,0) + coalesce(lrt_rphrusak,0) + coalesce(lrt_rphadj,0) + coalesce(lrt_rph_selisih_so, 0) ";
+        //     $query .= "+ coalesce(lrt_soadj, 0) - coalesce(lrt_rphsupplier,0) - coalesce(lrt_rphhilang,0) - coalesce(lrt_rphlbaik,0) - coalesce(lrt_rphlrusak,0)) koreksi ";
+        //     $query .= "FROM TBTR_LPPRT, TBMASTER_PRODMAST ";
+        //     $query .= "WHERE LRT_PRDCD = PRD_PRDCD AND LRT_KODEIGR = PRD_KODEIGR ";
+        //     $query .= "AND TO_CHAR(LRT_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
+        //     if(count($request->plu) == 0){
+        //         $query .= "";
+        //     }else{
+        //         $query .= "AND LRT_PRDCD in ( " & implode(',', $request->plu) & " ) ";
+        //     }
+        //     $query .= "ORDER BY LRT_PRDCD ";
+        //     $data['lpp_retur'] = DB::select($query);
 
-        }elseif($request->jenis_barang == 'R' || $request->jenis_barang == 'A'){
-            $query = '';
-            $query .= "select LRS_KODEIGR, LRS_TGL1, LRS_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, ";
-            $query .= "LRS_QTYBEGBAL, LRS_RPHBEGBAL, LRS_QTYBAIK, LRS_RPHBAIK, LRS_QTYRETUR, LRS_RPHRETUR, LRS_QTYMUSNAH, LRS_RPHMUSNAH, ";
-            $query .= "LRS_QTYHILANG, LRS_RPHHILANG, LRS_QTYLBAIK, LRS_RPHLBAIK, LRS_QTYLRETUR, LRS_RPHLRETUR, LRS_QTYADJ, LRS_RPHADJ, ";
-            $query .= "LRS_SOADJ, LRS_QTYAKHIR, LRS_RPHAKHIR, LRS_AVGCOST1, LRS_AVGCOST, LRS_QTY_SELISIH_SO, LRS_RPH_SELISIH_SO, LRS_QTY_SELISIH_SOIC, LRS_RPH_SELISIH_SOIC, ";
-            $query .= "coalesce(lrs_rphakhir,0) - (coalesce(lrs_rphbegbal,0) + coalesce(lrs_rphbaik,0) + coalesce(lrs_rphretur,0) + coalesce(lrs_rphadj,0) + coalesce(lrs_rph_selisih_so, 0) ";
-            $query .= "+ coalesce(lrs_soadj, 0) - coalesce(lrs_rphmusnah,0) - coalesce(lrs_rphhilang,0) - coalesce(lrs_rphlbaik,0) - coalesce(lrs_rphlretur,0)) koreksi ";
-            $query .= "FROM TBTR_LPPRS, TBMASTER_PRODMAST ";
-            $query .= "WHERE LRS_PRDCD = PRD_PRDCD AND LRS_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LRS_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
-            if(count($request->plu) == 0){
-                $query .= "";
-            }else{
-                $query .= "AND LRS_PRDCD in ( " & implode(',', $request->plu) & " ) ";
-            }
-            $query .= "ORDER BY LRS_PRDCD ";
-            $data['lpp_rusak'] = DB::select($query);
-        }
+        // }elseif($request->jenis_barang == 'R' || $request->jenis_barang == 'A'){
+        //     $query = '';
+        //     $query .= "select LRS_KODEIGR, LRS_TGL1, LRS_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, ";
+        //     $query .= "LRS_QTYBEGBAL, LRS_RPHBEGBAL, LRS_QTYBAIK, LRS_RPHBAIK, LRS_QTYRETUR, LRS_RPHRETUR, LRS_QTYMUSNAH, LRS_RPHMUSNAH, ";
+        //     $query .= "LRS_QTYHILANG, LRS_RPHHILANG, LRS_QTYLBAIK, LRS_RPHLBAIK, LRS_QTYLRETUR, LRS_RPHLRETUR, LRS_QTYADJ, LRS_RPHADJ, ";
+        //     $query .= "LRS_SOADJ, LRS_QTYAKHIR, LRS_RPHAKHIR, LRS_AVGCOST1, LRS_AVGCOST, LRS_QTY_SELISIH_SO, LRS_RPH_SELISIH_SO, LRS_QTY_SELISIH_SOIC, LRS_RPH_SELISIH_SOIC, ";
+        //     $query .= "coalesce(lrs_rphakhir,0) - (coalesce(lrs_rphbegbal,0) + coalesce(lrs_rphbaik,0) + coalesce(lrs_rphretur,0) + coalesce(lrs_rphadj,0) + coalesce(lrs_rph_selisih_so, 0) ";
+        //     $query .= "+ coalesce(lrs_soadj, 0) - coalesce(lrs_rphmusnah,0) - coalesce(lrs_rphhilang,0) - coalesce(lrs_rphlbaik,0) - coalesce(lrs_rphlretur,0)) koreksi ";
+        //     $query .= "FROM TBTR_LPPRS, TBMASTER_PRODMAST ";
+        //     $query .= "WHERE LRS_PRDCD = PRD_PRDCD AND LRS_KODEIGR = PRD_KODEIGR ";
+        //     $query .= "AND TO_CHAR(LRS_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
+        //     if(count($request->plu) == 0){
+        //         $query .= "";
+        //     }else{
+        //         $query .= "AND LRS_PRDCD in ( " & implode(',', $request->plu) & " ) ";
+        //     }
+        //     $query .= "ORDER BY LRS_PRDCD ";
+        //     $data['lpp_rusak'] = DB::select($query);
+        // }
+
+        $data['data'] = 'wasdf';
+
+        // Generate Excel file content
+        $fileContent = Excel::raw(new LppMonthEndExport($data), \Maatwebsite\Excel\Excel::XLSX);
+
+        $excelFileName = 'LPP_MONTH_END.xlsx'; // Set your desired filename here
+        $encodedFileName = rawurlencode($excelFileName);
+
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $encodedFileName . '"',
+        ];
 
 
+        // Return Excel file content as response=
+        return response($fileContent, 200, $headers);
 
         // rowData.CreateCell(0).SetCellValue(dt.Rows(i).Item("LRS_KODEIGR").ToString)
         // rowData.CreateCell(1).SetCellValue(Format(dt.Rows(i).Item("LRS_TGL1"), "yyyy-MM-dd").ToString)

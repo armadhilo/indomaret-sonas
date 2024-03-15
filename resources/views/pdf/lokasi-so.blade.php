@@ -99,6 +99,34 @@
                         <tr>
                             <td colspan="13" style="text-align: center">Tidak Ada Data</td>
                         </tr>
+                        @else
+                        @foreach ($data as $prdcd)
+                            <tr>
+                                <td>{{ $prdcd[0]->prd_prdcd }}</td>
+                                <td colspan="12" style="text-align: left">{{ $prdcd[0]->prd_deskripsipanjang }}</td>
+                            </tr>
+                            @foreach ($prdcd as $item)
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>{{ $item->prd_kodedivisi }}</td>
+                                    <td>{{ $item->prd_kodedepartement }}</td>
+                                    <td>{{ $item->prd_kodekategoribarang }}</td>
+                                    <td>{{ $item->lso_koderak }}</td>
+                                    <td>{{ $item->lso_kodesubrak }}</td>
+                                    <td>{{ $item->lso_tiperak }}</td>
+                                    <td>{{ $item->lso_shelvingrak }}</td>
+                                    <td>{{ $item->lso_lokasi }}</td>
+                                    <td>{{ $item->ctn }}</td>
+                                    <td>{{ $item->pcs }}</td>
+                                    <td>{{ $item->lso_qty }}</td>
+                                </tr>
+                            @endforeach
+                        @endforeach
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
                         @endif
                     </tbody>
                 </table>

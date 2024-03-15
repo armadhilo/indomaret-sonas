@@ -203,23 +203,26 @@
                             @endforeach
 
                             <tr>
-                                <td colspan="6" style="text-align: right">Total Nilai Per Kategori :</td>
-                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai1, 2, '.', '') }}</td>
-                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai2, 2, '.', '') }}</td>
-                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai3, 2, '.', '') }}</td>
-                                <td colspan="3" style="text-align: right">{{ number_format($total_nilai4, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">Total Nilai Per Kategori :</td>
+                                <td colspan="4" style="text-align: right; border: 0">{{ number_format($total_nilai1, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">{{ number_format($total_nilai2, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">{{ number_format($total_nilai3, 2, '.', '') }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">{{ number_format($total_nilai4, 2, '.', '') }}</td>
+                                <td colspan="2" style="border: 0"></td>
                             </tr>
-                            {{-- <tr>
-                                <td colspan="4">Selisih (+) :</td>
-                                <td colspan="4" style="text-align: right">Rp. 50000</td>
-                                <td colspan="2" style="text-align: right">Selisih (-):</td>
-                            </tr> --}}
                             <tr>
-                                <td colspan="6" style="text-align: right">Total PLU Per Kategori :</td>
-                                <td colspan="3" style="text-align: right">{{ $total_plu1 }}</td>
-                                <td colspan="3" style="text-align: right">{{ $total_plu2 }}</td>
-                                <td colspan="3" style="text-align: right">{{ $total_plu3 }}</td>
-                                <td colspan="3" style="text-align: right">{{ $total_plu4 }}</td>
+                                <td colspan="4" style="text-align: right; border: 0">Selisih (+) :</td>
+                                <td colspan="4" style="text-align: right; border: 0">{{ number_format($total_nilai4, 2, '.', '') }}</td>
+                                <td colspan="2" style="text-align: right; border: 0">Selisih (-) :</td>
+                                <td colspan="8" style="border: 0"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="text-align: right; border: 0">Total PLU Per Kategori :</td>
+                                <td colspan="4" style="text-align: right; border: 0">{{ $total_plu1 }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">{{ $total_plu2 }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">{{ $total_plu3 }}</td>
+                                <td colspan="3" style="text-align: right; border: 0">{{ $total_plu4 }}</td>
+                                <td colspan="2" style="border: 0"></td>
                             </tr>
                             @endforeach
                         @endforeach

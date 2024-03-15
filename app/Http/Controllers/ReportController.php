@@ -1017,7 +1017,7 @@ class ReportController extends Controller
         return $data;
     }
 
-    //* PDF Belum Diintegrasikan dengan $data
+    //! DONE
     public function reportLokasiSo(ReportLokasiSoRequest $request){
 
         //! GET NAMA PERUSAHAAN
@@ -1026,8 +1026,8 @@ class ReportController extends Controller
             ->first();
 
         $query = '';
-        $query .= "select lso_koderak, lso_kodesubrak, lso_tiperak || '.' || lso_shelvingrak || '.' || lso_nourut as lokasi, ";
-        $query .= "lso_prdcd, prd_deskripsipanjang, lso_tglso, lso_flagsarana ";
+        $query .= "select lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut, lso_lokasi, lso_qty, ";
+        $query .= "lso_prdcd, prd_deskripsipanjang, lso_tglso, lso_flagsarana, prd_kodedivisi, prd_prdcd, prd_kodedepartement, prd_kodekategoribarang, FLOOR (LSO_QTY / PRD_FRAC) CTN, MOD (LSO_QTY, PRD_FRAC) PCS  ";
         $query .= "from TBTR_LOKASI_SO, TBMASTER_PRODMAST ";
         $query .= "where LSO_PRDCD = PRD_PRDCD ";
         if(isset($request->raksubrak)){
@@ -1041,8 +1041,8 @@ class ReportController extends Controller
         $query .= "and lso_flagsarana= '" & $request->sarana & "' ";
         $query .= "and lso_flaglimit= 'Y' ";
         $query .= "and DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" & $request->tanggal_start_so & "','YYYY-MM-DD') ";
-        $query .= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut LIMIT 4";
-        $data['data'] = DB::select($query);
+        $query .= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut ";
+        $data['data'] = collect(DB::select($query))->groupBy(['lso_prdcd'])->slice(0, 10); //! DUMMY SLICE NYA
 
         $pdf = PDF::loadView('pdf.lokasi-so', $data);
         if ($request->method() === 'GET') {

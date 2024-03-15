@@ -100,7 +100,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $total_total = 0;
+                        @endphp
                         @foreach ($data as $item)
+                        @php
+                            $total_total += $item->total;
+                        @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->lso_prdcd }}</td>
@@ -110,7 +116,7 @@
                             <td>{{ $item->pcs }}</td>
                             <td>{{ $item->lso_qty }}</td>
                             <td>{{ number_format($item->st_avgcostmonthend, 2, '.', '') }}</td>
-                            <td style="text-align: right;">{{ $item->total }}</td>
+                            <td style="text-align: right;">{{ number_format($item->total, 2, '.', '') }}</td>
                             <td>{{ $item->lso_modify_by }}</td>
                         </tr>
                         @endforeach
@@ -118,27 +124,27 @@
                     <tfoot>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Shelving</td>
-                            <td style="text-align: right;">Rp. 00 (dummy)</td>
+                            <td style="text-align: right;">{{ number_format($total_total, 2, '.', '') }}</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Tipe Rak</td>
-                            <td style="text-align: right;">Rp. 00 (dummy)</td>
+                            <td style="text-align: right;">{{ number_format($total_total, 2, '.', '') }}</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Sub Rak</td>
-                            <td style="text-align: right;">Rp. 00 (dummy)</td>
+                            <td style="text-align: right;">{{ number_format($total_total, 2, '.', '') }}</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="8" style="text-align: right;">Total Per Kode Rak</td>
-                            <td style="text-align: right;">Rp. 00 (dummy)</td>
+                            <td style="text-align: right;">{{ number_format($total_total, 2, '.', '') }}</td>
                             <td></td>
                         </tr>
                         <tr style="border: 1px solid gray; background: #E9E7E7">
                             <td colspan="8" style="text-align: center; font-weight: 700">TOTAL AKHIR</td>
-                            <td style="text-align: right; font-weight: 700">Rp. 00 (dummy)</td>
+                            <td style="text-align: right; font-weight: 700">{{ number_format($total_total, 2, '.', '') }}</td>
                             <td></td>
                         </tr>
                     </tfoot>

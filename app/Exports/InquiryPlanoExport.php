@@ -21,7 +21,7 @@ class InquiryPlanoExport implements FromView, WithColumnWidths
     public function view(): View
     {
         return view('pdf.inquiry-plano-sonas', [
-            'data' => $this->data['data'], // Pass data to the view
+            'data' => $this->data, // Pass data to the view
         ]);
     }
 
@@ -32,5 +32,5 @@ class InquiryPlanoExport implements FromView, WithColumnWidths
             'B' => 15,
         ];
     }
-    
+
 }

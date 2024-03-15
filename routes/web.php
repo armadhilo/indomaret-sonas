@@ -7,6 +7,7 @@ use App\Http\Controllers\InputLokasiController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProsesBaSoController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SetLimitSoController;
 use App\Http\Controllers\SettingJalur;
 use App\Http\Controllers\SettingJalurHHController;
 use Illuminate\Support\Facades\Redirect;
@@ -185,6 +186,15 @@ Route::middleware(['mylogin'])->group(function () {
             Route::get('/', [ReportController::class, 'index']);
             Route::post('/show-pdf', [ReportController::class, 'reportLokasiSo']);
             Route::get('/pdf', [ReportController::class, 'reportLokasiSo']);
+        });
+    });
+
+    Route::group(['prefix' => 'set-limit-so'], function(){
+        Route::get('/', [SetLimitSoController::class, 'index']);
+
+        Route::group(['prefix' => 'action'], function(){
+            Route::get('/datatables/{tahap}/{tglSO}', [SetLimitSoController::class, 'loadDatatables']);
+            Route::post('/proses-ba-so', [SetLimitSoController::class, 'prosesBaSo']);
         });
     });
 });

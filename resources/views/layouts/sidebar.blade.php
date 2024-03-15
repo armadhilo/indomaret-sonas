@@ -64,16 +64,11 @@
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Reset SO</span></a>
     </li> --}}
-    {{-- <li class="nav-item">
-        <a class="nav-link" href="{{ url('/report') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Report</span></a>
-    </li> --}}
-    {{-- <li class="nav-item">
+    <li class="nav-item">
         <a class="nav-link" href="{{ url('/set-limit-so') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Set Limit SO</span></a>
-    </li> --}}
+    </li>
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

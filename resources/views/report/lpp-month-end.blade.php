@@ -97,7 +97,7 @@
                                     <div class="form-group d-flex align-items-center">
                                         <label class="label-form" for="priode">Priode <span>:</span></label>
                                         <div class="d-flex align-items-center" style="gap: 20px">
-                                            <input type="month" class="form-control" name="" id="priode">
+                                            <input type="month" class="form-control" name="priode" id="priode">
                                         </div>
                                     </div>
                                     <div class="form-group d-flex align-items-center">
@@ -334,7 +334,7 @@
                 $.ajax({
                     url: "/report/lpp-month-end/action/cetak-lpp",
                     type: "POST",
-                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), priode: $("[name=priode]").val()},
+                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), priode: $("#priode").val()},
                     xhrFields: {
                         responseType: 'blob' // Important for binary data
                     },

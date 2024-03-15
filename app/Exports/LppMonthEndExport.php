@@ -20,9 +20,7 @@ class LppMonthEndExport implements FromView, WithColumnWidths
 
     public function view(): View
     {
-        return view('pdf.lpp-month-end', [
-            'data' => $this->data['data'], // Pass data to the view
-        ]);
+        return view('pdf.lpp-month-end', $this->data);
     }
 
     public function columnWidths(): array

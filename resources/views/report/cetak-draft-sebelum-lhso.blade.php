@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-    <h1 class="pagetitle">CETAK DRAFT RETR SEBELUM LHSO</h1>
+    <h1 class="pagetitle">CETAK DRAFT RETUR SEBELUM LHSO</h1>
 @endsection
 
 @section('css')

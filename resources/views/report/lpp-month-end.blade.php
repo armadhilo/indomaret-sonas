@@ -97,7 +97,7 @@
                                     <div class="form-group d-flex align-items-center">
                                         <label class="label-form" for="priode">Priode <span>:</span></label>
                                         <div class="d-flex align-items-center" style="gap: 20px">
-                                            <input type="month" class="form-control" name="" id="priode">
+                                            <input type="month" class="form-control" name="priode" id="priode">
                                         </div>
                                     </div>
                                     <div class="form-group d-flex align-items-center">
@@ -334,17 +334,23 @@
                 $.ajax({
                     url: "/report/lpp-month-end/action/cetak-lpp",
                     type: "POST",
-                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), priode: $("[name=priode]").val()},
+                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), priode: $("#priode").val()},
                     xhrFields: {
                         responseType: 'blob' // Important for binary data
                     },
                     success: function(response) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-                        var blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                        var link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = 'LPP MONTH END.xlsx';
-                        link.click();
+                        var contentType = response.type;
+                        var blob = new Blob([response], { type: contentType });
+                        var downloadUrl = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = downloadUrl;    
+                        var fileName = 'LPP_MONTH_END.xlsx';
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(downloadUrl);
+                        document.body.removeChild(a);
                     },error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire({

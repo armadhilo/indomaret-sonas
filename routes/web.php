@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MonitoringSoController;
 use App\Http\Controllers\ProsesBaSoController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SetLimitSoController;
 use App\Http\Controllers\SettingJalur;
 use App\Http\Controllers\SettingJalurHHController;
 use Illuminate\Support\Facades\Redirect;
@@ -191,8 +192,18 @@ Route::middleware(['mylogin'])->group(function () {
 
     Route::group(['prefix' => 'monitoring'], function(){
         Route::get('/', [MonitoringSoController::class, 'index']);
+
         Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
         Route::get('/datatables', [MonitoringSoController::class, 'datatables']);
         Route::get('/print-struk-so/{KodeRak}/{KodeSubRak}/{TipeRak}/{ShelvingRak}/{tanggal_start_so}', [MonitoringSoController::class, 'printStrukSO']);
+    });
+
+    Route::group(['prefix' => 'set-limit-so'], function(){
+        Route::get('/', [SetLimitSoController::class, 'index']);
+
+        Route::group(['prefix' => 'action'], function(){
+            Route::get('/datatables/{tahap}/{tglSO}', [SetLimitSoController::class, 'loadDatatables']);
+            Route::post('/proses-ba-so', [SetLimitSoController::class, 'prosesBaSo']);
+        });
     });
 });

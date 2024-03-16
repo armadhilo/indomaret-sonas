@@ -24,21 +24,24 @@ class SetLimitSoController extends Controller
             ->get();
 
         if(count($dtCek) == 0){
-            return ApiFormatter::error(400, 'SO BELUM DI-INITIAL');
+            $check_error = "SO belum diinitial";
+            return view('set-limit-so', compact('check_error'));
         }else{
             if($dtCek[0]->mso_flagsum <> ''){
-                return ApiFormatter::error(400, 'SO sudah diproses BA');
+                $check_error = "SO sudah diproses BA";
+                return view('set-limit-so', compact('check_error'));
             }
 
             if($dtCek[0]->mso_flaglimit <> ''){
-                return ApiFormatter::error(400, 'Setting Limit Item untuk tahap ini sudah dilakukan');
+                $check_error = "Setting Limit Item untuk tahap ini sudah dilakukan";
+                return view('set-limit-so', compact('check_error'));
             }
         }
 
         $data['tahap'] = $dtCek[0]->mso_flagtahap;
         $data['tglSO'] = $dtCek[0]->mso_tglso;
 
-        return view('proses-ba-so');
+        return view('set-limit-so', $data);
     }
 
     public function loadDatatables($tahap, $tglSO){

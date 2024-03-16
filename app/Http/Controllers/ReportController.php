@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\InquiryPlanoExport;
+use App\Exports\LppMonthEndExport;
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
 use App\Http\Requests\reportCetakDraftLhsoRequest;
@@ -660,6 +661,10 @@ class ReportController extends Controller
     public function reportLppMonthEndExcelActionCetak(Request $request){
         //? jika checklist all PLU maka parameter plu isi array kosong aja
 
+        $date = Carbon::parse($request->priode);
+
+        $data['priode'] = $date->format('F Y');
+
         if($request->jenis_barang == 'B' || $request->jenis_barang == 'A'){
             $query = '';
             $query .= "SELECT LPP_KODEIGR, LPP_TGL1, LPP_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC,  ";
@@ -681,9 +686,9 @@ class ReportController extends Controller
             }
             $query .= "ORDER BY LPP_PRDCD ";
             $data['lpp_baik'] = DB::select($query);
+        }
 
-
-        }elseif($request->jenis_barang == 'T' || $request->jenis_barang == 'A'){
+        if($request->jenis_barang == 'T' || $request->jenis_barang == 'A'){
             $query = '';
             $query .= "select LRT_KODEIGR ,LRT_TGL1, LRT_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, ";
             $query .= "LRT_QTYBEGBAL, LRT_RPHBEGBAL, LRT_QTYBAIK, LRT_RPHBAIK, LRT_QTYRUSAK, LRT_RPHRUSAK, LRT_QTYSUPPLIER, LRT_RPHSUPPLIER, ";
@@ -701,8 +706,9 @@ class ReportController extends Controller
             }
             $query .= "ORDER BY LRT_PRDCD ";
             $data['lpp_retur'] = DB::select($query);
+        }
 
-        }elseif($request->jenis_barang == 'R' || $request->jenis_barang == 'A'){
+        if($request->jenis_barang == 'R' || $request->jenis_barang == 'A'){
             $query = '';
             $query .= "select LRS_KODEIGR, LRS_TGL1, LRS_TGL2, PRD_KODEDIVISI, PRD_KODEDEPARTEMENT, PRD_KODEKATEGORIBARANG, PRD_PRDCD, PRD_DESKRIPSIPANJANG, PRD_UNIT, PRD_FRAC, ";
             $query .= "LRS_QTYBEGBAL, LRS_RPHBEGBAL, LRS_QTYBAIK, LRS_RPHBAIK, LRS_QTYRETUR, LRS_RPHRETUR, LRS_QTYMUSNAH, LRS_RPHMUSNAH, ";
@@ -722,7 +728,20 @@ class ReportController extends Controller
             $data['lpp_rusak'] = DB::select($query);
         }
 
+        // Generate Excel file content
+        $fileContent = Excel::raw(new LppMonthEndExport($data), \Maatwebsite\Excel\Excel::XLSX);
 
+        $excelFileName = 'LPP_MONTH_END.xlsx'; // Set your desired filename here
+        $encodedFileName = rawurlencode($excelFileName);
+
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $encodedFileName . '"',
+        ];
+
+
+        // Return Excel file content as response=
+        return response($fileContent, 200, $headers);
 
         // rowData.CreateCell(0).SetCellValue(dt.Rows(i).Item("LRS_KODEIGR").ToString)
         // rowData.CreateCell(1).SetCellValue(Format(dt.Rows(i).Item("LRS_TGL1"), "yyyy-MM-dd").ToString)

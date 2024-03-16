@@ -49,7 +49,7 @@ class MonitoringSoController extends Controller
         // $query .= "      AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' AND LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND (LSO_KODERAK NOT LIKE 'L%' OR LSO_TIPERAK NOT LIKE 'Z%')";
         $query .= "      GROUP BY lso_koderak ";
         $query .= " ) AS DATAS";
-        $data['toko'] = DB::select($query);
+        $data['toko'] = collect(DB::select($query))->last();
         //* _toko = dr.Item("PROGRESS").ToString
 
         //! DETAIL TOKO
@@ -84,7 +84,7 @@ class MonitoringSoController extends Controller
         // $query .= "      AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' AND (Lso_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR (LSO_KODERAK  LIKE 'L%' AND LSO_TIPERAK  LIKE 'Z%'))";
         $query .= "      GROUP BY lso_koderak ";
         $query .= ")AS DATAS ";
-        $data['gudang'] = DB::select($query);
+        $data['gudang'] = collect(DB::select($query))->last();
 
         //* _toko = dr.Item("PROGRESS").ToString
 
@@ -111,6 +111,48 @@ class MonitoringSoController extends Controller
         // TreeView1.Nodes("GUDANG").Nodes(dr.Item("LSO_KODERAK").ToString).Nodes.Add("1")
 
         return $data;
+    }
+
+    public function showLevel2($lso_koderak){
+        $query = '';
+        $query .= "select distinct lso_kodesubrak ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
+        // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
+        $query .= "AND LSO_KODERAK = '" . $lso_koderak . "' ";
+        $query .= "ORDER BY lso_kodesubrak ";
+        $data = DB::select($query);
+
+        return ApiFormatter::success(200, 'Level 2 berhasil ditampilkan', $data);
+    }
+
+    public function showLevel3($lso_koderak, $lso_kodesubrak){
+        $query = '';
+        $query .= "select distinct lso_tiperak ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
+        // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
+        $query .= "AND LSO_KODERAK = '" . $lso_koderak . "' ";
+        $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
+        $query .= "ORDER BY lso_tiperak ";
+        $data = DB::select($query);
+
+        return ApiFormatter::success(200, 'Level 3 berhasil ditampilkan', $data);
+    }
+
+    public function showLevel4($lso_koderak, $lso_kodesubrak, $lso_tiperak){
+        $query = '';
+        $query .= "select distinct lso_shelvingrak ";
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
+        // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
+        $query .= "AND LSO_KODERAK = '" . $lso_koderak . "' ";
+        $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
+        $query .= "AND LSO_TIPERAK = '" . $lso_tiperak . "' ";
+        $query .= "ORDER BY lso_shelvingrak ";
+        $data = DB::select($query);
+
+        return ApiFormatter::success(200, 'Level 4 berhasil ditampilkan', $data);
     }
 
     public function datatables(MonitoringRequest $request){
@@ -145,20 +187,25 @@ class MonitoringSoController extends Controller
             $query = '';
             $query .= "SELECT LSO_LOKASI, LSO_NOURUT, PRD_PRDCD, PRD_DESKRIPSIPENDEK, PRD_UNIT, PRD_FRAC, LSO_QTY, LSO_MODIFY_BY, coalesce(ST_AVGCOST, 0) AS ST_AVGCOST ";
             $query .= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI, TBMASTER_PRODMAST ";
-            $query .= "WHERE DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $tanggal_start_so . "', 'YYYY-MM-DD') ";
-            $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' ";
-            $query .= "AND LSO_KODERAK = '" . $KodeRak . "' ";
-            $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
-            $query .= "AND LSO_KODESUBRAK = '" . $KodeSubRak . "' ";
-            $query .= "AND LSO_TIPERAK = '" . $TipeRak . "' ";
-            $query .= "AND LSO_SHELVINGRAK = '" . $ShelvingRak . "' ";
-            $query .= "ORDER BY LSO_NOURUT ASC";
+            // $query .= "WHERE DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $tanggal_start_so . "', 'YYYY-MM-DD') ";
+            // $query .= "AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' ";
+            // $query .= "AND LSO_KODERAK = '" . $KodeRak . "' ";
+            // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
+            // $query .= "AND LSO_KODESUBRAK = '" . $KodeSubRak . "' ";
+            // $query .= "AND LSO_TIPERAK = '" . $TipeRak . "' ";
+            // $query .= "AND LSO_SHELVINGRAK = '" . $ShelvingRak . "' ";
+            $query .= "ORDER BY LSO_NOURUT ASC ";
+            //! dummy
+            $query .= 'LIMIT 10';
             $data = DB::select($query);
+
+            return $data;
 
             if(count($data) == 0){
                 return ApiFormatter::error(400, 'Tidak ada data yang dicetak');
             }
 
+            //! dummy
             $check = collect($data)->where('LSO_MODIFY_BY', '');
             if(count($check)){
                 return ApiFormatter::error(400, 'Ada item yang belum di SO!');

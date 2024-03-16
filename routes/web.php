@@ -5,6 +5,7 @@ use App\Http\Controllers\InitialSoController;
 use App\Http\Controllers\InputKksoController;
 use App\Http\Controllers\InputLokasiController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MonitoringSoController;
 use App\Http\Controllers\ProsesBaSoController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingJalur;
@@ -186,5 +187,12 @@ Route::middleware(['mylogin'])->group(function () {
             Route::post('/show-pdf', [ReportController::class, 'reportLokasiSo']);
             Route::get('/pdf', [ReportController::class, 'reportLokasiSo']);
         });
+    });
+
+    Route::group(['prefix' => 'monitoring'], function(){
+        Route::get('/', [MonitoringSoController::class, 'index']);
+        Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
+        Route::get('/datatables', [MonitoringSoController::class, 'datatables']);
+        Route::get('/print-struk-so/{KodeRak}/{KodeSubRak}/{TipeRak}/{ShelvingRak}/{tanggal_start_so}', [MonitoringSoController::class, 'printStrukSO']);
     });
 });

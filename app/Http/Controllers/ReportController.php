@@ -291,7 +291,7 @@ class ReportController extends Controller
         }
 
         if($request->check_rpt_audit == 1){
-            $dtCek = DB::select("SELECT DISTINCT LSI_PRDCD FROM TBTR_LOKASI_SO_EY WHERE DATE_TRUNC('DAY',LSI_TGLSO) = TO_DATE('" & $request->tanggal_start_so & "', 'YYYY-MM-DD')");
+            $dtCek = DB::select("SELECT DISTINCT LSI_PRDCD FROM TBTR_LOKASI_SO_EY WHERE DATE_TRUNC('DAY',LSI_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD')");
             if(count($dtCek) > 0){
                 if($request->selisih_so != '1'){
                     $query .= "AND ";
@@ -673,11 +673,11 @@ class ReportController extends Controller
             $query .= "coalesce(lpp_rphhilang,0) - coalesce(lpp_rphlainout,0) + coalesce(lpp_rphintransit,0) + coalesce(lpp_rphadj, 0) + coalesce(lpp_soadj, 0)) koreksi ";
             $query .= "FROM TBTR_LPP, TBMASTER_PRODMAST ";
             $query .= "WHERE LPP_PRDCD = PRD_PRDCD AND LPP_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LPP_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
+            $query .= "AND TO_CHAR(LPP_TGL1, 'MM-YYYY') = '" . Carbon::parse($request->periode)->format('m-Y') . "' ";
             if(count($request->plu) == 0){
                 $query .= "";
             }else{
-                $query .= "AND LPP_PRDCD in ( " & implode(',', $request->plu) & " ) ";
+                $query .= "AND LPP_PRDCD in ( " . implode(',', $request->plu) . " ) ";
             }
             $query .= "ORDER BY LPP_PRDCD ";
             $data['lpp_baik'] = DB::select($query);
@@ -693,11 +693,11 @@ class ReportController extends Controller
             $query .= "+ coalesce(lrt_soadj, 0) - coalesce(lrt_rphsupplier,0) - coalesce(lrt_rphhilang,0) - coalesce(lrt_rphlbaik,0) - coalesce(lrt_rphlrusak,0)) koreksi ";
             $query .= "FROM TBTR_LPPRT, TBMASTER_PRODMAST ";
             $query .= "WHERE LRT_PRDCD = PRD_PRDCD AND LRT_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LRT_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
+            $query .= "AND TO_CHAR(LRT_TGL1, 'MM-YYYY') = '" . Carbon::parse($request->periode)->format('m-Y') . "' ";
             if(count($request->plu) == 0){
                 $query .= "";
             }else{
-                $query .= "AND LRT_PRDCD in ( " & implode(',', $request->plu) & " ) ";
+                $query .= "AND LRT_PRDCD in ( " . implode(',', $request->plu) . " ) ";
             }
             $query .= "ORDER BY LRT_PRDCD ";
             $data['lpp_retur'] = DB::select($query);
@@ -712,11 +712,11 @@ class ReportController extends Controller
             $query .= "+ coalesce(lrs_soadj, 0) - coalesce(lrs_rphmusnah,0) - coalesce(lrs_rphhilang,0) - coalesce(lrs_rphlbaik,0) - coalesce(lrs_rphlretur,0)) koreksi ";
             $query .= "FROM TBTR_LPPRS, TBMASTER_PRODMAST ";
             $query .= "WHERE LRS_PRDCD = PRD_PRDCD AND LRS_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LRS_TGL1, 'MM-YYYY') = '" & Carbon::parse($request->periode)->format('m-Y') & "' ";
+            $query .= "AND TO_CHAR(LRS_TGL1, 'MM-YYYY') = '" . Carbon::parse($request->periode)->format('m-Y') . "' ";
             if(count($request->plu) == 0){
                 $query .= "";
             }else{
-                $query .= "AND LRS_PRDCD in ( " & implode(',', $request->plu) & " ) ";
+                $query .= "AND LRS_PRDCD in ( " . implode(',', $request->plu) . " ) ";
             }
             $query .= "ORDER BY LRS_PRDCD ";
             $data['lpp_rusak'] = DB::select($query);
@@ -1038,9 +1038,9 @@ class ReportController extends Controller
         }else{
             $query .= "";
         }
-        $query .= "and lso_flagsarana= '" & $request->sarana & "' ";
+        $query .= "and lso_flagsarana= '" . $request->sarana . "' ";
         $query .= "and lso_flaglimit= 'Y' ";
-        $query .= "and DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" & $request->tanggal_start_so & "','YYYY-MM-DD') ";
+        $query .= "and DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
         $query .= "order by lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut ";
         $data['data'] = collect(DB::select($query))->groupBy(['lso_prdcd'])->slice(0, 10); //! DUMMY SLICE NYA
 

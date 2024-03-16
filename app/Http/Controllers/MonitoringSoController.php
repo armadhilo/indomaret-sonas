@@ -7,6 +7,7 @@ use App\Helper\DatabaseConnection;
 use App\Http\Requests\MonitoringRequest;
 use App\Http\Requests\ProsesBaSoRequest;
 use Carbon\Carbon;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -113,47 +114,57 @@ class MonitoringSoController extends Controller
         return $data;
     }
 
-    public function showLevel2($lso_koderak){
+    public function showLevel($lso_koderak, $lso_kodesubrak = null, $lso_tiperak = null){
         $query = '';
-        $query .= "select distinct lso_kodesubrak ";
+        if($lso_tiperak != null) $query .= "select distinct lso_shelvingrak ";
+        elseif($lso_kodesubrak != null) $query .= "select distinct lso_tiperak ";
+        else $query .= "select distinct lso_kodesubrak ";
+
         $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
-        $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
+        // $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
         // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
-        $query .= "AND LSO_KODERAK = '" . $lso_koderak . "' ";
-        $query .= "ORDER BY lso_kodesubrak ";
+        $query .= "WHERE LSO_KODERAK = '" . $lso_koderak . "' ";
+        if($lso_kodesubrak != null) $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
+        if($lso_tiperak != null)  $query .= "AND LSO_TIPERAK = '" . $lso_tiperak . "' ";
+
+        if($lso_tiperak != null) $query .= "ORDER BY lso_shelvingrak ";
+        elseif($lso_kodesubrak != null) $query .= "ORDER BY lso_tiperak ";
+        else $query .= "ORDER BY lso_kodesubrak ";
+
         $data = DB::select($query);
 
-        return ApiFormatter::success(200, 'Level 2 berhasil ditampilkan', $data);
+        return ApiFormatter::success(200, 'Show level berhasil ditampilkan', $data);
     }
 
-    public function showLevel3($lso_koderak, $lso_kodesubrak){
-        $query = '';
-        $query .= "select distinct lso_tiperak ";
-        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
-        $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
-        // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
-        $query .= "AND LSO_KODERAK = '" . $lso_koderak . "' ";
-        $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
-        $query .= "ORDER BY lso_tiperak ";
-        $data = DB::select($query);
+    // private function recursive($level, $lso_koderak = null, $lso_kodesubrak = null, $lso_tiperak = null){
+    //     $array = [];
+    //     if($level == 1){
+    //         $data = $this->showLevel2($lso_koderak);
+    //         foreach($data as $item){
+    //             $array[] = [
+    //                 'data' => $item->lso_kodesubrak,
+    //                 'lso_tiperak' => $this->recursive(2, $lso_koderak, $item->lso_kodesubrak)
+    //             ];
+    //         }
+    //     }elseif($level == 2){
+    //         $data = $this->showLevel3($lso_koderak, $lso_kodesubrak);
+    //         foreach($data as $item){
+    //             $array[] = [
+    //                 'data' => $item->lso_tiperak,
+    //                 'lso_shelving' => $this->recursive(3, $lso_koderak, $lso_kodesubrak, $item->lso_tiperak)
+    //             ];
+    //         }
+    //     }elseif($level == 3){
+    //         $data = $this->showLevel4($lso_koderak, $lso_kodesubrak, $lso_tiperak);
+    //         foreach($data as $item){
+    //             $array[] = [
+    //                 'data' => $item->lso_shelvingrak,
+    //             ];
+    //         }
+    //     }
 
-        return ApiFormatter::success(200, 'Level 3 berhasil ditampilkan', $data);
-    }
-
-    public function showLevel4($lso_koderak, $lso_kodesubrak, $lso_tiperak){
-        $query = '';
-        $query .= "select distinct lso_shelvingrak ";
-        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
-        $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
-        // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
-        $query .= "AND LSO_KODERAK = '" . $lso_koderak . "' ";
-        $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
-        $query .= "AND LSO_TIPERAK = '" . $lso_tiperak . "' ";
-        $query .= "ORDER BY lso_shelvingrak ";
-        $data = DB::select($query);
-
-        return ApiFormatter::success(200, 'Level 4 berhasil ditampilkan', $data);
-    }
+    //     return $array;
+    // }
 
     public function datatables(MonitoringRequest $request){
         $query = '';
@@ -183,7 +194,48 @@ class MonitoringSoController extends Controller
             ->make(true);
     }
 
-    public function printStrukSO($KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak, $tanggal_start_so){
+    private function privateShowLevel($lso_koderak, $lso_kodesubrak = null, $lso_tiperak = null){
+        $query = '';
+        if($lso_tiperak != null) $query .= "select distinct lso_shelvingrak ";
+        elseif($lso_kodesubrak != null) $query .= "select distinct lso_tiperak ";
+        else $query .= "select distinct lso_kodesubrak ";
+
+        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
+        // $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
+        // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
+        $query .= "WHERE LSO_KODERAK = '" . $lso_koderak . "' ";
+        if($lso_kodesubrak != null) $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
+        if($lso_tiperak != null)  $query .= "AND LSO_TIPERAK = '" . $lso_tiperak . "' ";
+
+        if($lso_tiperak != null) $query .= "ORDER BY lso_shelvingrak ";
+        elseif($lso_kodesubrak != null) $query .= "ORDER BY lso_tiperak ";
+        else $query .= "ORDER BY lso_kodesubrak ";
+
+        $data = DB::select($query);
+
+        return ApiFormatter::success(200, 'Level 4 berhasil ditampilkan', $data);
+    }
+
+    public function printStrukSO($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak = null, $ShelvingRak = null){
+        if($TipeRak == null){
+            $data = $this->privateShowLevel($KodeRak, $KodeSubRak);
+            foreach($data as $item){
+                $data2 = $this->privateShowLevel($KodeRak, $KodeSubRak, $item->lso_tiperak);
+                foreach($data2 as $item2){
+                    $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $item->lso_tiperak, $item2->lso_shelvingrak);
+                }
+            }
+        }elseif($ShelvingRak == null){
+            $data2 = $this->privateShowLevel($KodeRak, $KodeSubRak, $TipeRak);
+            foreach($data2 as $item2){
+                $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $item2->lso_shelvingrak);
+            }
+        }else{
+            $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak);
+        }
+    }
+
+    private function generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak){
             $query = '';
             $query .= "SELECT LSO_LOKASI, LSO_NOURUT, PRD_PRDCD, PRD_DESKRIPSIPENDEK, PRD_UNIT, PRD_FRAC, LSO_QTY, LSO_MODIFY_BY, coalesce(ST_AVGCOST, 0) AS ST_AVGCOST ";
             $query .= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI, TBMASTER_PRODMAST ";
@@ -202,13 +254,13 @@ class MonitoringSoController extends Controller
             return $data;
 
             if(count($data) == 0){
-                return ApiFormatter::error(400, 'Tidak ada data yang dicetak');
+                throw new HttpResponseException(ApiFormatter::error(404, "Tidak ada data yang dicetak [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
             }
 
             //! dummy
             $check = collect($data)->where('LSO_MODIFY_BY', '');
             if(count($check)){
-                return ApiFormatter::error(400, 'Ada item yang belum di SO!');
+                throw new HttpResponseException(ApiFormatter::error(404, "Ada item yang belum di SO! [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
             }
 
             $lokasi = 'Rusak';
@@ -219,6 +271,7 @@ class MonitoringSoController extends Controller
             }
 
             //! CETAK  .TXT
+            //! INI NEK BISA DI JADIKAN .ZIP AJA
             //         s &= "========================================" & vbCrLf
             //         s &= StrCenter("LISTING ITEM SO", 40) & vbCrLf
             //         s &= "========================================" & vbCrLf

@@ -194,12 +194,10 @@ Route::middleware(['mylogin'])->group(function () {
         Route::get('/', [MonitoringSoController::class, 'index']);
 
         Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
-        Route::get('/get-monitoring-level-2/{lso_koderak}', [MonitoringSoController::class, 'showLevel2']);
-        Route::get('/get-monitoring-level-3/{lso_kodesubrak}/{lso_tiperak}', [MonitoringSoController::class, 'showLevel3']);
-        Route::get('/get-monitoring-level-4/{lso_koderak}/{lso_kodesubrak}/{lso_tiperak}', [MonitoringSoController::class, 'showLevel4']);
+        Route::get('/get-monitoring-level/{lso_koderak}/{lso_kodesubrak?}/{lso_tiperak?}', [MonitoringSoController::class, 'showLevel']);
 
         Route::get('/datatables', [MonitoringSoController::class, 'datatables']);
-        Route::get('/print-struk-so/{KodeRak}/{KodeSubRak}/{TipeRak}/{ShelvingRak}/{tanggal_start_so}', [MonitoringSoController::class, 'printStrukSO']);
+        Route::get('/print-struk-so/{tanggal_start_so}/{KodeRak}/{KodeSubRak}/{TipeRak?}/{ShelvingRak?}', [MonitoringSoController::class, 'printStrukSO']);
     });
 
     Route::group(['prefix' => 'set-limit-so'], function(){

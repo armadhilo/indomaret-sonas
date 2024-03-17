@@ -25,16 +25,16 @@ class MonitoringSoController extends Controller
             ->whereNull('mso_flagreset')
             ->get();
 
-        if(count($dtCek) == 0){
-            return ApiFormatter::error(400, 'SO BELUM DI-INITIAL');
-        }else{
-            if($dtCek[0]->mso_flaglimit == ''){
-                return ApiFormatter::error(400, 'Setting limit item untuk tahap ini belum disetting');
-            }
-        }
+        // if(count($dtCek) == 0){
+        //     return ApiFormatter::error(400, 'SO BELUM DI-INITIAL');
+        // }else{
+        //     if($dtCek[0]->mso_flaglimit == ''){
+        //         return ApiFormatter::error(400, 'Setting limit item untuk tahap ini belum disetting');
+        //     }
+        // }
 
 
-        return view('proses-ba-so');
+        return view('monitoring-so');
     }
 
     public function getMonitoring(){

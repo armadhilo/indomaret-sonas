@@ -56,6 +56,9 @@ class ReportController extends Controller
         } else if($currentView == "cetak-draft-lhso"){
             $customPaper = array(0, 0, 795, 620);
             $pdf->setPaper($customPaper);
+        } else if ($currentView == "cetak-draft-sebelum-lhso"){
+            $customPaper = array(0, 0, 796, 620);
+            $pdf->setPaper($customPaper);
         }
         return $pdf->stream();
     }
@@ -864,13 +867,13 @@ class ReportController extends Controller
         $FlagTahap = $dtCek[0]->mso_flagtahap;
         $request->merge(['TglSO' => $dtCek[0]->mso_tglso]);
 
-        if($request->tahap != 1){
+        // if($request->tahap != 1){
 
-            if($FlagTahap != $request->tahap){
-                return ApiFormatter::error(400, 'Saat ini Proses Tahap ke ' . $request->tahap . ' !');
-            }
+        //     if($FlagTahap != $request->tahap){
+        //         return ApiFormatter::error(400, 'Saat ini Proses Tahap ke ' . $request->tahap . ' !');
+        //     }
 
-        }
+        // }
 
         if(isset($request->tahap)){
             $request->merge(['tahap' => str_pad($request->tahap, 2, "0", STR_PAD_LEFT)]);
@@ -885,6 +888,22 @@ class ReportController extends Controller
         }else{
             $data['data'] = $this->LoadReport2($request);
         }
+
+        switch ($request->jenis_barang) {
+            case '01':
+                $textJenisBarang = 'BAIK';
+                break;
+            case '02':
+                $textJenisBarang = 'RETUR';
+                break;
+            default:
+                $textJenisBarang = 'RUSAK';
+                break;
+        }
+
+        $request->merge(['textJenisBarang' => $textJenisBarang]);
+
+        $data['request'] = $request;
 
         $pdf = PDF::loadView('pdf.cetak-draft-lhso', $data);
         $customPaper = array(0, 0, 795, 620);
@@ -1069,7 +1088,30 @@ class ReportController extends Controller
         $query .= ") p ORDER BY ABS(NILAI_SELISIH) DESC ";
         $data['data'] = DB::select($query);
 
-        return $data;
+        switch ($request->jenis_barang) {
+            case '01':
+                $textJenisBarang = 'BAIK';
+                break;
+            case '02':
+                $textJenisBarang = 'RETUR';
+                break;
+            default:
+                $textJenisBarang = 'RUSAK';
+                break;
+        }
+
+        $request->merge(['textJenisBarang' => $textJenisBarang]);
+
+        $data['request'] = $request;
+
+        $pdf = PDF::loadView('pdf.cetak-draft-sebelum-lhso', $data);
+        $customPaper = array(0, 0, 795, 620);
+        $pdf->setPaper($customPaper);
+        if ($request->method() === 'GET') {
+            return $pdf->stream('LAPORAN HASIL STOCKNAME IGR - .pdf');
+        }
+        $pdfContent = $pdf->output();
+        return response()->json(['pdf' => base64_encode($pdfContent)]);
     }
 
     //! DONE
@@ -1093,9 +1135,9 @@ class ReportController extends Controller
         }else{
             $query .= "";
         }
-        // $query .= "AND lso_flagsarana= '" . $request->sarana . "' ";
+        $query .= "AND lso_flagsarana= '" . $request->sarana . "' ";
         $query .= "AND lso_flaglimit= 'Y' ";
-        // $query .= "AND DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
+        $query .= "AND DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
         $query .= "ORDER BY lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut ";
         $data['data'] = collect(DB::select($query))->groupBy(['lso_prdcd'])->slice(0, 10); //! DUMMY SLICE NYA
 

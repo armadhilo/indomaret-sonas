@@ -59,12 +59,12 @@
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Report</span></a>
     </li>
-    {{-- <li class="nav-item">
-        <a class="nav-link" href="{{ url('/reset-so') }}">
+    <li class="nav-item @if($sub_url == 'monitoring-so') active @endif">
+        <a class="nav-link" href="{{ url('/monitoring-so') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Reset SO</span></a>
-    </li> --}}
-    <li class="nav-item">
+            <span>Monitoring SO</span></a>
+    </li>
+    <li class="nav-item @if($sub_url == 'set-limit-so') active @endif">
         <a class="nav-link" href="{{ url('/set-limit-so') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Set Limit SO</span></a>

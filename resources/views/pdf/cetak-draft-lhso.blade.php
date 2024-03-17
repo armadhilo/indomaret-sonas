@@ -65,14 +65,14 @@
     <header class="header">
         <div style="width: 100%;">
             <div style="float: left;">
-                <p style="font-size: 1rem; margin-left: 2px"><b>INDOGROSIR</b></p>
+                <p style="font-size: 1rem; margin-left: 2px"><b>{{ $perusahaan->prs_namacabang }}</b></p>
                 <table>
                     <tr>
                         <td>Divisi</td>
                         <td style="width: 6%">:</td>
-                        <td>1 - FOOD</td>
+                        <td>{{ $request->div1 ? $request->div1 : "-" }}</td>
                         <td>S/D</td>
-                        <td>6 - SERVICE</td>
+                        <td>{{ $request->div2 ? $request->div2 : "-" }}</td>
                     </tr>
                     <tr>
                         <td>Divisi</td>
@@ -105,7 +105,7 @@
                     <tr>
                         <td>User</td>
                         <td style="width: 6%">:</td>
-                        <td style="text-align: right">GUN</td>
+                        <td style="text-align: right">{{ session('userid') }}</td>
                     </tr>
                     <tr>
                         <td>Hal</td>
@@ -117,10 +117,10 @@
         </div>
         <div style="width: 100%; display: block; margin-top: 60px">
             <p style="text-align: center; font-size: 1.2rem"><b>DRAFT LAPORAN HASIL STOCK OPNAME DI TOKO IGR.</b></p>
-            <p style="text-align: center; font-size: 1rem;">Tahap : 01</p>
-            <p style="text-align: center; font-size: .85rem">Tanggal : 02-Februari-2025</p>
+            <p style="text-align: center; font-size: 1rem;">Tahap : {{ $request->tahap ? $request->tahap : "-" }}</p>
+            <p style="text-align: center; font-size: .85rem">Tanggal : {{ \Carbon\Carbon::parse({{ $request->tanggal_start_so }})->format('d-m-y') }}</p>
         </div>
-        <p style="text-align: right; font-weight: bold">Lokasi Barang Baik - 01</p>
+        <p style="text-align: right; font-weight: bold">Lokasi Barang {{ $request->textJenisBarang . " - " . $request->jenis_barang }}</p>
     </header>
     <div class="container-fluid">
         <div style="width: 100%">

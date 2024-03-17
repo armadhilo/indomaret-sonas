@@ -41,6 +41,14 @@
             display: inline-block;
         }
 
+        .table-border-outside thead tr th, .table-border-outside{
+            border: 1px solid gray;
+        }
+
+        .bg-gray {
+            background-color: #f2f2f2;
+        }
+
         .title > *{
             text-align: center;
         }
@@ -74,9 +82,10 @@
                 <hr style="margin-top: 30px">
             </div>
 
+
             <div class="body">
                 <p style="text-align: center; font-size: .85rem; margin-top: 0px"><b>DAFTAR MASTER LOKASI SO ( STOCK OPNAME )</b></p>
-                <table border="1" style="border-collapse: collapse; margin-top:10px" class="table-center" cellpadding="2">
+                <table border="0" style="border-collapse: collapse; margin-top:10px" class="table-border-outside table-striped">
                     <thead>
                         <tr>
                             <th style="width: 9%">PLU</th>
@@ -95,13 +104,14 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if(count($data) == 0)
                         @if(!count($data))
                         <tr>
                             <td colspan="13" style="text-align: center">Tidak Ada Data</td>
                         </tr>
                         @else
                         @foreach ($data as $prdcd)
-                            <tr>
+                            <tr class="bg-gray">
                                 <td>{{ $prdcd[0]->prd_prdcd }}</td>
                                 <td colspan="12" style="text-align: left">{{ $prdcd[0]->prd_deskripsipanjang }}</td>
                             </tr>

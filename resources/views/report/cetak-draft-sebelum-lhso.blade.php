@@ -51,12 +51,12 @@
                 @include('layouts.report-menu')
             </div>
             <div class="col-md-5 col-lg-6 offset-1">
-                <div class="card shadow mb-4 vertical-center w-100">
-                    <div class="card-body">
+                <div class="card shadow mb-4 vertical-center w-100" id="report_container">
+                    <div class="card-body" id="report_content">
                         <div id="header_tb">
                             <h5 class="m-0">Draft Retur Sebelum LHSO</h5>
                         </div>
-                        <form id="form_report">
+                        <form id="form_report" method="POST" action="/report/cetak-draft-sebelum-lhso/show-pdf">
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="divisi">Divisi <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">

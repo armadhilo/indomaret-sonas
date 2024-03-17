@@ -186,6 +186,8 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::group(['prefix' => 'cetak-draft-sebelum-lhso'], function(){
             Route::get('/', [ReportController::class, 'index']);
+            Route::post('/show-pdf', [ReportController::class, 'reportCetakDraftReturSebelumLhso']);
+            Route::get('/pdf', [ReportController::class, 'reportCetakDraftReturSebelumLhso']);
         });
 
         Route::group(['prefix' => 'lokasi-so'], function(){
@@ -203,6 +205,14 @@ Route::middleware(['mylogin'])->group(function () {
 
         Route::get('/datatables', [MonitoringSoController::class, 'datatables']);
         Route::get('/print-struk-so/{tanggal_start_so}/{KodeRak}/{KodeSubRak}/{TipeRak?}/{ShelvingRak?}', [MonitoringSoController::class, 'printStrukSO']);
+    });
+
+    Route::group(['prefix' => 'monitoring-so'], function(){
+        Route::get('/', [MonitoringSoController::class, 'index']);
+        Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
+
+        Route::group(['prefix' => 'action'], function(){
+        });
     });
 
     Route::group(['prefix' => 'set-limit-so'], function(){

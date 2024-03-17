@@ -210,17 +210,19 @@ Route::middleware(['mylogin'])->group(function () {
     Route::group(['prefix' => 'monitoring-so'], function(){
         Route::get('/', [MonitoringSoController::class, 'index']);
         Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
-
+        Route::get('/show-level/{lso_koderak}', [MonitoringSoController::class, 'showLevel']);
+        
         Route::group(['prefix' => 'action'], function(){
         });
     });
 
     Route::group(['prefix' => 'set-limit-so'], function(){
         Route::get('/', [SetLimitSoController::class, 'index']);
+        Route::get('/datatables/{tahap}/{tglSO}', [SetLimitSoController::class, 'loadDatatables']);
 
         Route::group(['prefix' => 'action'], function(){
-            Route::get('/datatables/{tahap}/{tglSO}', [SetLimitSoController::class, 'loadDatatables']);
-            Route::post('/proses-ba-so', [SetLimitSoController::class, 'prosesBaSo']);
+            Route::get('/download-excel/{tahap}/{tglSO}', [SetLimitSoController::class, 'downloadDataExcel']);
+            Route::post('/upload-excel', [SetLimitSoController::class, 'uploadDataExcel']);
         });
     });
 });

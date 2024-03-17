@@ -4,87 +4,7 @@
 @endsection
 
 @section('css')
-<link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.css" rel="stylesheet" type="text/css"/>
-<style>
-summary {
-    display: block;
-    cursor: pointer;
-    outline: 0; 
-}
-
-summary::-webkit-details-marker {
-    display: none;
-}
-
-.tree-nav__item {
-    display: block;
-    white-space: nowrap;
-    color: #ccc;
-    position: relative;
-}
-.tree-nav__item.is-expandable::before {
-    border-left: 1px solid #d5d5d5;
-    content: "";
-    height: 100%;
-    left: 0.8rem;
-    position: absolute;
-    top: 2.4rem;
-    height: calc(100% - 2.4rem);
-}
-.tree-nav__item .tree-nav__item {
-    margin-left: 2.4rem;
-}
-.tree-nav__item.is-expandable[open] > .tree-nav__item-title::before {
-    font-family: "ionicons";
-    transform: rotate(90deg);
-}
-.tree-nav__item.is-expandable > .tree-nav__item-title {
-    padding-left: 2.4rem;
-}
-.tree-nav__item.is-expandable > .tree-nav__item-title::before {
-    position: absolute;
-    will-change: transform;
-    transition: transform 300ms ease;
-    font-family: "ionicons";
-    color: #000;
-    font-size: 1.1rem;
-    content: "\f125";
-    left: 0;
-    display: inline-block;
-    width: 1.6rem;
-    text-align: center;
-}
-
-.tree-nav__item-title {
-    cursor: pointer;
-    display: block;
-    outline: 0;
-    color: #000;
-    font-size: 1.5rem;
-    line-height: 3.2rem;
-}
-.tree-nav__item-title .icon {
-    display: inline;
-    padding-left: 1.6rem;
-    margin-right: 0.8rem;
-    color: #666;
-    font-size: 1.4rem;
-    position: relative;
-}
-.tree-nav__item-title .icon::before {
-    top: 0;
-    position: absolute;
-    left: 0;
-    display: inline-block;
-    width: 1.6rem;
-    text-align: center;
-}
-
-.tree-nav__item-title::-webkit-details-marker {
-    display: none;
-}
-
-</style>
+<link rel="stylesheet" href="{{ asset('plugin/jstree/jstree.css') }}">
 @endsection
 
 @section('content')
@@ -92,31 +12,37 @@ summary::-webkit-details-marker {
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-12">
+            <div class="col-5">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <nav class="tree-nav" id="tree_nav">
-                            {{-- <details class="tree-nav__item is-expandable">
-                                <summary class="tree-nav__item-title">The Realm of the Elderlings</summary>
-                                <details class="tree-nav__item is-expandable">
-                                    <details class="tree-nav__item is-expandable">
-                                    </details>
-                                
-                                    <summary class="tree-nav__item-title">The Six Duchies</summary>
-                                    
-                                    <details class="tree-nav__item is-expandable">
-                                        <summary class="tree-nav__item-title">The Fitz and the Fool Trilogy</summary>
-                                        <div class="tree-nav__item">
-                                        <a class="tree-nav__item-title"><i class="icon ion-ios-bookmarks"></i> FOOL'S ASSASSIN</a>
-                                        <a class="tree-nav__item-title"><i class="icon ion-ios-book"></i> FOOL'S QUEST</a>
-                                        <a class="tree-nav__item-title"><i class="icon ion-android-bookmark"></i> Assassin's Fate</a>
-                                        </div>
-                                    </details>
-                                </details>
-                            </details> --}}
-
-                            
-                        </nav>
+                        <div id="jstree"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-7">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="position-relative">
+                            <table class="table table-striped table-hover w-100 datatable-dark-primary table-center" id="tb_kkso" style="margin-top: 20px">
+                                <thead>
+                                    <tr>
+                                        <th>No. Urut</th>
+                                        <th>PLU</th>
+                                        <th>Deskripsi</th>
+                                        <th>Unit</th>
+                                        <th>CTN / KG</th>
+                                        <th>PCS / Gram</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                            <button class="btn btn-lg btn-primary d-none" id="loading_datatable" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" type="button" disabled>
+                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                Loading...
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -125,48 +51,88 @@ summary::-webkit-details-marker {
 @endsection
 
 @push('page-script')
+<script src="{{ asset('plugin/jstree/jstree.min.js') }}"></script>
 <script>
-
-    $(document).ready(function(){
-        getMonitoring();
-    });
-
-    function getMonitoring(){
-        $('#modal_loading').modal('show');
-        $.ajax({
-            url: `/monitoring-so/get-monitoring`,
-            type: "GET",
-            success: function(response) {
-                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-                let detailToko = '';
-                let detailGudang;
-                console.log(response);
-                $.each(response.detail_toko, function(index, element) {
-                    detailToko += `<summary class="tree-nav__item-title">${element.lso_koderak} : ${element.progress}</summary><details class="tree-nav__item is-expandable"></details>`;
-                });
-                // response.detailGudang.forEach(element => {
-                //     detailToko += `<summary class="tree-nav__item-title">${element}</summary>`
-                // });
-                $("#tree_nav").append(`
-                    <details class="tree-nav__item is-expandable">
-                        <summary class="tree-nav__item-title">TOKO : ${response.toko.progress}</summary>
-                        <details class="tree-nav__item is-expandable">
-                            ${detailToko}
-                        </details>
-                        
-                    </details>
-                `);
-            }, error: function(jqXHR, textStatus, errorThrown) {
-                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-                Swal.fire({
-                    text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
-                        ? jqXHR.responseJSON.message
-                        : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
-                    icon: "error"
-                });
-            }
-        });
+$(document).ready(function() {
+    $.ajax({
+        url: '/monitoring-so/get-monitoring', 
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+           $('#jstree').jstree({
+                'core': {
+                    'check_callback': true,
+                    'data': [{
+                        "text": "TOKO: " + data.toko.progress,
+                        "children": data.detail_toko.map(function(item) {
+                            return {
+                                "text": item.lso_koderak + ": " + item.progress,
+                                "data": {
+                                    "koderak": item.lso_koderak
+                                }
+                            };
+                        })
+                    }, {
+                        "text": "GUDANG: " + data.gudang.progress,
+                        "children": data.detail_gudang.map(function(item) {
+                            return {
+                                "text": item.lso_koderak + ": " + item.progress,
+                                "data": {
+                                    "koderak": item.lso_koderak
+                                }
+                            };
+                        })
+                    }]
+                }
+            }).on('dblclick.jstree', function (e) {
+                var node = $(e.target).closest('.jstree-node').length ? $(e.target).closest('.jstree-node') : $(e.target);
+                var nodeId = node.attr('id');
+                var instance = $.jstree.reference(this);
+                var koderak = instance.get_node(nodeId).data.koderak;
+                if (koderak) {
+                    console.log('Double-clicked Koderak:', koderak);
+                    $.ajax({
+                        url: '/monitoring-so/show-level/' + koderak,
+                        type: 'GET',
+                        success: function(response) {
+                            // Append received data as child nodes
+                            if (response.data) {
+                                var children = response.data.map(function(item, index) {
+                                    console.log(item);
+                                    return {
+                                        "text": item.lso_kodesubrak, // Use appropriate property for child node text
+                                        "data": { // You can include additional data if needed
+                                            "id": item.id,
+                                            "kodesubrak": koderak + "/" +item.lso_kodesubrak
+                                        }
+                                    };
+                                });
+                                if (instance && instance.is_ready) {
+                                    console.log("Before create_node");
+instance.create_node(nodeId, { text: "Test Child Node" }, 'last', function (newNode, response) {
+    console.log("Inside create_node callback");
+    if (response && response.status === true) {
+        console.log("Node creation successful:", newNode);
+    } else {
+        console.error("Node creation failed:", response ? response.error : "Unknown error");
     }
+});
+} else {
+    console.error("jstree instance is not ready");
+}
+
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                }
+            });
+        }
+    });
+});
 </script>
 
 @endpush

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SetLimitSoExport;
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
 use App\Http\Requests\ProsesBaSoRequest;
+use App\Imports\SetLimitSoImport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class SetLimitSoController extends Controller
@@ -144,26 +147,46 @@ class SetLimitSoController extends Controller
         $query .= " WHERE (((AREAGUDANG + AREATOKO ) - LPP ) * LSO_AVGCOST) <> 0 ORDER BY LSO_LOKASI, DIVISI ASC, NILAI_SELISIH_ABS DESC ";
         $query .= ")AS DATAS1";
 
-        return DB::select($query);
+        $data['data'] = DB::select($query);
+
+        $fileContent = Excel::raw(new SetLimitSoExport($data), \Maatwebsite\Excel\Excel::XLSX);
+
+        $excelFileName = 'SET_LIMIT_SO.xlsx'; // Set your desired filename here
+        $encodedFileName = rawurlencode($excelFileName);
+
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $encodedFileName . '"',
+        ];
+
+        return response($fileContent, 200, $headers);
     }
 
-    public function uploadDataExcel($tglSO){
-        $data = [];
+    public function uploadDataExcel(Request $request){
+        $file = $request->file('excel_file');
+
+        $import = new SetLimitSoImport();
+        Excel::import($import, $file);
+        $data = $import->data;
+        // return $data;
         //! LOOP DATA DATA DARI EXCEL
         $array = [];
         foreach($data as $item){
-            if($item['plu'] != ''){
-                $array[] = $item->plu .'-'. $item->lokasi;
+            if($item["plu"] != ''){
+                $array[] = $item["plu"] .'-'. $item["lokasi"];
             }
         }
+
         //! END LOOP DATA
 
         DB::table('tbtr_lokasi_so')
             ->whereIn(DB::raw("LSO_PRDCD || '-' || LSO_LOKASI"), $array)
             ->where('lso_lokasi', '01')
-            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) = TO_DATE('" . $tglSO . "','YYYY-MM-DD')")
+            ->whereRaw("DATE_TRUNC('DAY',lso_tglso) = TO_DATE('" . $request->tglSO . "','YYYY-MM-DD')")
             ->update([
                 'LSO_FLAGLIMIT' => 'Y',
             ]);
+
+        return ApiFormatter::success(200, "Upload Excel Berhasil");
     }
 }

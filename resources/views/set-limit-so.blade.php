@@ -83,7 +83,7 @@
                         <div class="header">
                             <div class="form-group d-flex justify-content-center" style="gap: 35px">
                                 <button type="button" onclick="downloadExcelAction();" class="btn btn-cust my-2">Download Excel</button>
-                                <button type="button" onclick="uploadExcelAction();" class="btn btn-cust my-2">Upload Excel</button>
+                                <button type="button" onclick="showModalUpload();" class="btn btn-cust my-2">Upload Excel</button>
                             </div>
                         </div>
                         <div class="body">
@@ -119,6 +119,30 @@
     </div>
 @endsection
 
+@section('modal')
+<div class="modal fade" role="dialog" id="modal" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header br">
+                <h5 class="modal-title">Upload Excel</h5>
+                <button type="button" class="close clearButton" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="file" name="excel_file" id="excel_file" class="form-control" style="height: calc(1.5em + .75rem + 10px)!important">
+                </div>
+            </div>
+            <div class="modal-footer flex-center">
+                <button type="button" class="btn btn-secondary clearButton" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success me-3" onclick="uploadExcelAction()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
 @push('page-script')
 <script>
     let tb;
@@ -145,7 +169,7 @@
                 emptyTable: "<div class='datatable-no-data' style='color: #ababab'>Tidak Ada Data</div>",
             },
             ajax: {
-                url: '/set-limit-so/action/datatables/' + "{{ $tahap }}" + '/' + "{{ $tglSO }}",
+                url: '/set-limit-so/datatables/' + "{{ $tahap }}" + '/' + "{{ $tglSO }}",
                 type: 'GET',
             },
             columns: [
@@ -186,9 +210,8 @@
             if (result.value) {
                 $('#modal_loading').modal('show');
                 $.ajax({
-                    url: "/report/lpp-month-end/action/cetak-lpp",
-                    type: "POST",
-                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), periode: $("#periode").val()},
+                    url: '/set-limit-so/action/download-excel/' + "{{ $tahap }}" + '/' + "{{ $tglSO }}",
+                    type: "GET",
                     xhrFields: {
                         responseType: 'blob' // Important for binary data
                     },
@@ -199,7 +222,7 @@
                         var downloadUrl = URL.createObjectURL(blob);
                         var a = document.createElement('a');
                         a.href = downloadUrl;
-                        var fileName = 'LPP_MONTH_END.xlsx';
+                        var fileName = 'SET_LIMIT_SO.xlsx';
                         a.download = fileName;
                         document.body.appendChild(a);
                         a.click();
@@ -219,7 +242,56 @@
         });
     }
 
+    function showModalUpload(){
+        $("#modal").modal("show");
+    }
 
+    $('.clearButton').click(function(){
+        $('#excel_file').val('');
+    });
+
+    function uploadExcelAction(){
+        var fileInput = $('#excel_file')[0].files[0];
+        
+        if (!fileInput) {
+            Swal.fire({
+                text: "Silahkan Upload File Excel Terlebih Dahulu",
+                icon: "error"
+            });
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('excel_file', fileInput);
+        formData.append('tglSO', "{{ $tglSO }}");
+        $('#modal_loading').modal('show');
+        $.ajax({
+            url: '/set-limit-so/action/upload-excel',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                Swal.fire({
+                    text: response.message,
+                    icon: "success"
+                });
+                $("#excel_file").val('');
+                $("#modal").modal("hide");
+                tb.ajax.reload();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                Swal.fire({
+                    text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
+                        ? jqXHR.responseJSON.message
+                        : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                    icon: "error"
+                });
+            }
+        });
+    }
 </script>
 
 @endpush

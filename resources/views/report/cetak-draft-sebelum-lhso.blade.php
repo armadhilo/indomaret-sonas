@@ -60,36 +60,36 @@
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="divisi">Divisi <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control" style="width: 100px">
+                                    <input type="text" class="form-control" style="width: 100px" name="div1">
                                     S/D
-                                    <input type="text" class="form-control" style="width: 100px">
+                                    <input type="text" class="form-control" style="width: 100px" name="div2"> 
                                     <p class="m-0 fw-semibold">[Kode Divisi 1 - 6]</p>
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="departemen">Departemen <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control" style="width: 100px">
+                                    <input type="text" class="form-control" style="width: 100px" name="dept1">
                                     S/D
-                                    <input type="text" class="form-control" style="width: 100px">
+                                    <input type="text" class="form-control" style="width: 100px" name="dept2">
                                     <p class="m-0 fw-semibold">[Kode Dept 01 - 58]</p>
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="kategori">Kategori <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control" style="width: 100px">
+                                    <input type="text" class="form-control" style="width: 100px" name="kat1">
                                     S/D
-                                    <input type="text" class="form-control" style="width: 100px">
+                                    <input type="text" class="form-control" style="width: 100px" name="kat2">
                                     <p class="m-0 fw-semibold">[Kode kategori 01 - 22]</p>
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="plu">PLU <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="plu1">
                                     S/D
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="plu2">
                                 </div>
                             </div>
                             <div class="float-right">

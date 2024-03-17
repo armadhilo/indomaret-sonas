@@ -91,6 +91,11 @@ Route::middleware(['mylogin'])->group(function () {
     Route::group(['prefix' => 'report'], function(){
         Route::get('/', [ReportController::class, 'index']);
 
+        Route::group(['prefix' => 'addon'], function(){
+            Route::get('/get-plu', [ReportController::class, 'getPlu']);
+            Route::get('/get-description/{prd_prdcd}', [ReportController::class, 'getPluDesc']);
+        });
+
         Route::group(['prefix' => 'list-form-kkso'], function(){
             Route::get('/', [ReportController::class, 'index']);
             Route::post('/show-pdf', [ReportController::class, 'reportListFormKkso']);

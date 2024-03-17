@@ -95,7 +95,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if(empty($data))
+                        @if(!count($data))
                         <tr>
                             <td colspan="13" style="text-align: center">Tidak Ada Data</td>
                         </tr>

@@ -27,7 +27,7 @@ class reportCetakDraftLhsoRequest extends FormRequest
         return [
             'tanggal_start_so' => ['required', 'date_format:Y-m-d'],
             'type' => ['required', 'in:draft_lhso,draft_lhso_all'],
-            'tahap' => ['nullable','min:1','max:6'],
+            'tahap' => ['required','min:1','max:6'],
             'div1' => ['nullable'],
             'dept1' => ['nullable'],
             'kat1' => ['nullable'],

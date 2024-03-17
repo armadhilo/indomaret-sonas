@@ -95,9 +95,9 @@
                             <div class="row">
                                 <div class="col-9">
                                     <div class="form-group d-flex align-items-center">
-                                        <label class="label-form" for="priode">Priode <span>:</span></label>
+                                        <label class="label-form" for="periode">periode <span>:</span></label>
                                         <div class="d-flex align-items-center" style="gap: 20px">
-                                            <input type="month" class="form-control" name="priode" id="priode">
+                                            <input type="month" class="form-control" name="periode" id="periode">
                                         </div>
                                     </div>
                                     <div class="form-group d-flex align-items-center">
@@ -125,7 +125,7 @@
                                         <button type="button" class="btn btn-danger" onclick="cancelActionCust()" style="flex: 1">Cancel</button>
                                     </div>
                                     <div class="d-flex" style="margin-top: 9px; height: 25%">
-                                        <button type="button" class="btn btn-secondary" onclick="clearDataPLU()" style="flex: 1">Clear</button>
+                                        <button type="button" class="btn btn-secondary" onclick="clearDataPLU()" style="flex: 1">Reset Data</button>
                                     </div>
                                     <div class="d-flex" style="margin-top: 9px; height: 25%">
                                         <button type="button" class="btn btn-success" onclick="simpanDataPLU()" style="flex: 1">Simpan Data PLU</button>
@@ -153,10 +153,10 @@
 <script>
     let tb;
     $(document).ready(function(){
-        setMonthNow('#priode');
+        setMonthNow('#periode');
 
         $('#report_content').on('input', "#jenis_barang_cust", function(){
-            var input = $(this).val().trim(); 
+            var input = $(this).val().trim();
             var words = input.split(' ');
 
             if (!/^[ABTR]$/i.test(input)) {
@@ -329,12 +329,12 @@
                     let message = !plu_list.length ? "Harap Pilih PLU Terlebih Dahulu" : "Harap Masukkan Jenis Barang Terlebih Dahulu";
                     Swal.fire(message, "", "warning");
                     return;
-                }                
+                }
                 $('#modal_loading').modal('show');
                 $.ajax({
                     url: "/report/lpp-month-end/action/cetak-lpp",
                     type: "POST",
-                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), priode: $("#priode").val()},
+                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), periode: $("#periode").val()},
                     xhrFields: {
                         responseType: 'blob' // Important for binary data
                     },
@@ -344,7 +344,7 @@
                         var blob = new Blob([response], { type: contentType });
                         var downloadUrl = URL.createObjectURL(blob);
                         var a = document.createElement('a');
-                        a.href = downloadUrl;    
+                        a.href = downloadUrl;
                         var fileName = 'LPP_MONTH_END.xlsx';
                         a.download = fileName;
                         document.body.appendChild(a);

@@ -95,23 +95,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($data as $item)
-                        <tr>
-                            <td><b>{{ $item->lso_prdcd }}</b></td>
-                            <td>{{ $item->prd_deskripsipanjang }}</td>
-                            <td>{{ $item->prd_kodedivisi }}</td>
-                            <td>{{ $item->prd_kodedepartement }}</td>
-                            <td>{{ $item->prd_kodekategoribarang }}</td>
-                            <td>{{ $item->lso_koderak }}</td>
-                            <td>{{ $item->lso_kodesubrak }}</td>
-                            <td>{{ $item->lso_tiperak }}</td>
-                            <td>{{ $item->lso_shelvingrak }}</td>
-                            <td>{{ $item->lso_lokasi }}</td>
-                            <td>{{ $item->ctn }}</td>
-                            <td>{{ $item->pcs }}</td>
-                            <td>{{ $item->lso_qty }}</td>
-                        </tr>
-                        @endforeach
+                        @if (!count($data))
+                            <tr>
+                                <td colspan="13">No Data</td>
+                            </tr>
+                        @else
+                            @foreach ($data as $item)
+                            <tr>
+                                <td><b>{{ $item->lso_prdcd }}</b></td>
+                                <td>{{ $item->prd_deskripsipanjang }}</td>
+                                <td>{{ $item->prd_kodedivisi }}</td>
+                                <td>{{ $item->prd_kodedepartement }}</td>
+                                <td>{{ $item->prd_kodekategoribarang }}</td>
+                                <td>{{ $item->lso_koderak }}</td>
+                                <td>{{ $item->lso_kodesubrak }}</td>
+                                <td>{{ $item->lso_tiperak }}</td>
+                                <td>{{ $item->lso_shelvingrak }}</td>
+                                <td>{{ $item->lso_lokasi }}</td>
+                                <td>{{ $item->ctn }}</td>
+                                <td>{{ $item->pcs }}</td>
+                                <td>{{ $item->lso_qty }}</td>
+                            </tr>
+                            @endforeach
+                        @endif
+
                     </tbody>
                 </table>
                 <p style="width: 100%; text-align: right; margin-top: 5px;">** Akhir Dari Laporan **</p>

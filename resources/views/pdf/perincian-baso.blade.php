@@ -130,9 +130,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if(empty($data))
+                        @if(!count($data))
                         <tr>
-                            <td colspan="18" style="text-align: center">Tiida Ada Data</td>
+                            <td colspan="18" style="text-align: center">Tidak Ada Data</td>
                         </tr>
                         @endif
                         @foreach ($data as $department)

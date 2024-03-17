@@ -4,7 +4,7 @@
         <td colspan="4" style="font-weight: 500; font-size: 14px">LPP BARANG BAIK</td>
     </tr>
     <tr>
-        <td>Priode : {{ $priode }}</td>
+        <td>periode : {{ $periode }}</td>
     </tr>
     <tr><td></td></tr>
     <tr>
@@ -116,7 +116,7 @@
         <td colspan="4" style="font-weight: 500; font-size: 14px">LPP BARANG RETUR</td>
     </tr>
     <tr>
-        <td>Priode : {{ $priode }}</td>
+        <td>periode : {{ $periode }}</td>
     </tr>
     <tr><td></td></tr>
     <tr>
@@ -228,7 +228,7 @@
         <td colspan="4" style="font-weight: 500; font-size: 14px">LPP BARANG RUSAK</td>
     </tr>
     <tr>
-        <td>Priode : {{ $priode }}</td>
+        <td>periode : {{ $periode }}</td>
     </tr>
     <tr><td></td></tr>
     <tr>
@@ -334,5 +334,5 @@
     <tr><td></td></tr>
     <tr><td></td></tr>
     @endif
-    
+
 </table>

@@ -70,23 +70,35 @@
                     <tr>
                         <td>Divisi</td>
                         <td style="width: 6%">:</td>
-                        <td>1 - FOOD</td>
-                        <td>S/D</td>
-                        <td>6 - SERVICE</td>
+                        @if ($request['div1'] == null && $request['div2'] == null)
+                            <td>ALL</td>
+                        @else
+                            <td>{{ $request['div1'] }}</td>
+                            <td>S/D</td>
+                            <td>{{ $request['div2'] }}</td>
+                        @endif
                     </tr>
                     <tr>
-                        <td>Divisi</td>
+                        <td>Departement</td>
                         <td style="width: 6%">:</td>
-                        <td>1 - FOOD</td>
-                        <td>S/D</td>
-                        <td>6 - SERVICE</td>
+                        @if ($request['dept1'] == null && $request['dept2'] == null)
+                            <td>ALL</td>
+                        @else
+                            <td>{{ $request['dept1'] }}</td>
+                            <td>S/D</td>
+                            <td>{{ $request['dept2'] }}</td>
+                        @endif
                     </tr>
                     <tr>
-                        <td>Divisi</td>
+                        <td>Kategori</td>
                         <td style="width: 6%">:</td>
-                        <td>1 - FOOD</td>
-                        <td>S/D</td>
-                        <td>6 - SERVICE</td>
+                        @if ($request['kat1'] == null && $request['kat2'] == null)
+                            <td>ALL</td>
+                        @else
+                            <td>{{ $request['kat1'] }}</td>
+                            <td>S/D</td>
+                            <td>{{ $request['kat2'] }}</td>
+                        @endif
                     </tr>
                 </table>
             </div>
@@ -105,7 +117,7 @@
                     <tr>
                         <td>User</td>
                         <td style="width: 6%">:</td>
-                        <td style="text-align: right">GUN</td>
+                        <td style="text-align: right">{{ session('userid') }}</td>
                     </tr>
                     <tr>
                         <td>Hal</td>
@@ -117,10 +129,9 @@
         </div>
         <div style="width: 100%; display: block; margin-top: 60px">
             <p style="text-align: center; font-size: 1.2rem"><b>DRAFT LAPORAN HASIL STOCK OPNAME DI TOKO IGR.</b></p>
-            <p style="text-align: center; font-size: 1rem;">Tahap : 01</p>
-            <p style="text-align: center; font-size: .85rem">Tanggal : 02-Februari-2025</p>
+            <p style="text-align: center; font-size: 1rem;">LOKASI BARANG RETUR</p>
+            <p style="text-align: center; font-size: .85rem">Tanggal : {{ $request['tanggal_start_so'] }}</p>
         </div>
-        <p style="text-align: right; font-weight: bold">Lokasi Barang Baik - 01</p>
     </header>
     <div class="container-fluid">
         <div style="width: 100%">
@@ -129,13 +140,16 @@
                     <thead>
                         <tr>
                             <th style="width: 2%" rowspan="2">No.</th>
-                            <th colspan="2">Item</th>
-                            <th colspan="3"></th>
+                            <th colspan="5">Item</th>
+                            <th colspan="3">Area</th>
                             <th rowspan="2">LPP(QTY.)</th>
                             <th rowspan="2">Selisih Hasil SO(Qty.)</th>
                             <th rowspan="2">Nilai Selisih(Rp.)</th>
                         </tr>
                         <tr>
+                            <th>Div</th>
+                            <th>Dep</th>
+                            <th>Kat</th>
                             <th style="width: 7%">PLU</th>
                             <th style="width: 40%">DESKRIPSI</th>
                             <th>TOKO</th>
@@ -144,19 +158,58 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="9" style="text-align: center">Tiida Ada Data</td>
-                        </tr>
+                        @if (!count($data))
+                            <tr>
+                                <td colspan="9" style="text-align: center">Tidak ada data</td>
+                            </tr>
+                        @else
+
+                            @php
+                                $total1 = 0;
+                                $total2 = 0;
+                                $total3 = 0;
+                                $total4 = 0;
+                                $total5 = 0;
+                                $total6 = 0;
+                            @endphp
+
+                            @foreach ($data as $item)
+
+                                @php
+                                    $total1 += $item->areatoko;
+                                    $total2 += $item->areagudang;
+                                    $total3 += $item->total;
+                                    $total4 += $item->lpp;
+                                    $total5 += $item->selisih;
+                                    $total6 += $item->nilai_selisih;
+                                @endphp
+
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->prd_kodedivisi }}</td>
+                                    <td>{{ $item->prd_kodedepartement }}</td>
+                                    <td>{{ $item->prd_kodekategoribarang }}</td>
+                                    <td>{{ $item->plu }}</td>
+                                    <td>{{ $item->deskripsi }}</td>
+                                    <td>{{ $item->areatoko}}</td>
+                                    <td>{{ $item->areagudang}}</td>
+                                    <td>{{ $item->total }}</td>
+                                    <td>{{ number_format($item->lpp, 2, '.', '') }}</td>
+                                    <td>{{ number_format($item->selisih, 2, '.', '') }}</td>
+                                    <td>{{ number_format($item->nilai_selisih, 2, '.', '') }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3">TOTAL</td>
-                            <td>TOTAL 1</td>
-                            <td>TOTAL 2</td>
-                            <td>TOTAL 3</td>
-                            <td>TOTAL 3</td>
-                            <td>TOTAL 3</td>
-                            <td>TOTAL 3</td>
+                            <td colspan="6">TOTAL</td>
+                            <td>{{ number_format($total1, 2, '.', '') }}</td>
+                            <td>{{ number_format($total2, 2, '.', '') }}</td>
+                            <td>{{ number_format($total3, 2, '.', '') }}</td>
+                            <td>{{ number_format($total4, 2, '.', '') }}</td>
+                            <td>{{ number_format($total5, 2, '.', '') }}</td>
+                            <td>{{ number_format($total6, 2, '.', '') }}</td>
                         </tr>
                     </tfoot>
                 </table>

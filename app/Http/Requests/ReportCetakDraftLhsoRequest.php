@@ -51,7 +51,7 @@ class reportCetakDraftLhsoRequest extends FormRequest
             $this->merge(['jenis_barang' => '03']);
         }
 
-        $limit = isset($limit) ? $limit : "100000";
+        $limit = isset($this->limit) ? $this->limit : "100000";
 
         $this->merge([
             'limit' => $limit,

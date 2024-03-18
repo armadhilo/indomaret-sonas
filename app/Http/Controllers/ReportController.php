@@ -405,23 +405,27 @@ class ReportController extends Controller
 
         $query = '';
         $query .= "SELECT adj_prdcd ";
-        $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
+        $query .= "FROM tbtr_adjustso join tbtr_ba_stockopname on sop_prdcd = adj_prdcd join tbmaster_prodmast on prd_prdcd = adj_prdcd ";
         $query .= "WHERE adj_lokasi = '" . $request->jenis_barang . "' ";
         // $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
         // $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
         // $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
-        $query .= "ORDER BY adj_create_dt";
+        $query .= "ORDER BY adj_create_dt ";
+        //! dummy
+        $query .= "LIMIT 10";
         $dt1 = DB::select($query);
 
         $query = '';
         $query .= "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, ";
         $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
-        $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
+        $query .= "FROM tbtr_adjustso join tbtr_ba_stockopname on sop_prdcd = adj_prdcd join tbmaster_prodmast on prd_prdcd = adj_prdcd ";
         $query .= "WHERE adj_lokasi = '" . $request->jenis_barang . "' ";
         // $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
         // $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
         // $query .= "AND adj_prdcd BETWEEN '" . $request->plu1 . "' AND '" . $request->plu2 . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
-        $query .= "ORDER BY adj_create_dt LIMIT 10";
+        $query .= "ORDER BY adj_create_dt ";
+        //! dummy
+        $query .= "LIMIT 10";
         $dtDATA = DB::select($query);
         $array = [];
         foreach($dt1 as $item){
@@ -431,12 +435,14 @@ class ReportController extends Controller
                 $query = '';
                 $query .= "SELECT adj_prdcd, adj_create_dt, prd_deskripsipanjang, adj_qty, adj_keterangan, sop_newavgcost sop_lastavgcost, case when prd_unit = 'KG' then (adj_qty * sop_newavgcost) / 1000 else (adj_qty * sop_newavgcost) end total, ";
                 $query .= "CASE WHEN ADJ_LOKASI = '01' THEN '01 - BARANG BAIK' ELSE CASE WHEN ADJ_LOKASI = '02' THEN '02 - BARANG RETUR' ELSE '03 - BARANG RUSAK' End END LOKASI ";
-                $query .= "FROM tbtr_adjustso, tbtr_ba_stockopname, tbmaster_prodmast ";
+                $query .= "FROM tbtr_adjustso join tbtr_ba_stockopname on sop_prdcd = adj_prdcd join tbmaster_prodmast on prd_prdcd = adj_prdcd ";
                 $query .= "WHERE adj_lokasi = '" . $request->jenis_barang . "' ";
                 // $query .= "AND adj_tglso = TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
                 // $query .= "AND DATE_TRUNC('DAY',adj_create_dt) between TO_DATE('" . $request->tanggal_adjust_start . "','YYYY-MM-DD') AND TO_DATE('" . $request->tanggal_adjust_end . "','YYYY-MM-DD') ";
                 // $query .= "AND adj_prdcd = '" . $item->adj_prdcd . "' AND sop_tglso = adj_tglso and sop_prdcd = adj_prdcd AND sop_lokasi = adj_lokasi AND prd_Prdcd = adj_prdcd ";
-                $query .= "ORDER BY adj_create_dt LIMIT 10";
+                $query .= "ORDER BY adj_create_dt ";
+                //! dummy
+                $query .= "LIMIT 10";
                 $data_detail = DB::select($query);
 
                 foreach($data_detail as $item_detail){

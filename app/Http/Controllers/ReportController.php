@@ -651,7 +651,7 @@ class ReportController extends Controller
             $query .= "SELECT *, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi ";
             $query .= "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST ";
             $query .= "WHERE LSO_PRDCD = PRD_PRDCD ";
-            $query .= "AND LSO_PRDCD = '" . $request->plu . "' ";
+            // $query .= "AND LSO_PRDCD = '" . $request->plu . "' ";
             // $query .= "AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD') ";
 
         }else{
@@ -659,8 +659,8 @@ class ReportController extends Controller
             $query .= "SELECT *, case when lso_lokasi = '01' then '01 - BARANG BAIK' else case when lso_lokasi = '02' then '02 - BARANG RETUR' else '03 - BARANG RUSAK' end end lokasi ";
             $query .= "FROM TBTR_LOKASI_SO, TBMASTER_PRODMAST ";
             $query .= "WHERE LSO_PRDCD = PRD_PRDCD ";
-            $query .= "AND LSO_LOKASI = '" . $request->jenis_barang . "' ";
-            $query .= "AND LSO_PRDCD = '" . $request->plu . "' ";
+            // $query .= "AND LSO_LOKASI = '" . $request->jenis_barang . "' ";
+            // $query .= "AND LSO_PRDCD = '" . $request->plu . "' ";
             // $query .= "AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD') ";
         }
 
@@ -668,20 +668,29 @@ class ReportController extends Controller
             return ApiFormatter::error(400, 'PLU tidak terdaftar di master lokasi SONAS');
         }
 
+        // $data['data'] = DB::select($query);
+        // $data['data1'] = DB::select($query . " AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR LSO_KODERAK LIKE 'L%') AND LSO_LOKASI = '01' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        // $data['data2'] = DB::select($query . " AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND LSO_KODERAK NOT LIKE 'L%') AND LSO_LOKASI = '01' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        // $data['data3'] = DB::select($query . " AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR LSO_KODERAK LIKE 'L%') AND LSO_LOKASI = '02' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        // $data['data4'] = DB::select($query . " AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND LSO_KODERAK NOT LIKE 'L%') AND LSO_LOKASI = '02' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        // $data['data5'] = DB::select($query . " AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR LSO_KODERAK LIKE 'L%') AND LSO_LOKASI = '03' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        // $data['data6'] = DB::select($query . " AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND LSO_KODERAK NOT LIKE 'L%') AND LSO_LOKASI = '03' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+
+        //! dummy
         $data['data'] = DB::select($query);
-        $data['data1'] = DB::select($query . " AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR LSO_KODERAK LIKE 'L%') AND LSO_LOKASI = '01' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
-        $data['data2'] = DB::select($query . " AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND LSO_KODERAK NOT LIKE 'L%') AND LSO_LOKASI = '01' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
-        $data['data3'] = DB::select($query . " AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR LSO_KODERAK LIKE 'L%') AND LSO_LOKASI = '02' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
-        $data['data4'] = DB::select($query . " AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND LSO_KODERAK NOT LIKE 'L%') AND LSO_LOKASI = '02' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
-        $data['data5'] = DB::select($query . " AND (LSO_KODERAK LIKE 'D%' OR LSO_KODERAK LIKE 'G%' OR LSO_KODERAK LIKE 'L%') AND LSO_LOKASI = '03' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
-        $data['data6'] = DB::select($query . " AND (LSO_KODERAK NOT LIKE 'D%' AND LSO_KODERAK NOT LIKE 'G%' AND LSO_KODERAK NOT LIKE 'L%') AND LSO_LOKASI = '03' ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        $data['data1'] = DB::select($query . " ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        $data['data2'] = DB::select($query . " ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        $data['data3'] = DB::select($query . " ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        $data['data4'] = DB::select($query . " ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        $data['data5'] = DB::select($query . " ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+        $data['data6'] = DB::select($query . " ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC limit 10");
+
         $data['request'] = $request->all();
 
         return Excel::download(new InquiryPlanoExport($data), 'INQUIRY PLANO SONAS.xls');
     }
 
     public function reportLppMonthEndExcelActionCetak(ReportLppMonthEndExcelActionCetakRequest $request){
-        //? jika checklist all PLU maka parameter plu isi array kosong aja
 
         $date = Carbon::parse($request->periode);
 
@@ -698,10 +707,10 @@ class ReportController extends Controller
             $query .= "coalesce(lpp_rphretursales,0) + coalesce(lpp_rph_selisih_so, 0) + coalesce(lpp_rphrepack,0) + coalesce(lpp_rphlainin,0) - coalesce(lpp_rphrafak,0) - ";
             $query .= "coalesce(lpp_rphsales,0) - coalesce(lpp_rphkirim,0) - coalesce(lpp_rphprepacking,0) - ";
             $query .= "coalesce(lpp_rphhilang,0) - coalesce(lpp_rphlainout,0) + coalesce(lpp_rphintransit,0) + coalesce(lpp_rphadj, 0) + coalesce(lpp_soadj, 0)) koreksi ";
-            $query .= "FROM TBTR_LPP, TBMASTER_PRODMAST ";
-            $query .= "WHERE LPP_PRDCD = PRD_PRDCD AND LPP_KODEIGR = PRD_KODEIGR ";
-            //$query .= "AND TO_CHAR(LPP_TGL1, 'YYYY-MM') = '" . $request->periode . "' ";
-            if(count($request->plu) == 0){
+            $query .= "FROM TBTR_LPP ";
+            $query .= "JOIN TBMASTER_PRODMAST ON LPP_PRDCD = PRD_PRDCD AND LPP_KODEIGR = PRD_KODEIGR ";
+            //$query .= "WHERE TO_CHAR(LPP_TGL1, 'YYYY-MM') = '" . $request->periode . "' ";
+            if($request->all_plu == 1){
                 $query .= "";
             }else{
                 $string_prdcdc = '';
@@ -728,10 +737,10 @@ class ReportController extends Controller
             $query .= "LRT_SOADJ, LRT_QTYAKHIR, LRT_RPHAKHIR, LRT_AVGCOST1, LRT_AVGCOST, LRT_QTY_SELISIH_SO, LRT_RPH_SELISIH_SO, LRT_QTY_SELISIH_SOIC, LRT_RPH_SELISIH_SOIC, ";
             $query .= "coalesce(lrt_rphakhir,0) - (coalesce(lrt_rphbegbal,0) + coalesce(lrt_rphbaik,0) + coalesce(lrt_rphrusak,0) + coalesce(lrt_rphadj,0) + coalesce(lrt_rph_selisih_so, 0) ";
             $query .= "+ coalesce(lrt_soadj, 0) - coalesce(lrt_rphsupplier,0) - coalesce(lrt_rphhilang,0) - coalesce(lrt_rphlbaik,0) - coalesce(lrt_rphlrusak,0)) koreksi ";
-            $query .= "FROM TBTR_LPPRT, TBMASTER_PRODMAST ";
-            $query .= "WHERE LRT_PRDCD = PRD_PRDCD AND LRT_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LRT_TGL1, 'YYYY-MM') = '" . $request->periode . "' ";
-            if(count($request->plu) == 0){
+            $query .= "FROM TBTR_LPPRT ";
+            $query .= "JOIN TBMASTER_PRODMAST ON LRT_PRDCD = PRD_PRDCD AND LRT_KODEIGR = PRD_KODEIGR ";
+            // $query .= "WHERE TO_CHAR(LRT_TGL1, 'YYYY-MM') = '" . $request->periode . "' ";
+            if($request->all_plu == 1){
                 $query .= "";
             }else{
                 $string_prdcdc = '';
@@ -744,6 +753,8 @@ class ReportController extends Controller
                 $query .= "AND LRT_PRDCD in ( " . $string_prdcdc . " ) ";
             }
             $query .= "ORDER BY LRT_PRDCD ";
+            //! dummy
+            $query .= 'LIMIT 10';
             $data['lpp_retur'] = DB::select($query);
         }
 
@@ -755,10 +766,10 @@ class ReportController extends Controller
             $query .= "LRS_SOADJ, LRS_QTYAKHIR, LRS_RPHAKHIR, LRS_AVGCOST1, LRS_AVGCOST, LRS_QTY_SELISIH_SO, LRS_RPH_SELISIH_SO, LRS_QTY_SELISIH_SOIC, LRS_RPH_SELISIH_SOIC, ";
             $query .= "coalesce(lrs_rphakhir,0) - (coalesce(lrs_rphbegbal,0) + coalesce(lrs_rphbaik,0) + coalesce(lrs_rphretur,0) + coalesce(lrs_rphadj,0) + coalesce(lrs_rph_selisih_so, 0) ";
             $query .= "+ coalesce(lrs_soadj, 0) - coalesce(lrs_rphmusnah,0) - coalesce(lrs_rphhilang,0) - coalesce(lrs_rphlbaik,0) - coalesce(lrs_rphlretur,0)) koreksi ";
-            $query .= "FROM TBTR_LPPRS, TBMASTER_PRODMAST ";
-            $query .= "WHERE LRS_PRDCD = PRD_PRDCD AND LRS_KODEIGR = PRD_KODEIGR ";
-            $query .= "AND TO_CHAR(LRS_TGL1, 'YYYY-MM') = '" . $request->periode . "' ";
-            if(count($request->plu) == 0){
+            $query .= "FROM TBTR_LPPRS ";
+            $query .= "JOIN TBMASTER_PRODMAST ON LRS_PRDCD = PRD_PRDCD AND LRS_KODEIGR = PRD_KODEIGR ";
+            // $query .= "WHERE TO_CHAR(LRS_TGL1, 'YYYY-MM') = '" . $request->periode . "' ";
+            if($request->all_plu == 1){
                 $query .= "";
             }else{
 
@@ -772,13 +783,24 @@ class ReportController extends Controller
                 $query .= "AND LRS_PRDCD in ( " . $string_prdcdc . " ) ";
             }
             $query .= "ORDER BY LRS_PRDCD ";
+            //! dummy
+            $query .= 'LIMIT 10';
             $data['lpp_rusak'] = DB::select($query);
+        }
+
+        $txtJenisBarang = 'ALL';
+        if($request->jenis_barang == 'B'){
+            $txtJenisBarang = 'BAIK';
+        }elseif($request->jenis_barang == 'T'){
+            $txtJenisBarang = 'RETUR';
+        }elseif($request->jenis_barang == 'R'){
+            $txtJenisBarang = 'RUSAK';
         }
 
         // Generate Excel file content
         $fileContent = Excel::raw(new LppMonthEndExport($data), \Maatwebsite\Excel\Excel::XLSX);
 
-        $excelFileName = 'LPP_MONTH_END.xlsx'; // Set your desired filename here
+        $excelFileName = "LPP_MONTH_END - $txtJenisBarang.xlsx"; // Set your desired filename here
         $encodedFileName = rawurlencode($excelFileName);
 
         $headers = [
@@ -789,42 +811,6 @@ class ReportController extends Controller
 
         // Return Excel file content as response=
         return response($fileContent, 200, $headers);
-
-        // rowData.CreateCell(0).SetCellValue(dt.Rows(i).Item("LRS_KODEIGR").ToString)
-        // rowData.CreateCell(1).SetCellValue(Format(dt.Rows(i).Item("LRS_TGL1"), "yyyy-MM-dd").ToString)
-        // rowData.CreateCell(2).SetCellValue(Format(dt.Rows(i).Item("LRS_TGL2"), "yyyy-MM-dd").ToString)
-        // rowData.CreateCell(3).SetCellValue(dt.Rows(i).Item("PRD_KODEDIVISI").ToString)
-        // rowData.CreateCell(4).SetCellValue(dt.Rows(i).Item("PRD_KODEDEPARTEMENT").ToString)
-        // rowData.CreateCell(5).SetCellValue(dt.Rows(i).Item("PRD_KODEKATEGORIBARANG").ToString)
-        // rowData.CreateCell(6).SetCellValue(dt.Rows(i).Item("PRD_PRDCD").ToString)
-        // rowData.CreateCell(7).SetCellValue(dt.Rows(i).Item("PRD_DESKRIPSIPANJANG").ToString)
-        // rowData.CreateCell(8).SetCellValue(dt.Rows(i).Item("PRD_UNIT").ToString & "/" & dt.Rows(i).Item("PRD_FRAC").ToString)
-        // rowData.CreateCell(9).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYBEGBAL").ToString))
-        // rowData.CreateCell(10).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHBEGBAL").ToString))
-        // rowData.CreateCell(11).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYBAIK").ToString))
-        // rowData.CreateCell(12).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHBAIK").ToString))
-        // rowData.CreateCell(13).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYRETUR").ToString))
-        // rowData.CreateCell(14).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHRETUR").ToString))
-        // rowData.CreateCell(15).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYMUSNAH").ToString))
-        // rowData.CreateCell(16).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHMUSNAH").ToString))
-        // rowData.CreateCell(17).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYHILANG").ToString))
-        // rowData.CreateCell(18).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHHILANG").ToString))
-        // rowData.CreateCell(19).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYLBAIK").ToString))
-        // rowData.CreateCell(20).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHLBAIK").ToString))
-        // rowData.CreateCell(21).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYLRETUR").ToString))
-        // rowData.CreateCell(22).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHLRETUR").ToString))
-        // rowData.CreateCell(23).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYADJ").ToString))
-        // rowData.CreateCell(24).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHADJ").ToString))
-        // rowData.CreateCell(25).SetCellValue(Val(dt.Rows(i).Item("LRS_SOADJ").ToString))
-        // rowData.CreateCell(26).SetCellValue(Val(dt.Rows(i).Item("LRS_QTY_SELISIH_SO").ToString))
-        // rowData.CreateCell(27).SetCellValue(Val(dt.Rows(i).Item("LRS_RPH_SELISIH_SO").ToString))
-        // rowData.CreateCell(28).SetCellValue(Val(dt.Rows(i).Item("LRS_QTY_SELISIH_SOIC").ToString))
-        // rowData.CreateCell(29).SetCellValue(Val(dt.Rows(i).Item("LRS_RPH_SELISIH_SOIC").ToString))
-        // rowData.CreateCell(30).SetCellValue(Val(dt.Rows(i).Item("LRS_QTYAKHIR").ToString))
-        // rowData.CreateCell(31).SetCellValue(Val(dt.Rows(i).Item("LRS_RPHAKHIR").ToString))
-        // rowData.CreateCell(32).SetCellValue(Val(dt.Rows(i).Item("LRS_AVGCOST1").ToString))
-        // rowData.CreateCell(33).SetCellValue(Val(dt.Rows(i).Item("LRS_AVGCOST").ToString))
-        // rowData.CreateCell(34).SetCellValue(Val(dt.Rows(i).Item("KOREKSI").ToString))
     }
 
     public function reportLppMonthEndExcelDatatables(){
@@ -1146,9 +1132,9 @@ class ReportController extends Controller
         }else{
             $query .= "";
         }
-        $query .= "AND lso_flagsarana= '" . $request->sarana . "' ";
+        // $query .= "AND lso_flagsarana= '" . $request->sarana . "' ";
         $query .= "AND lso_flaglimit= 'Y' ";
-        $query .= "AND DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
+        // $query .= "AND DATE_trunc('DAY',LSO_TGLSO) >= TO_DATE('" . $request->tanggal_start_so . "','YYYY-MM-DD') ";
         $query .= "ORDER BY lso_koderak, lso_kodesubrak, lso_tiperak, lso_shelvingrak, lso_nourut ";
         $data['data'] = collect(DB::select($query))->groupBy(['lso_prdcd'])->slice(0, 10); //! DUMMY SLICE NYA
 

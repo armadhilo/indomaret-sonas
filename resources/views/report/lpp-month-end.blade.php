@@ -111,7 +111,7 @@
                                         <label class="label-form" for="selisih_so">PLU <span>:</span></label>
                                         <div class="d-flex align-items-center" style="gap: 20px">
                                             <label class="form-checkbox" for="check_all">
-                                                <input type="checkbox" id="check_all" onclick="$(this).val(this.checked ? 1 : 0)" name="check_rpt_audit" class="form-control">
+                                                <input type="checkbox" id="check_all" onclick="$(this).val(this.checked ? 1 : 0)" value="0" name="check_all" class="form-control">
                                                 All PLU
                                             </label>
                                             <input type="text" style="width: 20%" class="form-control" id="input_plu">
@@ -178,6 +178,14 @@
         $(element).val(today).trigger('change');
     }
 
+    $("#input_plu").focus().on("keydown", function(event) {
+        if (event.keyCode === 9) {
+            event.preventDefault();
+            checkDescPLU();
+        }
+    });
+
+
     function initializeDatatable(){
         tb = $('#tb_lpp_month').DataTable({
             ajax: {
@@ -211,6 +219,26 @@
             info: false,
             ordering: false,
             order: [],
+        });
+    }
+
+    function checkDescPLU(){
+        $('#modal_loading').modal('show');
+        $.ajax({
+            url: "/report/lpp-month-end/get-desc/" + $("#input_plu").val(),
+            type: "GET",
+            success: function(response) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                $("#input_desc").val(response.data.prd_deskripsipanjang);
+            },error: function(jqXHR, textStatus, errorThrown) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                Swal.fire({
+                    text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
+                        ? jqXHR.responseJSON.message
+                        : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                    icon: "error"
+                });
+            }
         });
     }
 
@@ -334,7 +362,7 @@
                 $.ajax({
                     url: "/report/lpp-month-end/action/cetak-lpp",
                     type: "POST",
-                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), periode: $("#periode").val()},
+                    data: {plu: plu_list, jenis_barang: $("[name=jenis_barang]").val(), periode: $("#periode").val(), all_plu: $("#check_all").val()},
                     xhrFields: {
                         responseType: 'blob' // Important for binary data
                     },

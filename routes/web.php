@@ -170,6 +170,7 @@ Route::middleware(['mylogin'])->group(function () {
         Route::group(['prefix' => 'lpp-month-end'], function(){
             Route::get('/', [ReportController::class, 'index']);
             Route::get('/datatables', [ReportController::class, 'reportLppMonthEndExcelDatatables']);
+            Route::get('/get-desc/{prd_prdcd}', [ReportController::class, 'getPluDesc']);
 
             Route::group(['prefix' => 'action'], function(){
                 Route::post('/cetak-lpp', [ReportController::class, 'reportLppMonthEndExcelActionCetak']);
@@ -211,7 +212,7 @@ Route::middleware(['mylogin'])->group(function () {
         Route::get('/', [MonitoringSoController::class, 'index']);
         Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
         Route::get('/show-level/{lso_koderak}', [MonitoringSoController::class, 'showLevel']);
-        
+
         Route::group(['prefix' => 'action'], function(){
         });
     });

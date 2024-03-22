@@ -626,6 +626,17 @@ class ReportController extends Controller
         return response()->json(['pdf' => base64_encode($pdfContent)]);
     }
 
+    public function getLokasi(){
+        $data = DB::table('tbtr_lokasi_so')
+            ->select('lso_koderak','lso_kodesubrak','lso_tiperak','lso_shelvingrak')
+            ->groupBy(['lso_koderak','lso_kodesubrak','lso_tiperak','lso_shelvingrak'])
+            ->get();
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
+    }
+
     public function getPlu(){
         $data = DB::table('tbmaster_prodmast')->select('prd_prdcd','prd_deskripsipanjang')->limit(100)->get();
 

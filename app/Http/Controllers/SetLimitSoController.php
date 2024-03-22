@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\SetLimitSoExport;
 use App\Helper\ApiFormatter;
 use App\Helper\DatabaseConnection;
+use App\Http\Requests\AuthApprovalRequest;
 use App\Http\Requests\ProsesBaSoRequest;
 use App\Imports\SetLimitSoImport;
 use Carbon\Carbon;
@@ -194,5 +195,24 @@ class SetLimitSoController extends Controller
             ]);
 
         return ApiFormatter::success(200, "Upload Excel Berhasil");
+    }
+
+    public function authApproval(AuthApprovalRequest $request){
+        $data = DB::table('tbmaster_user')
+            ->where([
+                'userid' => $request->username,
+                'userpassword' => $request->password,
+                'kodeigr' => session('KODECABANG')
+            ])->first();
+
+        if(empty($data)){
+            return ApiFormatter::error(400, 'Invalid Username or Password');
+        }
+
+        if($data->userlevel > 1){
+            return ApiFormatter::error(400, 'Anda tidak berhak melakukan approval');
+        }
+
+        return ApiFormatter::success(200, 'Auth Approval Berhasil');
     }
 }

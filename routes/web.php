@@ -92,6 +92,7 @@ Route::middleware(['mylogin'])->group(function () {
         Route::get('/', [ReportController::class, 'index']);
 
         Route::group(['prefix' => 'addon'], function(){
+            Route::get('/get-lokasi', [ReportController::class, 'getLokasi']);
             Route::get('/get-plu', [ReportController::class, 'getPlu']);
             Route::get('/get-description/{prd_prdcd}', [ReportController::class, 'getPluDesc']);
         });
@@ -224,6 +225,7 @@ Route::middleware(['mylogin'])->group(function () {
         Route::group(['prefix' => 'action'], function(){
             Route::get('/download-excel/{tahap}/{tglSO}', [SetLimitSoController::class, 'downloadDataExcel']);
             Route::post('/upload-excel', [SetLimitSoController::class, 'uploadDataExcel']);
+            Route::post('/approval', [SetLimitSoController::class, 'authApproval']);
         });
     });
 });

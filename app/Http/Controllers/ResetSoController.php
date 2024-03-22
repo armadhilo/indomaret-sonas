@@ -87,18 +87,13 @@ class ResetSoController extends Controller
             return ApiFormatter::error(400, 'Data Reset SO terakhir tidak ditemukan');
         }
 
-        return view('report-adjust-so');
-    }
-
-    public function datatablesReportAdjustSo(){
-
-        $dt = DB::select("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_MODIFY_DT in (select max(MSO_MODIFY_DT) from TBMASTER_SETTING_SO)");
-        $TglSO = $dt[0]->mso_tglso;
-        $TglReset = $dt[0]->mso_create_dt;
-
         // dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_MODIFY_DT in (select max(MSO_MODIFY_DT) from TBMASTER_SETTING_SO)")
         // TglSO = Format(dt.Rows(0).Item("mso_tglso"), "dd-MM-yyyy").ToString
         // tglreset = Format(dt.Rows(0).Item("MSO_CREATE_DT"), "dd-MM-yyyy").ToString
+
+        $dt = DB::select("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_MODIFY_DT in (select max(MSO_MODIFY_DT) from TBMASTER_SETTING_SO)");
+        $TglSO = Carbon::parse($dt[0]->mso_tglso)->format('Y-m-d');
+        $TglReset = $dt[0]->mso_create_dt;
 
         $query = '';
         $query .= "select sop_lokasi, sum(total)  as Total ";
@@ -147,17 +142,13 @@ class ResetSoController extends Controller
             $brgRusak = $dt[2]->total;
         }
 
-        $total = (int)$brgBaik + (int)$brgRetur + (int)$brgRusak;
+        $data['perusahaan'] = DB::table('tbmaster_perusahaan')->select('prs_namaperusahaan', 'prs_namacabang')->first();
+        $data['TglSO'] = $TglSO;
+        $data['brgBaik'] = $brgBaik;
+        $data['brgRetur'] = $brgRetur;
+        $data['brgRusak'] = $brgRusak;
+        $data['total'] = (int)$brgBaik + (int)$brgRetur + (int)$brgRusak;
 
-        // cmd.CommandText = "SELECT PRS_NAMAPERUSAHAAN, PRS_NAMACABANG FROM TBMASTER_PERUSAHAAN "
-        // Da.SelectCommand = cmd
-        // Da.Fill(Ds, "DATAPERUSAHAN")
-
-        // If Ds.Tables(0).Rows.Count > 0 Then
-        //     Application.DoEvents()
-
-        //     Ds.WriteXml(Application.StartupPath & "\reportingDATA.xml", XmlWriteMode.WriteSchema)
-        //     oRpt.SetDataSource(Ds)
         //     oRpt.SetParameterValue("tgl_SO", TglSO)
         //     oRpt.SetParameterValue("Tgl_ref", tglreset)
         //     oRpt.SetParameterValue("Brg_Baik", brgbaik)

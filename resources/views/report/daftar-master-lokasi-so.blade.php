@@ -76,9 +76,23 @@
             </div>
         </div>
     </div>
+
+    @include('layouts.modal-plu')
+
 @endsection
 
 @push('page-script')
 <script src="{{ asset('js/report-action.js') }}"></script>
+<script>
+    $(document).ready(function(){
+        initializeHelpPLU();
+        $(document).keydown(function(event){
+            if(event.keyCode == 112) {
+                event.preventDefault();
+                showModalPLU();
+            }
+        });
+    });
+</script>
 
 @endpush

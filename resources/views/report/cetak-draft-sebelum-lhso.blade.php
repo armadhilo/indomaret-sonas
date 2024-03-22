@@ -105,11 +105,19 @@
             </div>
         </div>
     </div>
+    @include('layouts.modal-plu')
 @endsection
 
 @push('page-script')
 <script>
     $(document).ready(function(){
+        initializeHelpPLU();
+        $(document).keydown(function(event){
+            if(event.keyCode == 112) {
+                event.preventDefault();
+                showModalPLU();
+            }
+        });
         $('#jenis_barang').on('input', function(){
             var words = $(this).val().split(' ')[0];
             if (words.length > 1) {

@@ -142,17 +142,29 @@
                                 </thead>
                             </table>
                         </form>
+                        <div id="header_tb" style="margin-bottom: 0">
+                            <h5 class="m-0" style="font-weight: 700; font-size: 1rem;">*F1 - Help PLU</h5>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    @include('layouts.modal-plu')
 @endsection
 
 @push('page-script')
 <script>
     let tb;
     $(document).ready(function(){
+        initializeHelpPLU();
+        $(document).keydown(function(event){
+            if(event.keyCode == 112) {
+                event.preventDefault();
+                showModalPLU();
+            }
+        });
         setMonthNow('#periode');
 
         $('#report_content').on('input', "#jenis_barang_cust", function(){
@@ -359,6 +371,7 @@
                     return;
                 }
                 $('#modal_loading').modal('show');
+                var all_plu = $("#check_all").val();
                 $.ajax({
                     url: "/report/lpp-month-end/action/cetak-lpp",
                     type: "POST",
@@ -369,16 +382,34 @@
                     success: function(response) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         var contentType = response.type;
-                        var blob = new Blob([response], { type: contentType });
-                        var downloadUrl = URL.createObjectURL(blob);
-                        var a = document.createElement('a');
-                        a.href = downloadUrl;
-                        var fileName = 'LPP_MONTH_END.xlsx';
-                        a.download = fileName;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(downloadUrl);
-                        document.body.removeChild(a);
+
+                        if (contentType === 'application/zip') {
+                            var blob = new Blob([response]);
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = 'LPP_MONTH_END - ALL.zip';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            console.log('wasdf');
+                        } else if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                            var contentType = response.type;
+                            var blob = new Blob([response], { type: contentType });
+                            var downloadUrl = URL.createObjectURL(blob);
+                            var a = document.createElement('a');
+                            a.href = downloadUrl;
+                            var fileName = 'LPP_MONTH_END.xlsx';
+                            a.download = fileName;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(downloadUrl);
+                            document.body.removeChild(a);
+                        } else {
+                            Swal.fire({
+                                text: "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                                icon: "error"
+                            });
+                        }
                     },error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire({

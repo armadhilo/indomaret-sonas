@@ -46,6 +46,6 @@ class AuthApprovalRequest extends FormRequest
             'code' => 400,
             'errors' => $array,
             'message' => 'Input validation error'
-        ], 400));
+        ], 500));
     }
 }

@@ -114,3 +114,30 @@ function openInNewTabPDF(){
     pdfURL += '?' + currentRequestData;
     window.open(pdfURL, '_blank');
 }
+
+function initializeHelpPLU(){
+    tb_plu = $('#tb_plu').DataTable({
+        "lengthChange": false,
+        processing: true,
+        ajax: {
+            url: '/report/addon/get-plu',
+            type: 'GET'
+        },
+        columnDefs: [
+            { className: 'text-center', targets: [0] },
+            { "width": '15%', targets: [0] },
+        ],
+        columns: [
+            { data: 'prd_prdcd' },
+            { data: 'prd_deskripsipanjang' },
+        ],
+    });
+}
+
+$('#modal_plu').on('shown.bs.modal', function () {
+    tb_plu.columns.adjust().draw();
+});
+
+function showModalPLU(){
+    $("#modal_plu").modal("show");
+}

@@ -69,6 +69,17 @@
         transform: translateY(2px);
     }
 
+    @media (min-width: 576px){
+        .modal-width-cust {
+           max-width: 600px;
+        }
+    }
+
+    @media (min-width: 992px){
+        .modal-width-cust {
+            max-width: 900px;
+        }
+    }
 </style>
 @endsection
 
@@ -136,7 +147,31 @@
             </div>
             <div class="modal-footer flex-center">
                 <button type="button" class="btn btn-secondary clearButton" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success me-3" onclick="uploadExcelAction()">Submit</button>
+                <button type="button" class="btn btn-success me-3" onclick="showLoginModal()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" role="dialog" id="modal_login" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-width-cust" role="document">
+        <div class="modal-content">
+            <div class="modal-header br">
+                <h5 class="modal-title">LOGIN UPLOAD EXCEL</h5>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" name="username" id="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" name="password" id="password">
+                </div>
+                <div class="form-group float-right">
+                    <button class="btn btn-secondary mr-2" onclick="closeLoginModal()" style="width: 95px; height: 40px">Cancel</button>
+                    <button class="btn btn-success" onclick="checkAuth()" style="width: 95px; height: 40px">Login</button>
+                </div>
             </div>
         </div>
     </div>
@@ -196,6 +231,22 @@
             order: [],
         });
     });
+
+    function showLoginModal(){
+        var fileInput = $('#excel_file')[0].files[0];
+        if (!fileInput) {
+            Swal.fire({
+                text: "Silahkan Upload File Excel Terlebih Dahulu",
+                icon: "error"
+            });
+            return;
+        }
+        $("#modal_login").modal("show");
+    }
+
+    function closeLoginModal(){
+        $("#modal_login").modal("hide");
+    }
 
     function downloadExcelAction(){
         Swal.fire({
@@ -289,6 +340,44 @@
                         : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
                     icon: "error"
                 });
+            }
+        });
+    }
+
+    function checkAuth(){
+        $('#modal_loading').modal('show');
+        $.ajax({
+            url: '/set-limit-so/action/approval',
+            type: 'POST',
+            data: {username: $("#username").val(), password: $("#password").val()},
+            success: function(response) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                closeLoginModal();
+                Swal.fire({
+                    text: response.message,
+                    icon: "success",
+                    confirmButtonText: "Lanjutkan Upload Excel"
+                }).then((result) => {
+                    uploadExcelAction();
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                if(jqXHR.responseJSON.code === 500){
+                    Object.keys(jqXHR.responseJSON.errors).forEach(function (key) {
+                        var responseError = jqXHR.responseJSON.errors[key];
+                        var elem_name = $(this_form).find('[name=' + responseError['field'] + ']');
+                        elem_name.after(`<span class="d-flex text-danger invalid-feedback">${responseError['message']}</span>`)
+                        elem_name.addClass('is-invalid');
+                    });
+                } else {
+                    Swal.fire({
+                        text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
+                            ? jqXHR.responseJSON.message
+                            : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                        icon: "error"
+                    });
+                }
             }
         });
     }

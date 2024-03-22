@@ -171,6 +171,7 @@ class SetLimitSoController extends Controller
     }
 
     public function uploadDataExcel(Request $request){
+        return $request->all();
         $file = $request->file('excel_file');
 
         $import = new SetLimitSoImport();

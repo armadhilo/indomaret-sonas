@@ -76,6 +76,8 @@
             </div>
         </div>
     </div>
+
+    @include('layouts.modal-plu')
 @endsection
 
 @push('page-script')
@@ -89,6 +91,13 @@
                 $(this).val('');
             } else {
                 $(this).val(input.toUpperCase());
+            }
+        });
+        initializeHelpPLU();
+        $(document).keydown(function(event){
+            if(event.keyCode == 112) {
+                event.preventDefault();
+                showModalPLU();
             }
         });
     });

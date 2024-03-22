@@ -77,11 +77,74 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" role="dialog" id="modal_lokasi" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header br">
+                    <h5 class="modal-title">Help Lokasi SO</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-primary" style="margin-left: 20px; padding: .375rem 1.3rem; position: absolute; z-index: 1500" onclick="tb_lokasi_so.ajax.reload();">Refresh</button>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover datatable-dark-primary w-100" id="tb_lokasi_so" style="margin: 20px">
+                            <thead>
+                                <tr>
+                                    <th>Kode Rak</th>
+                                    <th>Kode SubRak</th>
+                                    <th>Tipe Rak</th>
+                                    <th>Shelving Rak</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-whitesmoke br">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('page-script')
 <script>
     $(document).ready(function(){
+        tb_lokasi_so = $('#tb_lokasi_so').DataTable({
+            "lengthChange": false,
+            processing: true,
+            ajax: {
+                url: '/report/addon/get-lokasi',
+                type: 'GET'
+            },
+            columnDefs: [
+                { className: 'text-center', targets: [0,1,2,3] },
+            ],
+            columns: [
+                { data: 'lso_koderak' },
+                { data: 'lso_kodesubrak' },
+                { data: 'lso_tiperak' },
+                { data: 'lso_shelvingrak' },
+                { data: null },
+            ],
+            rowCallback: function (row, data) {
+                $('td:eq(4)', row).html(`<button class="btn btn-info btn-sm mr-1" onclick="pilihLokasi('${data.lso_koderak}', '${data.lso_kodesubrak}', '${data.lso_tiperak}', '${data.lso_shelvingrak}')">Pilih Lokasi</button>`);
+            }
+        });
+
+        $(document).keydown(function(event){
+            if(event.keyCode == 112) {
+                event.preventDefault();
+                showModalLokasi();
+            }
+        });
+
         $('#report_content').on('input', "#sarana_so", function(){
             var input = $(this).val().trim(); 
             
@@ -93,6 +156,15 @@
             }
         })
     });
+
+    function pilihLokasi(koderak, kodeSubrak, tipeRak, Shelving){
+        $("#modal_lokasi").modal("hide");
+        $("[name=raksubrak]").val(`${koderak}.${kodeSubrak}`);
+    }
+
+    function showModalLokasi(){
+        $("#modal_lokasi").modal("show");
+    }
 </script>
 
 <script src="{{ asset('js/report-action.js') }}"></script>

@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\File;
+use ZipArchive;
 
 class ReportController extends Controller
 {
@@ -701,6 +703,41 @@ class ReportController extends Controller
         return Excel::download(new InquiryPlanoExport($data), 'INQUIRY PLANO SONAS.xls');
     }
 
+    public function reportLppMonthExcelCetakAll($data){
+        foreach ($data['data'] as $key => $fileData){
+            $currentData = [];
+            $currentData['periode'] = $data['periode'];
+            $currentData[$key] = $fileData;
+            $fileContent = Excel::raw(new LppMonthEndExport($currentData), \Maatwebsite\Excel\Excel::XLSX);
+            $excelFiles[$key] = $fileContent;
+        }
+
+        $tempDir = storage_path('temp_excel');
+        if (!File::exists($tempDir)) {
+            File::makeDirectory($tempDir);
+        }
+
+        foreach ($excelFiles as $fileName => $fileContent) {
+            $filePath = $tempDir . '/' . $fileName . '.xlsx';
+            file_put_contents($filePath, $fileContent);
+        }
+
+        $zipFile = storage_path('LPP_MONTH_END - ALL.zip');
+        $zip = new ZipArchive();
+        if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            $files = File::files($tempDir);
+            foreach ($files as $file) {
+                $zip->addFile($file, basename($file));
+            }
+            $zip->close();
+        }
+        File::deleteDirectory($tempDir);
+
+        $zipContent = file_get_contents($zipFile);
+        File::delete($zipFile);
+        return $zipContent;
+    }
+
     public function reportLppMonthEndExcelActionCetak(ReportLppMonthEndExcelActionCetakRequest $request){
 
         $date = Carbon::parse($request->periode);
@@ -737,7 +774,7 @@ class ReportController extends Controller
 
             //! dummy
             $query .= 'LIMIT 10';
-            $data['lpp_baik'] = DB::select($query);
+            $data['data']['lpp_baik'] = DB::select($query);
         }
 
         if($request->jenis_barang == 'T' || $request->jenis_barang == 'A'){
@@ -766,7 +803,7 @@ class ReportController extends Controller
             $query .= "ORDER BY LRT_PRDCD ";
             //! dummy
             $query .= 'LIMIT 10';
-            $data['lpp_retur'] = DB::select($query);
+            $data['data']['lpp_retur'] = DB::select($query);
         }
 
         if($request->jenis_barang == 'R' || $request->jenis_barang == 'A'){
@@ -796,7 +833,7 @@ class ReportController extends Controller
             $query .= "ORDER BY LRS_PRDCD ";
             //! dummy
             $query .= 'LIMIT 10';
-            $data['lpp_rusak'] = DB::select($query);
+            $data['data']['lpp_rusak'] = DB::select($query);
         }
 
         $txtJenisBarang = 'ALL';
@@ -808,17 +845,25 @@ class ReportController extends Controller
             $txtJenisBarang = 'RUSAK';
         }
 
-        // Generate Excel file content
-        $fileContent = Excel::raw(new LppMonthEndExport($data), \Maatwebsite\Excel\Excel::XLSX);
-
-        $excelFileName = "LPP_MONTH_END - $txtJenisBarang.xlsx"; // Set your desired filename here
-        $encodedFileName = rawurlencode($excelFileName);
-
-        $headers = [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $encodedFileName . '"',
-        ];
-
+        if($request->jenis_barang === 'A'){
+            $fileContent = $this->reportLppMonthExcelCetakAll($data);
+            $headers = [
+                'Content-Type' => 'application/zip',
+                'Content-Disposition' => 'attachment; filename="LPP_MONTH_END - ALL.zip"',
+            ];
+        } else {
+            // Generate Excel file content  
+            $data['data']['periode'] = $date->format('F Y');
+            $fileContent = Excel::raw(new LppMonthEndExport($data['data']), \Maatwebsite\Excel\Excel::XLSX);
+    
+            $excelFileName = "LPP_MONTH_END - $txtJenisBarang.xlsx"; // Set your desired filename here
+            $encodedFileName = rawurlencode($excelFileName);
+    
+            $headers = [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $encodedFileName . '"',
+            ];
+        }
 
         // Return Excel file content as response=
         return response($fileContent, 200, $headers);

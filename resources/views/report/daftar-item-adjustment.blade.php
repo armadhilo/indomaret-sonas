@@ -66,9 +66,9 @@
                             <div class="form-group d-flex align-items-center">
                                 <label class="label-form" for="plu">PLU <span>:</span></label>
                                 <div class="d-flex align-items-center" style="gap: 20px;">
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="plu1">
                                     S/D
-                                    <input type="text" class="form-control">
+                                    <input type="text" class="form-control" name="plu2">
                                 </div>
                             </div>
                             <div class="form-group d-flex align-items-center">
@@ -91,9 +91,21 @@
             </div>
         </div>
     </div>
+
+    @include('layouts.modal-plu')
 @endsection
 
 @push('page-script')
 <script src="{{ asset('js/report-action.js') }}"></script>
-
+<script>
+    $(document).ready(function(){
+        initializeHelpPLU();
+        $(document).keydown(function(event){
+            if(event.keyCode == 112) {
+                event.preventDefault();
+                showModalPLU();
+            }
+        });
+    });
+</script>
 @endpush

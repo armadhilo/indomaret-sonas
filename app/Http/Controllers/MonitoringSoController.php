@@ -38,6 +38,8 @@ class MonitoringSoController extends Controller
     }
 
     public function getMonitoring(){
+
+
         //! TOKO
         $query = '';
         $query .= "select to_char(ROUND((total_so / total_lokasi) * 100, 2), '990D99') ";
@@ -66,7 +68,22 @@ class MonitoringSoController extends Controller
         $query .= "      GROUP BY lso_koderak";
         $query .= ")AS DATAS";
         $query .= " ORDER BY lso_koderak ";
-        $data['detail_toko'] = DB::select($query);
+        // $data['detail_toko'] = DB::select($query);
+        $detail_toko = DB::select($query);
+
+        $array = [];
+        foreach($detail_toko as $item){
+           $array[] = [
+               'lso_koderak' => $item->lso_koderak,
+               'progress' => $item->progress,
+               'koderak' => $item->lso_koderak,
+               'data_subrak' => $this->recursive(1, $item->lso_koderak)
+           ];
+        }
+
+        $data['detail_toko'] = $array;
+
+
         // nod.Name = dr.Item("LSO_KODERAK").ToString
         // nod.Text = dr.Item("LSO_KODERAK").ToString.PadRight(7) & _
         //             " " & dr.Item("PROGRESS").ToString
@@ -103,7 +120,21 @@ class MonitoringSoController extends Controller
         $query .= "      GROUP BY lso_koderak";
         $query .= ")AS DATAS";
         $query .= " ORDER BY lso_koderak ";
-        $data['detail_gudang'] = DB::select($query);
+        // $data['detail_gudang'] = DB::select($query);
+
+        $detail_gudang = DB::select($query);
+
+        $array = [];
+        foreach($detail_gudang as $item){
+           $array[] = [
+               'lso_koderak' => $item->lso_koderak,
+               'progress' => $item->progress,
+               'koderak' => $item->lso_koderak,
+               'data_subrak' => $this->recursive(1, $item->lso_koderak)
+           ];
+        }
+
+        $data['detail_gudang'] = $array;
 
         // nod.Name = dr.Item("LSO_KODERAK").ToString
         // nod.Text = dr.Item("LSO_KODERAK").ToString.PadRight(7) & _
@@ -120,8 +151,9 @@ class MonitoringSoController extends Controller
         elseif($lso_kodesubrak != null) $query .= "select distinct lso_tiperak ";
         else $query .= "select distinct lso_kodesubrak ";
 
-        $query .= "FROM tbtr_lokasi_so, tbmaster_setting_so ";
-        // $query .= "WHERE lso_tglso = mso_tglso and mso_flagreset is null ";
+        $query .= "FROM tbtr_lokasi_so ";
+        $query .= "JOIN tbmaster_setting_so on lso_tglso = mso_tglso ";
+        // $query .= "WHERE mso_flagreset is null ";
         // $query .= "AND coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
         $query .= "WHERE LSO_KODERAK = '" . $lso_koderak . "' ";
         if($lso_kodesubrak != null) $query .= "AND LSO_KODESUBRAK = '" . $lso_kodesubrak . "' ";
@@ -133,38 +165,40 @@ class MonitoringSoController extends Controller
 
         $data = DB::select($query);
 
+        return $data;
+
         return ApiFormatter::success(200, 'Show level berhasil ditampilkan', $data);
     }
 
-    // private function recursive($level, $lso_koderak = null, $lso_kodesubrak = null, $lso_tiperak = null){
-    //     $array = [];
-    //     if($level == 1){
-    //         $data = $this->showLevel2($lso_koderak);
-    //         foreach($data as $item){
-    //             $array[] = [
-    //                 'data' => $item->lso_kodesubrak,
-    //                 'lso_tiperak' => $this->recursive(2, $lso_koderak, $item->lso_kodesubrak)
-    //             ];
-    //         }
-    //     }elseif($level == 2){
-    //         $data = $this->showLevel3($lso_koderak, $lso_kodesubrak);
-    //         foreach($data as $item){
-    //             $array[] = [
-    //                 'data' => $item->lso_tiperak,
-    //                 'lso_shelving' => $this->recursive(3, $lso_koderak, $lso_kodesubrak, $item->lso_tiperak)
-    //             ];
-    //         }
-    //     }elseif($level == 3){
-    //         $data = $this->showLevel4($lso_koderak, $lso_kodesubrak, $lso_tiperak);
-    //         foreach($data as $item){
-    //             $array[] = [
-    //                 'data' => $item->lso_shelvingrak,
-    //             ];
-    //         }
-    //     }
+    private function recursive($level, $lso_koderak = null, $lso_kodesubrak = null, $lso_tiperak = null){
+        $array = [];
+        if($level == 1){
+            $data = $this->showLevel($lso_koderak);
+            foreach($data as $item){
+                $array[] = [
+                    'subrak' => $item->lso_kodesubrak,
+                    'data_tiperak' => $this->recursive(2, $lso_koderak, $item->lso_kodesubrak)
+                ];
+            }
+        }elseif($level == 2){
+            $data = $this->showLevel($lso_koderak, $lso_kodesubrak);
+            foreach($data as $item){
+                $array[] = [
+                    'tiperak' => $item->lso_tiperak,
+                    'data_shelving' => $this->recursive(3, $lso_koderak, $lso_kodesubrak, $item->lso_tiperak)
+                ];
+            }
+        }elseif($level == 3){
+            $data = $this->showLevel($lso_koderak, $lso_kodesubrak, $lso_tiperak);
+            foreach($data as $item){
+                $array[] = [
+                    'shelving' => $item->lso_shelvingrak,
+                ];
+            }
+        }
 
-    //     return $array;
-    // }
+        return $array;
+    }
 
     public function datatables(MonitoringRequest $request){
         $query = '';

@@ -11,6 +11,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use ZipArchive;
+use Illuminate\Support\Facades\File;
 
 class MonitoringSoController extends Controller
 {
@@ -25,6 +27,8 @@ class MonitoringSoController extends Controller
             ->whereNull('mso_flagreset')
             ->get();
 
+        $data['tgl_so'] = Carbon::parse($dtCek[0]->mso_tglso)->format('Y-m-d');
+
         // if(count($dtCek) == 0){
         //     return ApiFormatter::error(400, 'SO BELUM DI-INITIAL');
         // }else{
@@ -34,7 +38,7 @@ class MonitoringSoController extends Controller
         // }
 
 
-        return view('monitoring-so');
+        return view('monitoring-so', $data);
     }
 
     public function getMonitoring(){
@@ -206,16 +210,16 @@ class MonitoringSoController extends Controller
         $query .= "FROM TBTR_LOKASI_SO LEFT JOIN TBMASTER_STOCK ON LSO_PRDCD = ST_PRDCD AND LSO_LOKASI = ST_LOKASI, TBMASTER_PRODMAST ";
         $query .= "WHERE coalesce(LSO_FLAGLIMIT, 'N') = 'Y' ";
         // $query .= "AND DATE_TRUNC('DAY',LSO_TGLSO) = TO_DATE('" . $request->tanggal_start_so . "', 'YYYY-MM-DD') AND LSO_PRDCD = PRD_PRDCD AND LSO_KODEIGR = PRD_KODEIGR AND PRD_PRDCD LIKE '%0' ";
-        if($request->has('KodeRak')){
+        if($request->has('KodeRak') && $request->KodeRak !== null){
             $query .= "AND LSO_KODERAK = '" . $request->KodeRak . "' ";
         }
-        if($request->has('KodeSubrak')){
+        if($request->has('KodeSubrak') && $request->KodeRak !== null){
             $query .= "AND LSO_KODESUBRAK = '" . $request->KodeSubrak . "' ";
         }
-        if($request->has('Tiperak')){
+        if($request->has('Tiperak') && $request->KodeRak !== null){
             $query .= "AND LSO_TIPERAK = '" . $request->Tiperak . "' ";
         }
-        if($request->has('Shelvingrak')){
+        if($request->has('Shelvingrak') && $request->KodeRak !== null){
             $query .= "AND LSO_SHELVINGRAK = '" . $request->Shelvingrak . "' ";
         }
         $query .= "ORDER BY LSO_KODERAK, LSO_KODESUBRAK, LSO_TIPERAK, LSO_SHELVINGRAK, LSO_NOURUT ASC ";
@@ -246,27 +250,68 @@ class MonitoringSoController extends Controller
         else $query .= "ORDER BY lso_kodesubrak ";
 
         $data = DB::select($query);
-
-        return ApiFormatter::success(200, 'Level 4 berhasil ditampilkan', $data);
+        return $data;
+        // return ApiFormatter::success(200, 'Level 4 berhasil ditampilkan', $data);
     }
 
     public function printStrukSO($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak = null, $ShelvingRak = null){
-        if($TipeRak == null){
+        // Generate text files
+        $tempDir = storage_path('temp_txt');
+        if (!File::exists($tempDir)) {
+            File::makeDirectory($tempDir);
+        }
+
+        $files = [];
+        if ($TipeRak === null) {
             $data = $this->privateShowLevel($KodeRak, $KodeSubRak);
-            foreach($data as $item){
+            foreach ($data as $item) {
                 $data2 = $this->privateShowLevel($KodeRak, $KodeSubRak, $item->lso_tiperak);
-                foreach($data2 as $item2){
-                    $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $item->lso_tiperak, $item2->lso_shelvingrak);
+                foreach ($data2 as $item2) {
+                    $files[] = $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $item->lso_tiperak, $item2->lso_shelvingrak, $tempDir);
                 }
             }
-        }elseif($ShelvingRak == null){
+        } elseif ($ShelvingRak === null) {
             $data2 = $this->privateShowLevel($KodeRak, $KodeSubRak, $TipeRak);
-            foreach($data2 as $item2){
-                $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $item2->lso_shelvingrak);
+            foreach ($data2 as $item2) {
+                $files[] = $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $item2->lso_shelvingrak, $tempDir);
             }
-        }else{
-            $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak);
+        } else {
+            $files[] = $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak, $tempDir);
         }
+
+        // Create a zip archive
+        $zipFile = storage_path('MONITORING SO.zip');
+        $zip = new ZipArchive();
+        if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            // Add text files to the zip archive
+            foreach ($files as $file) {
+                $zip->addFile($file, basename($file));
+            }
+            $zip->close();
+        }
+
+        // Clean up temporary text files
+        File::deleteDirectory($tempDir);
+
+        // Return the zip file path
+        return response()->download($zipFile, 'MONITORING_SO.zip')->deleteFileAfterSend();
+        
+        // if($TipeRak == null){
+        //     $data = $this->privateShowLevel($KodeRak, $KodeSubRak);
+        //     foreach($data as $item){
+        //         $data2 = $this->privateShowLevel($KodeRak, $KodeSubRak, $item->lso_tiperak);
+        //         foreach($data2 as $item2){
+        //             $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $item->lso_tiperak, $item2->lso_shelvingrak);
+        //         }
+        //     }
+        // }elseif($ShelvingRak == null){
+        //     $data2 = $this->privateShowLevel($KodeRak, $KodeSubRak, $TipeRak);
+        //     foreach($data2 as $item2){
+        //         $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $item2->lso_shelvingrak);
+        //     }
+        // }else{
+        //     $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak);
+        // }
     }
 
     private function generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak){
@@ -285,17 +330,15 @@ class MonitoringSoController extends Controller
             $query .= 'LIMIT 10';
             $data = DB::select($query);
 
-            return $data;
+            // if(count($data) == 0){
+            //     throw new HttpResponseException(ApiFormatter::error(404, "Tidak ada data yang dicetak [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
+            // }
 
-            if(count($data) == 0){
-                throw new HttpResponseException(ApiFormatter::error(404, "Tidak ada data yang dicetak [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
-            }
-
-            //! dummy
-            $check = collect($data)->where('LSO_MODIFY_BY', '');
-            if(count($check)){
-                throw new HttpResponseException(ApiFormatter::error(404, "Ada item yang belum di SO! [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
-            }
+            // //! dummy
+            // $check = collect($data)->where('LSO_MODIFY_BY', '');
+            // if(count($check)){
+            //     throw new HttpResponseException(ApiFormatter::error(404, "Ada item yang belum di SO! [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
+            // }
 
             $lokasi = 'Rusak';
             if($data[0]->lso_lokasi == '01'){
@@ -303,6 +346,51 @@ class MonitoringSoController extends Controller
             }elseif($data[0]->lso_lokasi == '02'){
                 $lokasi = 'Retur';
             }
+
+            $s = "========================================" . PHP_EOL;
+            $s .= str_pad("LISTING ITEM SO", 40, " ", STR_PAD_BOTH) . PHP_EOL;
+            $s .= "========================================" . PHP_EOL;
+            $s .= str_pad("Lokasi      : " . $lokasi, 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+            $s .= str_pad("User ID     : " . session('userid'), 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+            $s .= str_pad("Kode Rak    : " . $KodeRak, 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+            $s .= str_pad("Kode SubRak : " . $KodeSubRak, 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+            $s .= str_pad("Tipe Rak    : " . $TipeRak, 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+            $s .= str_pad("Shelv. Rak  : " . $ShelvingRak, 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+            $s .= str_pad("Waktu Cetak : " . date("d-m-Y H:i:s"), 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+
+            $s .= "----------------------------------------" . PHP_EOL;
+            $s .= "NO   NAMA BARANG / PLU                  " . PHP_EOL;
+            $s .= "          UNIT / FRAC      CTN     PCS  " . PHP_EOL;
+            $s .= "========================================" . PHP_EOL;
+
+            foreach ($data as $row) {
+                $QtyCTN = floor($row->lso_qty / $row->prd_frac);
+                $QtyPCS = $row->lso_qty % $row->prd_frac;
+
+                $s .= str_pad($row->lso_nourut, 3, " ", STR_PAD_LEFT) . "   " .
+                    str_pad(substr($row->prd_deskripsipendek, 0, 22) . " (" . $row->prd_prdcd . ")", 40, " ", STR_PAD_RIGHT) . PHP_EOL;
+                $s .= str_pad($row->prd_unit . " / " . number_format($row->prd_frac, 0), 14, " ", STR_PAD_LEFT) . " / " .
+                    str_pad(number_format($QtyCTN, 0), 5, " ", STR_PAD_LEFT) .
+                    str_pad(number_format($QtyPCS, 0), 8, " ", STR_PAD_LEFT) . "  " . PHP_EOL;
+            }
+
+            $s .= "========================================" . PHP_EOL;
+            $s .= "                                        " . PHP_EOL;
+            $s .= "                                        " . PHP_EOL;
+            $s .= "                                        " . PHP_EOL;
+            $s .= "                                        " . PHP_EOL;
+
+            // Set the file name
+            $filename = 'PRINT_MONITORING_SO_' . $KodeRak . '-' . $KodeSubRak . '-' . $TipeRak . '-' . $ShelvingRak .'.txt';
+
+            // Set the file path
+            $filePath = storage_path('temp_txt/' . $filename);
+
+            // Write the content to the file
+            file_put_contents($filePath, $s);
+
+            // Return the file path
+            return $filePath;
 
             //! CETAK  .TXT
             //! INI NEK BISA DI JADIKAN .ZIP AJA

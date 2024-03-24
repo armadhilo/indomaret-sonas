@@ -83,7 +83,7 @@
 
             <div class="body">
                 <p style="text-align: center; font-size: .95rem"><b>EDIT LIST KKSO BY LOKASI</b></p>
-                <p style="text-align: center; font-size: .69rem">Tanggal SO : 27 Maret 2024<br>Lokasi : CRK / 01</p>
+                <p style="text-align: center; font-size: .69rem">Tanggal SO : {{ \Carbon\Carbon::now()->format('d-m-Y') }}<br>Lokasi : CRK / 01</p>
                 <table style="border-collapse: collapse; margin-top:20px" class="table-center table-border-outside" cellpadding="2">
                     <thead>
                         <tr>

@@ -391,7 +391,6 @@
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
-                            console.log('wasdf');
                         } else if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
                             var contentType = response.type;
                             var blob = new Blob([response], { type: contentType });

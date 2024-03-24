@@ -5,12 +5,26 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('plugin/jstree/jstree.css') }}">
+<style>
+    a.jstree-anchor.jstree-hovered[aria-level="5"] {
+        background: transparent!important;
+    }
+    a.jstree-anchor[aria-level="5"] {
+        width: 115px!important;
+    }
+
+    .btn-xs{
+        padding: 2px 8px;
+        font-size: .8rem;
+    }
+</style>
 @endsection
 
 @section('content')
     <script src="{{ url('js/home.js?time=') . rand() }}"></script>
 
     <div class="container-fluid">
+        <input type="hidden" value="{{ $tgl_so }}" id="tanggal_start_so">
         <div class="row">
             <div class="col-5">
                 <div class="card shadow mb-4">
@@ -23,7 +37,7 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <div class="position-relative">
-                            <table class="table table-striped table-hover w-100 datatable-dark-primary table-center" id="tb_kkso" style="margin-top: 20px">
+                            <table class="table table-striped table-hover w-100 datatable-dark-primary table-center" id="tb_monitoring" style="margin-top: 20px">
                                 <thead>
                                     <tr>
                                         <th>No. Urut</th>
@@ -54,85 +68,203 @@
 <script src="{{ asset('plugin/jstree/jstree.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+    tb_monitoring = $('#tb_monitoring').DataTable({
+        processing: true,
+        language: {
+            emptyTable: "<div class='datatable-no-data' style='color: #ababab'>Tidak Ada Data</div>",
+        },
+        columns: [
+            { data: 'lso_nourut'},
+            { data: 'prd_prdcd'},
+            { data: 'prd_deskripsipanjang'},
+            { data: 'prd_unit'},
+            { data: 'prd_unit'},
+            { data: 'prd_unit'},
+            { data: 'prd_unit'},
+        ],
+        columnDefs: [
+            { className: 'text-center-vh', targets: '_all' },
+            { "width": "25%", "targets": 2 },
+        ],
+        data: [],
+    });
+
     $.ajax({
         url: '/monitoring-so/get-monitoring', 
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-           $('#jstree').jstree({
+            $('#jstree').jstree({
                 'core': {
                     'check_callback': true,
-                    'data': [{
-                        "text": "TOKO: " + data.toko.progress,
-                        "children": data.detail_toko.map(function(item) {
-                            return {
-                                "text": item.lso_koderak + ": " + item.progress,
-                                "data": {
-                                    "koderak": item.lso_koderak
-                                }
-                            };
-                        })
-                    }, {
-                        "text": "GUDANG: " + data.gudang.progress,
-                        "children": data.detail_gudang.map(function(item) {
-                            return {
-                                "text": item.lso_koderak + ": " + item.progress,
-                                "data": {
-                                    "koderak": item.lso_koderak
-                                }
-                            };
-                        })
-                    }]
-                }
-            }).on('dblclick.jstree', function (e) {
-                var node = $(e.target).closest('.jstree-node').length ? $(e.target).closest('.jstree-node') : $(e.target);
-                var nodeId = node.attr('id');
-                var instance = $.jstree.reference(this);
-                var koderak = instance.get_node(nodeId).data.koderak;
-                if (koderak) {
-                    console.log('Double-clicked Koderak:', koderak);
-                    $.ajax({
-                        url: '/monitoring-so/show-level/' + koderak,
-                        type: 'GET',
-                        success: function(response) {
-                            // Append received data as child nodes
-                            if (response.data) {
-                                var children = response.data.map(function(item, index) {
-                                    console.log(item);
-                                    return {
-                                        "text": item.lso_kodesubrak, // Use appropriate property for child node text
-                                        "data": { // You can include additional data if needed
-                                            "id": item.id,
-                                            "kodesubrak": koderak + "/" +item.lso_kodesubrak
-                                        }
-                                    };
-                                });
-                                if (instance && instance.is_ready) {
-                                    console.log("Before create_node");
-instance.create_node(nodeId, { text: "Test Child Node" }, 'last', function (newNode, response) {
-    console.log("Inside create_node callback");
-    if (response && response.status === true) {
-        console.log("Node creation successful:", newNode);
-    } else {
-        console.error("Node creation failed:", response ? response.error : "Unknown error");
-    }
-});
-} else {
-    console.error("jstree instance is not ready");
-}
-
-                            }
+                    'data': [
+                        {
+                            "text": "TOKO: " + data.toko.progress,
+                            "children": data.detail_toko.map(function (item) {
+                                return {
+                                    "text": item.lso_koderak + ": " + item.progress,
+                                    "data": {
+                                        "data": item.lso_koderak
+                                    },
+                                    "children": item.data_subrak.map(function (subrak) {
+                                        return {
+                                            "text": "Subrak: " + subrak.subrak + `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button class="btn btn-xs btn-print-action btn-sm btn-primary"><i class="fas fa-print"></i></button>`,
+                                            "data": {
+                                                "data": subrak.subrak
+                                            },
+                                            "children": subrak.data_tiperak.map(function (tiperak) {
+                                                return {
+                                                    "text": "Tiperak: " + tiperak.tiperak + `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button class="btn btn-xs btn-print-action btn-sm btn-primary"><i class="fas fa-print"></i></button>`,
+                                                    "data": {
+                                                        "data": tiperak.tiperak
+                                                    },
+                                                    "children": tiperak.data_shelving.map(function (shelving) {
+                                                        return {
+                                                            "text": "Shelving: " + shelving.shelving + `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button class="btn btn-xs btn-print-action btn-sm btn-primary"><i class="fas fa-print"></i></button>`,
+                                                            "data": {
+                                                                "data": shelving.shelving
+                                                            },
+                                                            "li_attr": {
+                                                                "class": "no-hover-style"
+                                                            }
+                                                        };
+                                                    })
+                                                };
+                                            })
+                                        };
+                                    })
+                                };
+                            })
                         },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
+                        {
+                            "text": "GUDANG: " + data.gudang.progress,
+                            "children": data.detail_toko.map(function (item) {
+                                return {
+                                    "text": item.lso_koderak + ": " + item.progress,
+                                    "data": {
+                                        "data": item.lso_koderak
+                                    },
+                                    "children": item.data_subrak.map(function (subrak) {
+                                        return {
+                                            "text": "Subrak: " + subrak.subrak + `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button class="btn btn-xs btn-print-action btn-sm btn-primary"><i class="fas fa-print"></i></button>`,
+                                            "data": {
+                                                "data": subrak.subrak
+                                            },
+                                            "children": subrak.data_tiperak.map(function (tiperak) {
+                                                return {
+                                                    "text": "Tiperak: " + tiperak.tiperak + `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button class="btn btn-xs btn-print-action btn-sm btn-primary"><i class="fas fa-print"></i></button>`,
+                                                    "data": {
+                                                        "data": tiperak.tiperak
+                                                    },
+                                                    "children": tiperak.data_shelving.map(function (shelving) {
+                                                        return {
+                                                            "text": "Shelving: " + shelving.shelving + `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button class="btn btn-xs btn-print-action btn-sm btn-primary"><i class="fas fa-print"></i></button>`,
+                                                            "data": {
+                                                                "data": shelving.shelving
+                                                            },
+                                                            "li_attr": {
+                                                                "class": "no-hover-style"
+                                                            }
+                                                        };
+                                                    })
+                                                };
+                                            })
+                                        };
+                                    })
+                                };
+                            })
                         }
-                    });
+                    ]
+                },
+                'types': {
+                    'default': {
+                        'icon': 'custom-icon'
+                    }
+                }
+            });
 
+            $('#jstree').on('dblclick.jstree', function(event) {
+                var node = $(event.target).closest('.jstree-node');
+                var nodeData = $('#jstree').jstree(true).get_node(node);
+
+                if (nodeData.parents.length === 2){
+                    reinitializeDatatables( nodeData.data.data, null, null, null);
+                } else if (nodeData.parents.length === 3){
+                    let koderak = $('#jstree').jstree(true).get_node(nodeData.parent);
+                    reinitializeDatatables( koderak.data.data, nodeData.data.data, null, null);
+                } else if (nodeData.parents.length === 4){
+                    let koderak = $('#jstree').jstree(true).get_node(nodeData.parent);
+                    let subrak = $('#jstree').jstree(true).get_node(nodeData.parents[1]);
+                    reinitializeDatatables( koderak.data.data, subrak.data.data, nodeData.data.data, null);
+                } else if (nodeData.parents.length === 5){
+                    let koderak = $('#jstree').jstree(true).get_node(nodeData.parent);
+                    let subrak = $('#jstree').jstree(true).get_node(nodeData.parents[1]);
+                    let tiperak = $('#jstree').jstree(true).get_node(nodeData.parents[2]);
+                    reinitializeDatatables( koderak.data.data, subrak.data.data, tiperak.data.data, nodeData.data.data);
                 }
             });
         }
     });
 });
+
+function reinitializeDatatables(koderak, subrak, tiperak, shelvingrak){
+    tb_monitoring.clear().draw();
+    $('.datatable-no-data').css('color', '#F2F2F2');
+    $('#loading_datatable').removeClass('d-none');
+    $.ajax({
+        url: "/monitoring-so/datatables",
+        type: "GET",
+        data: {tanggal_start_so: $("#tanggal_start_so").val(), kodeRak: koderak, KodeSubrak: subrak, Tiperak: tiperak, Shelvingrak: shelvingrak},
+        success: function(response) {
+            $('#loading_datatable').addClass('d-none');
+            $('.datatable-no-data').css('color', '#ababab');
+            tb_monitoring.rows.add(response.data).draw();
+        }, error: function(jqXHR, textStatus, errorThrown) {
+            setTimeout(function () { $('#loading_datatable').addClass('d-none'); }, 500);
+            $('.datatable-no-data').css('color', '#ababab');
+            Swal.fire({
+                text: "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                icon: "error"
+            });
+        }
+    });
+}
+
+$("#jstree").on("click", ".btn-print-action", function(event) {
+    console.log(event);
+    var node = $(event.target).closest('.jstree-node');
+    var nodeData = $('#jstree').jstree(true).get_node(node);
+    if (nodeData.parents.length === 2){
+        printStrukAction( nodeData.data.data, null, null, null);
+    } else if (nodeData.parents.length === 3){
+        let koderak = $('#jstree').jstree(true).get_node(nodeData.parent);
+        printStrukAction( koderak.data.data, nodeData.data.data, null, null);
+    } else if (nodeData.parents.length === 4){
+        let koderak = $('#jstree').jstree(true).get_node(nodeData.parent);
+        let subrak = $('#jstree').jstree(true).get_node(nodeData.parents[1]);
+        printStrukAction( koderak.data.data, subrak.data.data, nodeData.data.data, null);
+    } else if (nodeData.parents.length === 5){
+        let koderak = $('#jstree').jstree(true).get_node(nodeData.parent);
+        let subrak = $('#jstree').jstree(true).get_node(nodeData.parents[1]);
+        let tiperak = $('#jstree').jstree(true).get_node(nodeData.parents[2]);
+        printStrukAction( koderak.data.data, subrak.data.data, tiperak.data.data, nodeData.data.data);
+    }
+});
+
+function printStrukAction(koderak, subrak, tiperak = null, shelvingrak = null){
+    var tanggal_start_so = $("#tanggal_start_so").val();
+    var url = `/monitoring-so/print-struk-so/${tanggal_start_so}/${koderak}/${subrak}`;
+
+    if (tiperak !== null) {
+        url += `/${tiperak}`;
+    }
+
+    if (shelvingrak !== null) {
+        url += `/${shelvingrak}`;
+    }
+    window.location.href = url;
+}
+
 </script>
 
 @endpush

@@ -8,6 +8,7 @@ use App\Http\Requests\ProsesBaSoRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ResetSoController extends Controller
 {
@@ -29,7 +30,11 @@ class ResetSoController extends Controller
             $data['btnReprintEnable'] = true;
         }else{
             if($dtCek[0]->mso_flagsum == ''){
-                //* SO belum di Proses BA
+                $data['btnResetText'] = 'SO BELUM DI PROSES BA';
+                $data['btnResetEnabled'] = false;
+                $data['btnReprintEnable'] = false;
+                $data['check_error'] = "SO belum di Proses BA";
+                return view('reset-so', $data);
             }else{
                 $data['tgl_so'] = $dtCek[0]->mso_tglso;
 
@@ -39,13 +44,12 @@ class ResetSoController extends Controller
             }
         }
 
-
-        return view('proses-ba-so', $data);
+        return view('reset-so', $data);
     }
 
     public function actionReset(){
-
         //* Apakah anda yakin melakukan Reset Stock Opname?
+
 
         if(session('userlevel') != 1){
             return ApiFormatter::error(400, 'Anda tidak berhak menjalankan menu ini');
@@ -76,7 +80,7 @@ class ResetSoController extends Controller
 
     }
 
-    public function actionReprint(){
+    public function actionCheckReprint(){
         $dtCek = DB::table('tbmaster_setting_so')
             ->select('mso_tglso')
             ->whereNotNull('mso_flagreset')
@@ -87,6 +91,10 @@ class ResetSoController extends Controller
             return ApiFormatter::error(400, 'Data Reset SO terakhir tidak ditemukan');
         }
 
+        return ApiFormatter::success(200, "success");
+    }
+    
+    public function actionReprint(){
         // dt = QueryOra("SELECT * FROM TBMASTER_SETTING_SO WHERE MSO_MODIFY_DT in (select max(MSO_MODIFY_DT) from TBMASTER_SETTING_SO)")
         // TglSO = Format(dt.Rows(0).Item("mso_tglso"), "dd-MM-yyyy").ToString
         // tglreset = Format(dt.Rows(0).Item("MSO_CREATE_DT"), "dd-MM-yyyy").ToString
@@ -144,6 +152,7 @@ class ResetSoController extends Controller
 
         $data['perusahaan'] = DB::table('tbmaster_perusahaan')->select('prs_namaperusahaan', 'prs_namacabang')->first();
         $data['TglSO'] = $TglSO;
+        $data['TglReset'] = $TglReset;
         $data['brgBaik'] = $brgBaik;
         $data['brgRetur'] = $brgRetur;
         $data['brgRusak'] = $brgRusak;
@@ -155,7 +164,7 @@ class ResetSoController extends Controller
         //     oRpt.SetParameterValue("Brg_Retur", brgretur)
         //     oRpt.SetParameterValue("Brg_Rusak", brgrusak)
         //     oRpt.SetParameterValue("Total", Total)
-
-        return view('report-adjust-so');
+        $pdf = PDF::loadView('pdf.reset-so', $data);
+        return $pdf->stream();
     }
 }

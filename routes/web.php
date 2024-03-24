@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MonitoringSoController;
 use App\Http\Controllers\ProsesBaSoController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ResetSoController;
 use App\Http\Controllers\SetLimitSoController;
 use App\Http\Controllers\SettingJalur;
 use App\Http\Controllers\SettingJalurHHController;
@@ -85,6 +86,16 @@ Route::middleware(['mylogin'])->group(function () {
         Route::group(['prefix' => 'action'], function(){
             Route::post('/draft-action', [ProsesBaSoController::class, 'action']);
             Route::post('/proses-ba-so', [ProsesBaSoController::class, 'prosesBaSo']);
+        });
+    });
+
+    Route::group(['prefix' => 'reset-so'], function(){
+        Route::get('/', [ResetSoController::class, 'index']);
+        Route::get('/reprint', [ResetSoController::class, 'actionReprint']);
+        
+        Route::group(['prefix' => 'action'], function(){
+            Route::post('/reset', [ResetSoController::class, 'actionReset']);
+            Route::post('/check-reprint', [ResetSoController::class, 'actionCheckReprint']);
         });
     });
 
@@ -199,23 +210,14 @@ Route::middleware(['mylogin'])->group(function () {
         });
     });
 
-    Route::group(['prefix' => 'monitoring'], function(){
+    Route::group(['prefix' => 'monitoring-so'], function(){
         Route::get('/', [MonitoringSoController::class, 'index']);
-
         Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
+
         Route::get('/get-monitoring-level/{lso_koderak}/{lso_kodesubrak?}/{lso_tiperak?}', [MonitoringSoController::class, 'showLevel']);
 
         Route::get('/datatables', [MonitoringSoController::class, 'datatables']);
         Route::get('/print-struk-so/{tanggal_start_so}/{KodeRak}/{KodeSubRak}/{TipeRak?}/{ShelvingRak?}', [MonitoringSoController::class, 'printStrukSO']);
-    });
-
-    Route::group(['prefix' => 'monitoring-so'], function(){
-        Route::get('/', [MonitoringSoController::class, 'index']);
-        Route::get('/get-monitoring', [MonitoringSoController::class, 'getMonitoring']);
-        Route::get('/show-level/{lso_koderak}', [MonitoringSoController::class, 'showLevel']);
-
-        Route::group(['prefix' => 'action'], function(){
-        });
     });
 
     Route::group(['prefix' => 'set-limit-so'], function(){

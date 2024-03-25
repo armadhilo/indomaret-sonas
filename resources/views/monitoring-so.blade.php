@@ -79,9 +79,7 @@ $(document).ready(function() {
                 allowOutsideClick: false,
                 confirmButtonText: 'Kembali Ke Initial SO',
             }).then(() => {
-                // window.location.href = '/initial-so';
-        initializePage();   
-
+                window.location.href = '/initial-so';
             });
         }
     @else

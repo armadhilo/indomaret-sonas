@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use ZipArchive;
 
 class InitialSoController extends Controller
 {
@@ -101,7 +103,7 @@ class InitialSoController extends Controller
             ->whereNotNull('lks_prdcd')
             ->count();
 
-            if($check > 0) return ApiFormatter::error(400, 'Terdapat PLU di Master Lokasi yang tidak ada Jenis Rak');
+            // if($check > 0) return ApiFormatter::error(400, 'Terdapat PLU di Master Lokasi yang tidak ada Jenis Rak');
 
             //! GET -> dtCek
             $dtCek = DB::select("
@@ -147,15 +149,14 @@ class InitialSoController extends Controller
                 ) t
             ");
 
+            $files = [];
+            $tempDir = storage_path('temp_txt');
+            if (!File::exists($tempDir)) {
+                File::makeDirectory($tempDir);
+            }
+
             if(count($dtCek)){
                 $this->flagOk = false;
-
-                $directoryName = 'initial-so';
-                $fileName = 'PLU dengan LPP -'.Carbon::now()->format('Ymd').'.txt';
-
-                // Define the base path
-                Storage::makeDirectory('initial-so/');
-
                 //CREATE FILE
                 $content = '';
                 $label_status = "--------- PLU dengan LPP <> 0 | " . Carbon::now()->format('H:i:s') . " ---------";
@@ -164,37 +165,20 @@ class InitialSoController extends Controller
                 $content .= $label_status . chr(13) . chr(10);
 
                 foreach($dtCek as $item){
-                    $label_status .= $item->plu . ' - ' . $item->lokasi . ' - ' . $item->deskripsi . ' - ' . $item->div . ' - ' . $item->dept . ' - ' . $item->katb . ' - ';
+                    $label_status .= $item->plu . ' - ' . $item->lokasi . ' - ' . $item->deskripsi . ' - ' . $item->div . ' - ' . $item->dept . ' - ' . $item->katb . ' - ' . PHP_EOL;
                 }
 
                 $label_status .= "====================================================================================";
 
-                $directory = "$directoryName/$fileName";
-                Storage::put($directory, $content);
+                $filename = 'PLU dengan LPP -'.Carbon::now()->format('Ymd').'.txt';
 
-                if (Storage::exists($directory)) {
-                    $fileContent = Storage::get($directory);
+                // Set the file path
+                $filePath = storage_path('temp_txt/' . $filename);
 
-                    $headers = [
-                        'Content-Type' => 'application/octet-stream',
-                        'Content-Disposition' => 'attachment; filename="' . basename($directory) . '"',
-                    ];
-
-                    // Send the filename in the response headers
-                    $response = Response::make($fileContent, 200, $headers);
-                    $response->header('filename', basename($directory));
-
-                    // Delete the file after sending it
-                    Storage::delete($directory);
-
-                    // Send the file as a response
-                    //* Terdapat PLU dengan LPP <> 0 yang belum didaftarkan lokasi SO
-                    return $response;
-
-                }else {
-                    $message = 'File gagal di download';
-                    return ApiFormatter::error(400, $message);
-                }
+                // Write the content to the file
+                $directory = file_put_contents($filePath, $label_status);
+                
+                $files[] = $filePath;
             }
 
             //! GET -> dtCek
@@ -217,15 +201,9 @@ class InitialSoController extends Controller
             if(count($dtCek)){
                 $this->flagOk = false;
 
-                $directoryName = 'initial-so';
-                $fileName = 'PLU dengan Plano -'.Carbon::now()->format('Ymd').'.txt';
-
-                // Define the base path
-                Storage::makeDirectory('initial-so/');
-
                 //CREATE FILE
                 $content = '';
-                $label_status = "--------- Terdapat PLU dengan Plano < 0 | " . Carbon::now()->format('H:i:s') . " ---------";
+                $label_status = "--------- Terdapat PLU dengan Plano < 0 | " . Carbon::now()->format('H:i:s') . " ---------" . PHP_EOL;
 
                 //APPEND DATA ON TXT
                 $content .= $label_status . chr(13) . chr(10);
@@ -245,37 +223,20 @@ class InitialSoController extends Controller
                         continue;
                     }
 
-                    $label_status .= $item->plu . ' - ' . $item->deskripsi . ' - ' . $item->rak . ' - ' . $item->subrak . ' - ' . $item->tiperak . ' - ' . $item->shelvingrak . ' - ' . $item->plano_qty;
+                    $label_status .= $item->plu . ' - ' . $item->deskripsi . ' - ' . $item->rak . ' - ' . $item->subrak . ' - ' . $item->tiperak . ' - ' . $item->shelvingrak . ' - ' . $item->plano_qty . PHP_EOL;
                 }
 
                 $label_status .= "====================================================================================";
 
-                $directory = "$directoryName/$fileName";
-                Storage::put($directory, $content);
+                $filename = 'PLU dengan Plano -'.Carbon::now()->format('Ymd').'.txt';
 
-                if (Storage::exists($directory)) {
-                    $fileContent = Storage::get($directory);
+                // Set the file path
+                $filePath = storage_path('temp_txt/' . $filename);
 
-                    $headers = [
-                        'Content-Type' => 'application/octet-stream',
-                        'Content-Disposition' => 'attachment; filename="' . basename($directory) . '"',
-                    ];
-
-                    // Send the filename in the response headers
-                    $response = Response::make($fileContent, 200, $headers);
-                    $response->header('filename', basename($directory));
-
-                    // Delete the file after sending it
-                    Storage::delete($directory);
-
-                    // Send the file as a response
-                    //* Terdapat PLU dengan Plano < 0
-                    return $response;
-
-                }else {
-                    $message = 'File gagal di download';
-                    return ApiFormatter::error(400, $message);
-                }
+                // Write the content to the file
+                $directory = file_put_contents($filePath, $label_status);
+                
+                $files[] = $filePath;
             }
 
             //! KALO BISA FILE NYA DIDOWNLOAD BERSAMAAN
@@ -283,10 +244,30 @@ class InitialSoController extends Controller
 
             //? kemudian lanjut step
 
-            DB::commit();
+            // DB::commit();
+
+            $zipFile = storage_path('PLU.zip');
+            $zip = new ZipArchive();
+            if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                foreach ($files as $file) {
+                    $zip->addFile($file, basename($file));
+                }
+                $zip->close();
+            }
+
+            File::deleteDirectory($tempDir);
+            $zipContent = file_get_contents($zipFile);
+            File::delete($zipFile);
+
+            $headers = [
+                'Content-Type' => 'application/zip',
+                'Content-Disposition' => 'attachment; filename="LPP.zip"',
+            ];
+            return response($zipContent, 200, $headers);
+
 
             //* Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?
-            return ApiFormatter::success(200, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
+            // return ApiFormatter::success(200, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
         }
 
         catch(\Exception $e){
@@ -298,7 +279,7 @@ class InitialSoController extends Controller
         }
     }
 
-    public function nextActionCopyMasterLokasi($request){
+    public function nextActionCopyMasterLokasi(Request $request){
          if(session('userlevel') != 1){
             return ApiFormatter::error(400, 'Anda tidak berhak menjalankan menu ini');
         }

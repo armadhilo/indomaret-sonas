@@ -44,6 +44,7 @@ Route::middleware(['mylogin'])->group(function () {
             Route::get('/check-persiapan-data-so', [InitialSoController::class, 'checkPersiapanDataSo']);
             Route::post('/start-data-so', [InitialSoController::class, 'actionStartPersiapanDataSo']);
             Route::post('/copy-master-lokasi-so', [InitialSoController::class, 'actionCopyMasterLokasi']);
+            Route::post('/copy-master-lokasi-so/next', [InitialSoController::class, 'nextActionCopyMasterLokasi']);
         });
     });
 

@@ -29,13 +29,15 @@ class MonitoringSoController extends Controller
 
         $data['tgl_so'] = Carbon::parse($dtCek[0]->mso_tglso)->format('Y-m-d');
 
-        // if(count($dtCek) == 0){
-        //     return ApiFormatter::error(400, 'SO BELUM DI-INITIAL');
-        // }else{
-        //     if($dtCek[0]->mso_flaglimit == ''){
-        //         return ApiFormatter::error(400, 'Setting limit item untuk tahap ini belum disetting');
-        //     }
-        // }
+        if(count($dtCek) == 0){
+            $data['check_error'] = "SO belum diinitial";
+            return view('monitoring-so', $data);
+        }else{
+            if($dtCek[0]->mso_flaglimit == ''){
+                $data['check_error'] = "Setting limit item untuk tahap ini belum disetting";
+                return view('monitoring-so', $data);
+            }
+        }
 
 
         return view('monitoring-so', $data);
@@ -255,7 +257,6 @@ class MonitoringSoController extends Controller
     }
 
     public function printStrukSO($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak = null, $ShelvingRak = null){
-        // Generate text files
         $tempDir = storage_path('temp_txt');
         if (!File::exists($tempDir)) {
             File::makeDirectory($tempDir);
@@ -279,21 +280,27 @@ class MonitoringSoController extends Controller
             $files[] = $this->generateTxt($tanggal_start_so, $KodeRak, $KodeSubRak, $TipeRak, $ShelvingRak, $tempDir);
         }
 
-        // Create a zip archive
+        foreach ($files as $value) {
+            if ($value['status'] === 0 && $value['status'] !== 1) {
+                $data['check_error'] = $value;
+                $data['tgl_so'] = $tanggal_start_so;
+
+                return view('display-error', $data);
+            }
+        }
+
+
         $zipFile = storage_path('MONITORING SO.zip');
         $zip = new ZipArchive();
         if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            // Add text files to the zip archive
             foreach ($files as $file) {
-                $zip->addFile($file, basename($file));
+                $zip->addFile($file['file'], basename($file['file']));
             }
             $zip->close();
         }
 
-        // Clean up temporary text files
         File::deleteDirectory($tempDir);
 
-        // Return the zip file path
         return response()->download($zipFile, 'MONITORING_SO.zip')->deleteFileAfterSend();
         
         // if($TipeRak == null){
@@ -330,15 +337,21 @@ class MonitoringSoController extends Controller
             $query .= 'LIMIT 10';
             $data = DB::select($query);
 
-            // if(count($data) == 0){
-            //     throw new HttpResponseException(ApiFormatter::error(404, "Tidak ada data yang dicetak [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
-            // }
+            if(count($data) == 0){
+                return [
+                    "status" => 0,
+                    "file" => "Tidak ada data yang dicetak [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"
+                ];
+            }
 
-            // //! dummy
-            // $check = collect($data)->where('LSO_MODIFY_BY', '');
-            // if(count($check)){
-            //     throw new HttpResponseException(ApiFormatter::error(404, "Ada item yang belum di SO! [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"));
-            // }
+            //! dummy
+            $check = collect($data)->where('LSO_MODIFY_BY', '');
+            if(count($check)){
+                return [
+                    "status" => 0,
+                    "file" => "Ada item yang belum di SO! [ $KodeRak | $KodeSubRak | $TipeRak | $ShelvingRak ]"
+                ];
+            }
 
             $lokasi = 'Rusak';
             if($data[0]->lso_lokasi == '01'){
@@ -390,7 +403,11 @@ class MonitoringSoController extends Controller
             file_put_contents($filePath, $s);
 
             // Return the file path
-            return $filePath;
+
+            return [
+                "status" => 1,
+                "file" => $filePath
+            ];
 
             //! CETAK  .TXT
             //! INI NEK BISA DI JADIKAN .ZIP AJA

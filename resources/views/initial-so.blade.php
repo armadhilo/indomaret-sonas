@@ -119,6 +119,30 @@
         })
     }
 
+    function nextAction(){
+        $('#modal_loading').modal('show');
+        $.ajax({
+            url: `/initial-so/action/copy-master-lokasi-so/next`,
+            type: "POST",
+            data: {tanggal_start_so: $('#tanggal_start_so').val()},
+            success: function(response) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                Swal.fire({
+                    text: response.message,
+                    icon: "success"
+                });
+            }, error: function(jqXHR, textStatus, errorThrown) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                Swal.fire({
+                    text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
+                        ? jqXHR.responseJSON.message
+                        : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+                    icon: "error"
+                });
+            }
+        });
+    }
+
     // belum ditest
     function actionCopyMasterLokasiSO(){
         Swal.fire({
@@ -134,11 +158,18 @@
                     url: `/initial-so/action/copy-master-lokasi-so`,
                     type: "POST",
                     data: {tanggal_start_so: $('#tanggal_start_so').val()},
+                    xhrFields: {
+                        responseType: 'blob' // Important for binary data
+                    },
                     success: function(response) {
-                        setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
-                        Swal.fire('Success!',response.message,'success').then(function(){
-                            location.reload();
-                        });
+                        var blob = new Blob([response]);
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = 'INITIAL SO.zip';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        nextAction();
                     }, error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire({

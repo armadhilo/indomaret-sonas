@@ -68,6 +68,26 @@
 <script src="{{ asset('plugin/jstree/jstree.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+    @if(isset($check_error) && !empty($check_error))
+        let check_error = "{{ $check_error }}";
+        if(check_error){
+            Swal.fire({
+                title: 'Peringatan...!',
+                text: `${check_error}`,
+                icon: 'warning',
+                showConfirmButton: true,
+                allowOutsideClick: false,
+                confirmButtonText: 'Kembali Ke Initial SO',
+            }).then(() => {
+                window.location.href = '/initial-so';
+            });
+        }
+    @else
+        initializePage();   
+    @endif
+});
+
+function initializePage(){
     tb_monitoring = $('#tb_monitoring').DataTable({
         processing: true,
         language: {
@@ -205,7 +225,7 @@ $(document).ready(function() {
             });
         }
     });
-});
+}
 
 function reinitializeDatatables(koderak, subrak, tiperak, shelvingrak){
     tb_monitoring.clear().draw();
@@ -231,7 +251,6 @@ function reinitializeDatatables(koderak, subrak, tiperak, shelvingrak){
 }
 
 $("#jstree").on("click", ".btn-print-action", function(event) {
-    console.log(event);
     var node = $(event.target).closest('.jstree-node');
     var nodeData = $('#jstree').jstree(true).get_node(node);
     if (nodeData.parents.length === 2){
@@ -252,6 +271,7 @@ $("#jstree").on("click", ".btn-print-action", function(event) {
 });
 
 function printStrukAction(koderak, subrak, tiperak = null, shelvingrak = null){
+
     var tanggal_start_so = $("#tanggal_start_so").val();
     var url = `/monitoring-so/print-struk-so/${tanggal_start_so}/${koderak}/${subrak}`;
 

@@ -162,6 +162,7 @@
                         responseType: 'blob' // Important for binary data
                     },
                     success: function(response) {
+                        $('#modal_loading').modal('hide')
                         var blob = new Blob([response]);
                         var link = document.createElement('a');
                         link.href = window.URL.createObjectURL(blob);
@@ -195,7 +196,7 @@
     }
 
     function checkPersiapanDataSo(){
-        $('#modal_loading').modal('show');
+        setTimeout(function () { $('#modal_loading').modal('show'); }, 800);
         $.ajax({
             url: `/initial-so/action/check-persiapan-data-so`,
             type: "GET",

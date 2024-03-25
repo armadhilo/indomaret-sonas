@@ -244,7 +244,7 @@ class InitialSoController extends Controller
 
             //? kemudian lanjut step
 
-            // DB::commit();
+            DB::commit();
 
             $zipFile = storage_path('PLU.zip');
             $zip = new ZipArchive();

@@ -282,10 +282,7 @@ class MonitoringSoController extends Controller
 
         foreach ($files as $value) {
             if ($value['status'] === 0 && $value['status'] !== 1) {
-                $data['check_error'] = $value;
-                $data['tgl_so'] = $tanggal_start_so;
-
-                return view('display-error', $data);
+                return ApiFormatter::error(400, $value['file']);
             }
         }
 

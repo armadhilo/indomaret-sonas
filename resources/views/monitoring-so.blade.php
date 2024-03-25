@@ -79,7 +79,9 @@ $(document).ready(function() {
                 allowOutsideClick: false,
                 confirmButtonText: 'Kembali Ke Initial SO',
             }).then(() => {
-                window.location.href = '/initial-so';
+                // window.location.href = '/initial-so';
+        initializePage();   
+
             });
         }
     @else
@@ -275,14 +277,38 @@ function printStrukAction(koderak, subrak, tiperak = null, shelvingrak = null){
     var tanggal_start_so = $("#tanggal_start_so").val();
     var url = `/monitoring-so/print-struk-so/${tanggal_start_so}/${koderak}/${subrak}`;
 
-    if (tiperak !== null) {
-        url += `/${tiperak}`;
+    $('#modal_loading').modal('show');
+    $.ajax({
+    url: url,
+    type: "GET",
+    success: function(response) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function() {
+            if (this.status === 200) {
+                setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+                var blob = new Blob([this.response], { type: 'application/zip' });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = 'MONITORING SO.zip';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
+        xhr.send();
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
+        Swal.fire({
+            text: (jqXHR.responseJSON && jqXHR.responseJSON.code === 400)
+                ? jqXHR.responseJSON.message
+                : "Oops! Terjadi kesalahan segera hubungi tim IT (" + errorThrown + ")",
+            icon: "error"
+        });
     }
-
-    if (shelvingrak !== null) {
-        url += `/${shelvingrak}`;
-    }
-    window.location.href = url;
+});
 }
 
 </script>

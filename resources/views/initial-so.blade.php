@@ -169,7 +169,17 @@
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-                        nextAction();
+                        Swal.fire({
+                            title: 'Yakin?',
+                            text: `Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                        })
+                        .then((result) => {
+                            if (result.value) {
+                                nextAction();
+                            }
+                        });
                     }, error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire({

@@ -157,30 +157,42 @@
                 $.ajax({
                     url: `/initial-so/action/copy-master-lokasi-so`,
                     type: "POST",
-                    data: {tanggal_start_so: $('#tanggal_start_so').val()},
-                    xhrFields: {
-                        responseType: 'blob' // Important for binary data
-                    },
+                    data: {tanggal_start_so: $('#tanggal_start_so').val(), status: 0},
                     success: function(response) {
-                        $('#modal_loading').modal('hide')
-                        var blob = new Blob([response]);
-                        var link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = 'INITIAL SO.zip';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        Swal.fire({
-                            title: 'Yakin?',
-                            text: `Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?`,
-                            icon: 'warning',
-                            showCancelButton: true,
-                        })
-                        .then((result) => {
-                            if (result.value) {
-                                nextAction();
-                            }
+                        if(response.code === 200){
+                        $.ajax({
+                            url: `/initial-so/action/copy-master-lokasi-so`,
+                            type: "POST",
+                            data: {tanggal_start_so: $('#tanggal_start_so').val(), status: 1},
+                            xhrFields: {
+                                responseType: 'blob' // Important for binary data
+                            },
+                            success: function(response) {
+                                $('#modal_loading').modal('hide')
+                                var blob = new Blob([response]);
+                                var link = document.createElement('a');
+                                link.href = window.URL.createObjectURL(blob);
+                                link.download = 'INITIAL SO.zip';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            },
                         });
+                        } else if(response.code === 201){
+                            $('#modal_loading').modal('hide')
+                            Swal.fire({
+                                title: 'Yakin?',
+                                text: `Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                            })
+                            .then((result) => {
+                                if (result.value) {
+                                    nextAction();
+                                }
+                            });
+                        }
+                        
                     }, error: function(jqXHR, textStatus, errorThrown) {
                         setTimeout(function () { $('#modal_loading').modal('hide'); }, 500);
                         Swal.fire({

@@ -75,6 +75,11 @@ class InitialSoController extends Controller
     }
 
     public function actionCopyMasterLokasi(initialSoRequest $request){
+        $tempDir = storage_path('temp_txt');
+        File::deleteDirectory($tempDir);
+        if (!File::exists($tempDir)) {
+            File::makeDirectory($tempDir);
+        }
 
         DB::beginTransaction();
 	    try{
@@ -150,11 +155,6 @@ class InitialSoController extends Controller
             ");
 
             $files = [];
-            $tempDir = storage_path('temp_txt');
-            if (!File::exists($tempDir)) {
-                File::makeDirectory($tempDir);
-            }
-
             if(count($dtCek)){
                 $this->flagOk = false;
                 //CREATE FILE
@@ -243,31 +243,35 @@ class InitialSoController extends Controller
             //! jika flagOK = false download .txt nya
 
             //? kemudian lanjut step
-
-            DB::commit();
-
-            $zipFile = storage_path('PLU.zip');
-            $zip = new ZipArchive();
-            if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-                foreach ($files as $file) {
-                    $zip->addFile($file, basename($file));
+            if($this->flagOk === false){
+                if($request->status === '0'){
+                    return ApiFormatter::success(200, 'success');
                 }
-                $zip->close();
+                $zipFile = storage_path('PLU.zip');
+                $zip = new ZipArchive();
+                if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                    foreach ($files as $file) {
+                        $zip->addFile($file, basename($file));
+                    }
+                    $zip->close();
+                }
+    
+                File::deleteDirectory($tempDir);
+                $zipContent = file_get_contents($zipFile);
+                File::delete($zipFile);
+    
+                $headers = [
+                    'Content-Type' => 'application/zip',
+                    'Content-Disposition' => 'attachment; filename="LPP.zip"',
+                ];
+                return response($zipContent, 200, $headers);
+            } else {
+                return ApiFormatter::success(201, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
             }
 
-            File::deleteDirectory($tempDir);
-            $zipContent = file_get_contents($zipFile);
-            File::delete($zipFile);
-
-            $headers = [
-                'Content-Type' => 'application/zip',
-                'Content-Disposition' => 'attachment; filename="LPP.zip"',
-            ];
-            return response($zipContent, 200, $headers);
 
 
             //* Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO?
-            // return ApiFormatter::success(200, 'Apakah anda yakin ingin meng-copy Master Lokasi ke Lokasi SO');
         }
 
         catch(\Exception $e){
